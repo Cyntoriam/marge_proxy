@@ -1,0 +1,6 @@
+[theme]
+base = "dark"
+primaryColor = "#D4AF37"          # Rich honey-gold / bronze accent
+backgroundColor = "#121212"       # Deep, grounding, fertile dark base
+secondaryBackgroundColor = "#1E1B18" # Warm dark amber-slate for cards and sidebar
+textColor = "#F5F2EB"             # Soft, warm, welcoming light text

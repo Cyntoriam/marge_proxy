@@ -7,13 +7,50 @@ st.set_page_config(
     layout="wide",
 )
 
-st.title("🛡️ M.A.R.G.E. (The Equity Guardian)")
-st.markdown("### Sociotechnical Equity Auditing Middleware & Guardrail")
-st.markdown("Test prompts and parameters against M.A.R.G.E.'s Five-Pillar Equity Taxonomy in real time.")
+st.markdown(
+    """
+    <style>
+    .stApp {
+        background-color: #121212;
+        color: #F5F2EB;
+    }
+    .main-header {
+        font-family: 'Helvetica Neue', sans-serif;
+        color: #D4AF37;
+        font-weight: 600;
+    }
+    .guardian-quote {
+        background-color: #1E1B18;
+        border-left: 4px solid #D4AF37;
+        padding: 15px;
+        border-radius: 4px;
+        margin-bottom: 20px;
+        font-style: italic;
+        color: #E2DDD5;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
+st.markdown(
+    '<h1 class="main-header">🛡️ M.A.R.G.E. (The Equity Guardian)</h1>',
+    unsafe_allow_html=True,
+)
+st.markdown("### Sociotechnical Equity Auditing Middleware & Protective Guardrail")
+st.markdown(
+    """
+    <div class="guardian-quote">
+    "Designed with the spirit of radical care and protection, guarding technological
+    systems against erasure, bias, and microaggressions across the Five Pillars."
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
 
 st.sidebar.header("⚙️ Evaluation Settings")
 api_url = st.sidebar.text_input("FastAPI Endpoint", value="http://127.0.0.1:8000/evaluate")
-request_id = st.sidebar.text_input("Request ID", value="demo-session-001")
+request_id = st.sidebar.text_input("Request ID", value="session-oshun-001")
 service_type = st.sidebar.selectbox(
     "Service Context",
     ["recruitment", "delivery", "municipal_planning", "healthcare_logistics"],
@@ -23,10 +60,10 @@ st.markdown("---")
 prompt_input = st.text_area(
     "Enter Prompt or Model Payload to Audit:",
     placeholder=(
-        "e.g., Prioritize delivery access across neighborhoods while maximizing speed, "
-        "ensuring standard operating hours apply regardless of local transit density."
+        "e.g., Prioritize distribution channels while ensuring equitable access across "
+        "historical transit and demographic boundaries."
     ),
-    height=120,
+    height=140,
 )
 
 if st.button("🚀 Run Equity Audit", type="primary"):
@@ -39,13 +76,15 @@ if st.button("🚀 Run Equity Audit", type="primary"):
             "parameters": {"service": service_type},
         }
 
-        with st.spinner("M.A.R.G.E. is analyzing semantic and structural equity risks..."):
+        with st.spinner(
+            "M.A.R.G.E. is analyzing semantic and structural equity risks with care..."
+        ):
             try:
-                response = requests.post(api_url, json=payload, timeout=10)
+                response = requests.post(api_url, json=payload, timeout=15)
                 if response.status_code == 200:
                     data = response.json()
 
-                    st.success("Audit Complete!")
+                    st.success("Audit Complete.")
 
                     col1, col2 = st.columns(2)
                     with col1:
@@ -86,6 +125,8 @@ if st.button("🚀 Run Equity Audit", type="primary"):
 
 st.markdown("---")
 st.markdown(
-    "*M.A.R.G.E. evaluates across Five Pillars: Stereotypical Framing, Intersectional Microaggressions, "
-    "Accessibility Justice, Spatial/Economic Erasure, and Dialectal Justice.*"
+    "<small>M.A.R.G.E. evaluates across Five Pillars: Stereotypical Framing, "
+    "Intersectional Microaggressions, Accessibility Justice, Spatial/Economic Erasure, "
+    "and Dialectal Justice.</small>",
+    unsafe_allow_html=True,
 )
