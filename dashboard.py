@@ -101,6 +101,14 @@ st.markdown(
             border-radius: 6px;
             margin-bottom: 0.8rem;
         }
+        .intersectional-banner {
+            background: rgba(212, 175, 55, 0.08);
+            border: 1px solid #D4AF37;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            color: #E0E0E0;
+        }
     </style>
     """,
     unsafe_allow_html=True,
@@ -158,12 +166,13 @@ PILLAR_RULES = {
 }
 
 
-def evaluate_equity_payload(text: str, deep_scan: bool = False) -> dict:
+def evaluate_equity_payload(text: str, mode: str = "Standard Audit") -> dict:
     """Run a lightweight keyword screen; this is not a semantic fairness audit."""
     if len(text.strip()) < 10:
         return {"error": "Please provide at least 10 characters for a useful keyword screen."}
 
     content = text.lower()
+    deep_scan = mode == "Deep Intersectional Scan"
     assessment = {}
     for pillar, rules in PILLAR_RULES.items():
         patterns = rules["patterns"]
@@ -175,7 +184,44 @@ def evaluate_equity_payload(text: str, deep_scan: bool = False) -> dict:
             "note": rules["note"] if detected else "No matching terms found; this is not evidence that the content is equitable.",
         }
 
-    return {"payload_length": len(text), "assessment": assessment}
+    intersectional_insights = None
+    if deep_scan:
+        flagged_pillars = {
+            pillar
+            for pillar, details in assessment.items()
+            if details["status"] == "Potential signal"
+        }
+        intersectional_insights = []
+
+        if len(flagged_pillars) >= 3:
+            intersectional_insights.append(
+                "Multiple pillar keyword signals co-occur; consider a coordinated human review."
+            )
+        if {
+            "Spatial/Economic Erasure",
+            "Accessibility Justice",
+        }.issubset(flagged_pillars):
+            intersectional_insights.append(
+                "Geographic and accessibility-related signals co-occur; review whether location and scheduling assumptions compound barriers."
+            )
+        if {
+            "Intersectional Microaggressions",
+            "Dialectal Justice",
+        }.issubset(flagged_pillars):
+            intersectional_insights.append(
+                "Cultural and dialect-related signals co-occur; review whether the criteria impose narrow norms of culture or communication."
+            )
+        if not intersectional_insights:
+            intersectional_insights.append(
+                "No cross-pillar rule combinations matched. This is not evidence that the content is equitable."
+            )
+
+    return {
+        "mode": mode,
+        "payload_length": len(text),
+        "assessment": assessment,
+        "intersectional_insights": intersectional_insights,
+    }
 
 
 st.markdown(
@@ -199,7 +245,11 @@ with st.sidebar:
     selected_mode = st.radio(
         "Evaluation Mode", ["Standard Audit", "Deep Intersectional Scan"]
     )
-    st.info("Oshun theme active: charcoal and honey-gold.")
+    if selected_mode == "Deep Intersectional Scan":
+        st.info("Deep Scan active: compound keyword-signal review enabled.")
+    else:
+        st.info("Standard Audit active: baseline single-pass keyword screen.")
+    st.caption("Oshun theme active: charcoal and honey-gold.")
     st.caption("Self-contained mode: no API request or external service is used.")
 
 user_payload = st.text_area(
@@ -212,16 +262,25 @@ if st.button("Run Equity Audit", type="primary"):
     if not user_payload.strip():
         st.error("Please enter some text before running the audit.")
     else:
-        with st.spinner("M.A.R.G.E. is screening the payload..."):
-            results = evaluate_equity_payload(
-                user_payload,
-                deep_scan=selected_mode == "Deep Intersectional Scan",
-            )
+        with st.spinner(f"M.A.R.G.E. is executing {selected_mode.lower()}..."):
+            results = evaluate_equity_payload(user_payload, mode=selected_mode)
 
         if "error" in results:
             st.warning(results["error"])
         else:
-            st.success("Keyword screen complete.")
+            st.success(f"{selected_mode} complete.")
+            intersectional_insights = results["intersectional_insights"]
+            if intersectional_insights:
+                insights_html = "<br>".join(intersectional_insights)
+                st.markdown(
+                    f"""
+                    <div class="intersectional-banner">
+                        <strong>Deep Scan: Possible Cross-Pillar Signals</strong><br>
+                        {insights_html}
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
             st.markdown("### Five-Pillar Evaluation Results")
             st.caption(
                 f"Mode: {selected_mode} | Payload length: {results['payload_length']} characters"
