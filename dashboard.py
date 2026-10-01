@@ -110,6 +110,15 @@ st.markdown(
             color: #E0E0E0;
             line-height: 1.6;
         }
+        .recommendation-banner {
+            background: rgba(76, 175, 80, 0.08);
+            border: 1px solid #81C784;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1.5rem 0;
+            color: #E0E0E0;
+            line-height: 1.6;
+        }
     </style>
     """,
     unsafe_allow_html=True,
@@ -131,7 +140,7 @@ PILLAR_RULES = {
         "patterns": (
             r"\b(?:aggressive|articulate|unprofessional|emotional|polished|"
             r"assertive|traditional university|pedigree|assimilation|backward|"
-            r"culture|prestige|executive presence)\b",
+            r"culture|prestige|executive presence|institutional culture)\b",
         ),
         "deep_patterns": (r"\b(?:angry woman|angry black|culture fit)\b",),
         "note": "Potentially subjective descriptors can carry different implications across identities.",
@@ -140,7 +149,8 @@ PILLAR_RULES = {
         "patterns": (
             r"\b(?:without accommodations|no accommodations|inaccessible|"
             r"wheelchair|screen reader|captions|disability|disabled|hour\w*|"
-            r"on[- ]site|schedule|subtitles|transcript|fast[- ]paced|rhythm)\b",
+            r"on[- ]site|schedule|subtitles|transcript|fast[- ]paced|rhythm|"
+            r"impromptu)\b",
         ),
         "deep_patterns": (r"\b(?:cognitive access|assistive technology|accessible format)\b",),
         "note": "Accessibility-related language was found; review whether the described needs are supported.",
@@ -149,7 +159,8 @@ PILLAR_RULES = {
         "patterns": (
             r"\b(?:all women|all men|women are naturally|men are naturally|"
             r"older workers|young and energetic|professional appearance|"
-            r"leadership roles|standard|traditional|align naturally)\b",
+            r"leadership roles|standard|traditional|align naturally|"
+            r"high[- ]potential)\b",
         ),
         "deep_patterns": (
             r"\b(?:naturally suited|born to|people like them|aggressive)\b",
@@ -160,7 +171,7 @@ PILLAR_RULES = {
         "patterns": (
             r"\b(?:accent|grammar|non[- ]standard dialect|speak properly|"
             r"native speaker|broken english|dialect|vernacular|prose|"
-            r"communication rhythms|polished clarity)\b",
+            r"communication rhythms|polished clarity|direct)\b",
         ),
         "deep_patterns": (r"\b(?:professional language|clear english|communication style)\b",),
         "note": "Language-variety terms can be used to unfairly judge dialect or fluency; review context.",
@@ -187,6 +198,7 @@ def evaluate_equity_payload(text: str, mode: str = "Standard Audit") -> dict:
         }
 
     intersectional_explanation = None
+    recommendations = None
     if deep_scan:
         flagged_pillars = {
             pillar
@@ -224,12 +236,29 @@ def evaluate_equity_payload(text: str, mode: str = "Standard Audit") -> dict:
             )
 
         intersectional_explanation = explanation_blocks
+        recommendation_by_pillar = {
+            "Spatial/Economic Erasure": "Review whether location, commute, or relocation requirements are essential; consider equivalent access paths where practical.",
+            "Intersectional Microaggressions": "Replace subjective culture or presence language with observable, role-related criteria.",
+            "Accessibility Justice": "Clarify essential timing or pace, consider structured alternatives, and document available accommodations.",
+            "Stereotypical Framing": "Define advancement and performance criteria using consistent, role-related outcomes.",
+            "Dialectal Justice": "Assess communication only where relevant to the role; specify the skill and accept equivalent dialects and styles.",
+        }
+        recommendations = [
+            f"{pillar}: {recommendation_by_pillar[pillar]}"
+            for pillar in PILLAR_RULES
+            if pillar in flagged_pillars
+        ]
+        if not recommendations:
+            recommendations.append(
+                "No keyword rules triggered, so no automatic rewrite is suggested. This does not replace contextual human review."
+            )
 
     return {
         "mode": mode,
         "payload_length": len(text),
         "assessment": assessment,
         "intersectional_explanation": intersectional_explanation,
+        "recommendations": recommendations,
     }
 
 
@@ -286,6 +315,18 @@ if st.button("Run Equity Audit", type="primary"):
                     <div class="intersectional-banner">
                         <strong>Deep Intersectional Explanatory Breakdown</strong><br><br>
                         {explanation_html}
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
+            recommendations = results["recommendations"]
+            if recommendations:
+                recommendations_html = "<br><br>".join(recommendations)
+                st.markdown(
+                    f"""
+                    <div class="recommendation-banner">
+                        <strong>Guardian Remediation Recommendations</strong><br><br>
+                        {recommendations_html}
                     </div>
                     """,
                     unsafe_allow_html=True,
