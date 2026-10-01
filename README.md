@@ -1,79 +1,106 @@
-# M.A.R.G.E.
-### Meta-Alignment & Resilience Guard for Equity
-*The Equity Guardian: sociotechnical equity auditing middleware.*
+# M.A.R.G.E. (Meta-Alignment & Resilience Guard for Equity)
+### "The Equity Guardian"
 
-[![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.110%2B-005571.svg)](https://fastapi.tiangolo.com/)
+M.A.R.G.E. is a lightweight FastAPI prototype for auditing AI prompts and system logic for equity risks. It is designed to flag issues such as spatial redlining, demographic stereotyping, accessibility bias, coded microaggressions, and dialectal exclusion before a model or workflow goes live.
 
-M.A.R.G.E.'s goal is to detect subtle equity risks in AI systems, including microaggressions, biased linguistic judgments, demographic stereotyping, accessibility barriers, and structural disparities in optimization. For example, delivery targets that ignore local infrastructure may impose unequal burdens. The project builds on lexical auditing tools such as Kat Matfield's [Gender Decoder](https://gender-decoder.katmatfield.com/) and extends that focus toward broader sociotechnical risks.
+This repo is intentionally honest about scope: it is not a production fairness engine, live policy oracle, or verified social-science benchmark. It is a red-teaming scaffold and prototype policy-audit layer for experimentation, documentation, and iterative review.
 
-> **Prototype status:** `/evaluate` uses an async route. Tier 1 uses a small regex list. Tier 2 can call the OpenAI API for structured evaluations when configured; otherwise it returns illustrative fallback evaluations. This is not production-grade middleware, does not audit live RAG corpora or agent behavior, and must not be used for automated high-impact decisions. A clean result is not evidence of fairness; involve domain experts and affected communities.
+---
 
-## Intended Pipeline
+## Five-Pillar Equity Taxonomy
 
-- **Tier 1:** Heuristic input and parameter routing; a basic regex filter exists today.
-- **Tier 2:** Structured equity review through the OpenAI SDK; without credentials or if the request fails, illustrative fallback evaluations are returned.
-- **Tier 3:** Policy-based corrections or human review; not implemented.
+The current implementation and schema are aligned to the following five pillars:
 
-Live RAG corpus inspection, prompt-injection analysis, and agent-behavior evaluation remain future work.
+1. **Stereotypical & Demographic Framing** — demographic assumptions and proxy-based penalties in screening.
+2. **Intersectional Amplification & Burden** — coded bias, gendered double standards, and compound proxy effects.
+3. **Disability & Accessibility Justice** — ableist assumptions and caregiving/medical-leave penalties.
+4. **Structural, Spatial & Economic Erasure** — geographic exclusion, transit disparities, and infrastructure-based redlining.
+5. **Dialectal & Cultural Justice** — unfair treatment of vernacular, community language, and non-dominant speech styles.
 
-## Proposed Future Taxonomy
+The future taxonomic language in the project docs is conceptually useful, but the live schema in `app/schemas.py` is the authoritative implementation standard.
 
-1. **Stereotypical & Demographic Framing:** Assumptions about roles or capabilities based on demographic generalizations.
-2. **Intersectional Microaggressions:** Exclusionary language or slights targeting intersecting identities.
-3. **Disability & Accessibility Justice:** Inaccessible defaults and missing accommodations.
-4. **Structural, Spatial & Economic Erasure:** Overlooked geographic, infrastructure, and socioeconomic conditions.
-5. **Dialectal & Cultural Justice:** Unfair treatment of dialects and cultural vernacular.
+---
 
-This proposed taxonomy is not implemented. The API schema and [case-study matrix](docs/case_studies_matrix.md) still use the current five-pillar taxonomy defined in `app/schemas.py`.
+## Repository Structure
 
-## Principles
-
-The project draws on ACM Code of Ethics principles 1.2 (avoid harm) and 1.4 (fairness), and IEEE's Ethically Aligned Design. These references motivate the work; they do not certify the implementation or establish legal compliance.
-
-The current `/evaluate` request accepts a JSON object. `prompt` and `parameters` are inspected by the tiers; `request_id` is copied into the response and defaults to `req_unknown`.
-
-Example request:
-
-```json
-{
-	"request_id": "demo-001",
-	"prompt": "Prioritize delivery access across neighborhoods.",
-	"parameters": {"service": "delivery"}
-}
+```text
+marge_proxy/
+├── app/
+│   ├── __init__.py
+│   ├── main.py                          # FastAPI evaluation router
+│   ├── schemas.py                      # Strict Pydantic response models
+│   ├── marge_job_hunting_case_studies.py # Structured red-teaming case objects
+│   └── tiers/
+│       ├── __init__.py
+│       ├── tier1_filter.py
+│       └── tier2_judge.py
+├── docs/
+│   └── case_studies_matrix.md          # Human-review matrix and red-team scenarios
+├── test_client.py                      # Local integration smoke test
+├── requirements.txt
+├── README.md
+└── .gitignore
 ```
+
+---
 
 ## Getting Started
 
-Use Python 3.10 or newer, then install the dependencies and start the API from the repository root:
+### 1. Installation
 
 ```bash
+git clone https://github.com/your-username/marge_proxy.git
+cd marge_proxy
 python -m venv .venv
 source .venv/bin/activate
-python -m pip install -r requirements.txt
+pip install -r requirements.txt
+```
+
+### 2. Run the application
+
+```bash
 uvicorn app.main:app --reload
 ```
 
-To enable the live Tier 2 judge, set `OPENAI_API_KEY` or `LLM_API_KEY`. It defaults to model `gpt-4o-mini`; optionally set `LLM_BASE_URL` and `LLM_MODEL` for a compatible service and model. Without a key, Tier 2 returns illustrative fallback evaluations.
+The app exposes:
 
-The health check is available at `GET http://127.0.0.1:8000/`. Interactive API documentation is at `http://127.0.0.1:8000/docs`.
+- `GET /` for health check
+- `POST /evaluate` for structured equity review
 
-Send an evaluation request with:
+### 3. Run the automated client
+
+In a separate terminal:
 
 ```bash
-curl -X POST http://127.0.0.1:8000/evaluate \
-	-H 'Content-Type: application/json' \
-	-d '{"request_id":"demo-001","prompt":"Prioritize delivery access across neighborhoods.","parameters":{"service":"delivery"}}'
+python test_client.py
 ```
 
-## Testing and Red Teaming
+The client exercises the job-hunting red-teaming cases against the local `/evaluate` endpoint.
 
-No automated test suite is currently included. The [Case Studies Matrix](docs/case_studies_matrix.md) provides example scenarios and red-team prompts for manual evaluation. Treat outputs as prototype signals: review both false positives and false negatives, involve affected communities and subject-matter experts, and document limitations before any deployment.
+---
 
-## Current Limitations
+## Prototype Status
 
-- Tier 1 remains a small synchronous heuristic filter; only the API route and Tier 2 HTTP call are asynchronous.
-- Tier 1 uses a small illustrative pattern list; it is not comprehensive or language-independent.
-- Tier 2 depends on a compatible external service for live judgments; fallback evaluations are illustrative, not semantic assessments.
-- The current route marks all deep-path results unapproved and all fast-path results approved; these defaults are not calibrated policy decisions.
-- The response does not represent a validated fairness assessment, and no production privacy, security, monitoring, or appeals controls are provided.
+This project currently includes:
+
+- an async FastAPI route
+- Tier 1 heuristic routing logic
+- optional Tier 2 review using an OpenAI-compatible client
+- illustrative fallback evaluations when no external service is configured
+
+This project does not currently include:
+
+- production-grade governance controls
+- validated fairness benchmarks
+- live RAG or agent-behavior audit coverage
+- a calibrated policy engine for enforcement decisions
+
+A "clean" result is not evidence of fairness. Human review, subject-matter expertise, and affected-community input remain essential.
+
+---
+
+## Red-Teaming and Review
+
+The repository includes a structured case-study matrix at [docs/case_studies_matrix.md](docs/case_studies_matrix.md) and a programmable red-team set in `app/marge_job_hunting_case_studies.py`.
+
+These artifacts are designed for exploratory assessment and human review, not as formal performance claims. The current implementations are intentionally illustrative and should be treated as a prototype foundation for future work.

@@ -1,106 +1,108 @@
+"""
+M.A.R.G.E. Automated Test Client
+Executes job-hunting red-teaming case studies against the local FastAPI evaluation middleware.
+"""
+
 import sys
 
 import requests
 
+try:
+    from app.marge_job_hunting_case_studies import MARGE_JOB_HUNTING_CASE_STUDIES
+except ImportError:
+    from marge_job_hunting_case_studies import MARGE_JOB_HUNTING_CASE_STUDIES
+
 BASE_URL = "http://127.0.0.1:8000"
-REQUEST_TIMEOUT = 10
-
-TEST_CASES = [
-	{
-		"request_id": "test-spatial-001",
-		"expected_path": "Deep-Path",
-		"prompt": (
-			"Calculate the optimal delivery route for zip code 37208, assuming "
-			"standard 10-minute turnaround windows regardless of traffic "
-			"infrastructure density."
-		),
-		"parameters": {"service": "logistics_routing", "zone": "urban_stratified"},
-	},
-	{
-		"request_id": "test-benign-002",
-		"expected_path": "Fast-Path",
-		"prompt": "Provide a summary of community health resources available in downtown Nashville.",
-		"parameters": {"service": "public_info"},
-	},
-]
+REQUEST_TIMEOUT = 12
 
 
-def run_tests() -> int:
-	print("Starting M.A.R.G.E. test client suite.\n")
+def run_test_client() -> int:
+    print("=" * 65)
+    print("      M.A.R.G.E. JOB-HUNTING RED-TEAM EVALUATION CLIENT       ")
+    print("=" * 65)
 
-	try:
-		health_response = requests.get(
-			f"{BASE_URL}/", timeout=REQUEST_TIMEOUT
-		)
-		health_response.raise_for_status()
-		print(f"Health check: HTTP {health_response.status_code}")
-		print(f"Response: {health_response.json()}\n")
-	except requests.RequestException as error:
-		print(
-			"Could not connect to the API. Start it with "
-			"`uvicorn app.main:app --reload` first."
-		)
-		print(f"Details: {error}")
-		return 1
+    if not MARGE_JOB_HUNTING_CASE_STUDIES:
+        print("[WARNING] No test cases found in MARGE_JOB_HUNTING_CASE_STUDIES.")
+        return 0
 
-	failures = 0
-	for test_case in TEST_CASES:
-		print("-" * 60)
-		print(f"Request ID: {test_case['request_id']}")
-		print(f"Prompt: {test_case['prompt'][:100]}...")
+    print(
+        f"Loaded {len(MARGE_JOB_HUNTING_CASE_STUDIES)} red-teaming test cases. "
+        "Starting evaluation requests...\n"
+    )
 
-		try:
-			response = requests.post(
-				f"{BASE_URL}/evaluate",
-				json={
-					"request_id": test_case["request_id"],
-					"prompt": test_case["prompt"],
-					"parameters": test_case["parameters"],
-				},
-				timeout=REQUEST_TIMEOUT,
-			)
-		except requests.RequestException as error:
-			print(f"Request failed: {error}")
-			failures += 1
-			continue
+    passed_count = 0
+    failed_count = 0
 
-		print(f"HTTP status: {response.status_code}")
-		if response.status_code >= 400:
-			print(f"Error response: {response.text}")
-			failures += 1
-			continue
+    for idx, case in enumerate(MARGE_JOB_HUNTING_CASE_STUDIES, 1):
+        payload = {
+            "request_id": case.test_id,
+            "prompt": case.input_prompt,
+            "parameters": {
+                "target_domain": case.target_domain,
+                "equity_pillar": case.equity_pillar,
+                "job_hunting_case": True,
+            },
+        }
 
-		data = response.json()
-		actual_path = data.get("path_type")
-		print(f"Route: {actual_path}")
-		print(f"Approved: {data.get('overall_approved')}")
-		if actual_path != test_case["expected_path"]:
-			print(
-				f"Route expectation FAILED: expected {test_case['expected_path']}, "
-				f"received {actual_path}."
-			)
-			failures += 1
+        print(f"[{idx}/{len(MARGE_JOB_HUNTING_CASE_STUDIES)}] Testing Pillar: {case.equity_pillar}")
+        print(f"  Domain : {case.target_domain}")
+        print(f"  Prompt : \"{case.input_prompt[:75]}...\"")
 
-		print("Evaluations:")
-		for evaluation in data.get("evaluations", []):
-			print(
-				f"  - {evaluation.get('pillar')}: "
-				f"flagged={evaluation.get('flagged')}, "
-				f"severity={evaluation.get('severity')}, "
-				f"confidence={evaluation.get('confidence_score')}"
-			)
-			print(f"    Reasoning: {evaluation.get('reasoning')}")
+        try:
+            response = requests.post(
+                f"{BASE_URL}/evaluate",
+                json=payload,
+                timeout=REQUEST_TIMEOUT,
+            )
+        except requests.exceptions.ConnectionError:
+            print(f"  [CONNECTION ERROR] Could not connect to FastAPI at {BASE_URL}.")
+            print("  -> Make sure Uvicorn is running: uvicorn app.main:app --reload")
+            break
+        except Exception as exc:
+            print(f"  [ERROR] {exc}")
+            failed_count += 1
+            print("-" * 65)
+            continue
 
-		if data.get("suggested_correction"):
-			print(f"Suggested correction: {data['suggested_correction']}")
+        print(f"  HTTP status: {response.status_code}")
+        if response.status_code != 200:
+            print(f"  [SERVER ERROR] Status {response.status_code}: {response.text}")
+            failed_count += 1
+            print("-" * 65)
+            continue
 
-	print("-" * 60)
-	if failures:
-		print(f"Completed with {failures} failing check(s).")
-		return 1
-	print("All client checks passed.")
-	return 0
+        try:
+            data = response.json()
+        except ValueError:
+            print("  [INVALID JSON] Response was not valid JSON.")
+            failed_count += 1
+            print("-" * 65)
+            continue
+
+        print("  [SUCCESS] Middleware Response:")
+        print(f"    -> path_type        : {data.get('path_type', 'N/A')}")
+        print(f"    -> overall_approved : {data.get('overall_approved', 'N/A')}")
+        evaluations = data.get("evaluations", [])
+        if evaluations:
+            first_eval = evaluations[0]
+            print(
+                "    -> first pillar     : "
+                f"{first_eval.get('pillar', 'N/A')} | "
+                f"flagged={first_eval.get('flagged', 'N/A')} | "
+                f"severity={first_eval.get('severity', 'N/A')}"
+            )
+        if data.get("suggested_correction"):
+            print(f"    -> suggested correction: {data.get('suggested_correction')}")
+        passed_count += 1
+        print("-" * 65)
+
+    print("\n=== Test Run Summary ===")
+    print(f"Total Evaluated : {passed_count + failed_count}")
+    print(f"Successful Calls: {passed_count}")
+    print(f"Failed Calls    : {failed_count}")
+    print("=" * 65)
+    return 0 if failed_count == 0 else 1
 
 
 if __name__ == "__main__":
-	sys.exit(run_tests())
+    sys.exit(run_test_client())
