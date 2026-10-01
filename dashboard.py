@@ -18,31 +18,51 @@ st.markdown(
             color: #E0E0E0;
         }
         .marge-header-card {
-            background: linear-gradient(135deg, #1A1A1A 0%, #1E1E1E 100%);
-            border: 1px solid #333333;
-            border-left: 6px solid #D4AF37;
-            padding: 1.75rem;
-            border-radius: 8px;
-            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, #1A1A1A 0%, #161616 100%);
+            border: 2px solid #D4AF37;
+            padding: 2.5rem 2rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(212, 175, 55, 0.15);
         }
         .marge-title {
-            color: #D4AF37 !important;
+            color: #FFD700 !important;
             font-family: Georgia, serif;
-            font-size: 2.25rem;
-            font-weight: 700;
+            font-size: 3rem;
+            font-weight: 800;
             margin: 0;
+            text-shadow: 0 2px 10px rgba(212, 175, 55, 0.3);
+        }
+        .marge-fullname {
+            color: #D4AF37;
+            font-size: 1.05rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-top: 0.5rem;
+            margin-bottom: 0.75rem;
         }
         .marge-subtitle {
-            color: #A0A0A0;
+            color: #CCCCCC;
             font-size: 1.1rem;
-            margin-top: 0.4rem;
-            margin-bottom: 0.2rem;
+            margin: 0 0 0.3rem;
             font-style: italic;
         }
         .marge-tagline {
-            color: #888888;
+            color: #999999;
             font-size: 0.95rem;
             margin: 0;
+        }
+        @media (max-width: 640px) {
+            .marge-header-card {
+                padding: 1.75rem 1rem;
+            }
+            .marge-title {
+                font-size: 2.1rem;
+            }
+            .marge-fullname {
+                font-size: 0.85rem;
+            }
         }
         h2, h3 {
             color: #D4AF37 !important;
@@ -147,6 +167,7 @@ st.markdown(
     """
     <div class="marge-header-card">
         <h1 class="marge-title">M.A.R.G.E. 🏹</h1>
+        <div class="marge-fullname">Multimodal Automated Real-time Guardian Engine</div>
         <div class="marge-subtitle">The Equity Guardian</div>
         <div class="marge-tagline">Sociotechnical Middleware</div>
     </div>
