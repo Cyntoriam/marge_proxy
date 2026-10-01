@@ -3,4 +3,5 @@ uvicorn>=0.28.0
 pydantic>=2.6.0
 pydantic-settings>=2.2.0
 requests>=2.31.0
+streamlit
 openai>=1.52.0
