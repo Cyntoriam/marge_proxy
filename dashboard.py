@@ -93,6 +93,14 @@ st.markdown(
             border-radius: 6px;
             margin-bottom: 0.8rem;
         }
+        .flagged-card {
+            background-color: #1E1E1E;
+            border: 1px solid #553333;
+            border-left: 4px solid #E57373;
+            padding: 1.1rem;
+            border-radius: 6px;
+            margin-bottom: 0.8rem;
+        }
     </style>
     """,
     unsafe_allow_html=True,
@@ -103,7 +111,8 @@ PILLAR_RULES = {
     "Spatial/Economic Erasure": {
         "patterns": (
             r"\b(?:bypass|exclude|exclusion|peripheral|low[- ]density|"
-            r"underserved|redlin\w*|low[- ]income|order volume is low)\b",
+            r"underserved|redlin\w*|low[- ]income|order volume is low|"
+            r"relocat\w*|suburban|headquarters|corridor|downtown|commute)\b",
         ),
         "deep_patterns": (r"\b(?:food desert|transit desert|service desert)\b",),
         "note": "Location, service access, or economic exclusion language needs context review.",
@@ -111,7 +120,8 @@ PILLAR_RULES = {
     "Intersectional Microaggressions": {
         "patterns": (
             r"\b(?:aggressive|articulate|unprofessional|emotional|polished|"
-            r"assertive|traditional university)\b",
+            r"assertive|traditional university|pedigree|assimilation|backward|"
+            r"culture|prestige)\b",
         ),
         "deep_patterns": (r"\b(?:angry woman|angry black|culture fit)\b",),
         "note": "Potentially subjective descriptors can carry different implications across identities.",
@@ -119,7 +129,8 @@ PILLAR_RULES = {
     "Accessibility Justice": {
         "patterns": (
             r"\b(?:without accommodations|no accommodations|inaccessible|"
-            r"wheelchair|screen reader|captions|disability|disabled)\b",
+            r"wheelchair|screen reader|captions|disability|disabled|hour\w*|"
+            r"on[- ]site|schedule|subtitles|transcript|fast[- ]paced)\b",
         ),
         "deep_patterns": (r"\b(?:cognitive access|assistive technology|accessible format)\b",),
         "note": "Accessibility-related language was found; review whether the described needs are supported.",
@@ -127,15 +138,19 @@ PILLAR_RULES = {
     "Stereotypical Framing": {
         "patterns": (
             r"\b(?:all women|all men|women are naturally|men are naturally|"
-            r"older workers|young and energetic|professional appearance)\b",
+            r"older workers|young and energetic|professional appearance|"
+            r"leadership roles|standard|traditional)\b",
         ),
-        "deep_patterns": (r"\b(?:naturally suited|born to|people like them)\b",),
+        "deep_patterns": (
+            r"\b(?:naturally suited|born to|people like them|aggressive)\b",
+        ),
         "note": "Generalizations or appearance criteria may encode assumptions about a group.",
     },
     "Dialectal Justice": {
         "patterns": (
             r"\b(?:accent|grammar|non[- ]standard dialect|speak properly|"
-            r"native speaker|broken english)\b",
+            r"native speaker|broken english|dialect|vernacular|prose|"
+            r"communication rhythms)\b",
         ),
         "deep_patterns": (r"\b(?:professional language|clear english|communication style)\b",),
         "note": "Language-variety terms can be used to unfairly judge dialect or fluency; review context.",
@@ -212,12 +227,16 @@ if st.button("Run Equity Audit", type="primary"):
                 f"Mode: {selected_mode} | Payload length: {results['payload_length']} characters"
             )
             for pillar, details in results["assessment"].items():
+                is_flagged = details["status"] == "Potential signal"
+                card_class = "flagged-card" if is_flagged else "equity-card"
+                status_color = "#E57373" if is_flagged else "#D4AF37"
+                note_color = "#DDDDDD" if is_flagged else "#A0A0A0"
                 st.markdown(
                     f"""
-                    <div class="equity-card">
+                    <div class="{card_class}">
                         <strong>{pillar}</strong><br>
-                        <span style="color: #D4AF37;">Status:</span> {details['status']}<br>
-                        <span style="color: #A0A0A0; font-size: 0.9rem;">{details['note']}</span>
+                        <span style="color: {status_color};">Status: {details['status']}</span><br>
+                        <span style="color: {note_color}; font-size: 0.9rem;">{details['note']}</span>
                     </div>
                     """,
                     unsafe_allow_html=True,
