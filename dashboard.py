@@ -108,6 +108,7 @@ st.markdown(
             border-radius: 8px;
             margin-bottom: 1.5rem;
             color: #E0E0E0;
+            line-height: 1.6;
         }
     </style>
     """,
@@ -120,7 +121,8 @@ PILLAR_RULES = {
         "patterns": (
             r"\b(?:bypass|exclude|exclusion|peripheral|low[- ]density|"
             r"underserved|redlin\w*|low[- ]income|order volume is low|"
-            r"relocat\w*|suburban|headquarters|corridor|downtown|commute)\b",
+            r"relocat\w*|suburban|headquarters|corridor|downtown|commute|"
+            r"on[- ]?site)\b",
         ),
         "deep_patterns": (r"\b(?:food desert|transit desert|service desert)\b",),
         "note": "Location, service access, or economic exclusion language needs context review.",
@@ -129,7 +131,7 @@ PILLAR_RULES = {
         "patterns": (
             r"\b(?:aggressive|articulate|unprofessional|emotional|polished|"
             r"assertive|traditional university|pedigree|assimilation|backward|"
-            r"culture|prestige)\b",
+            r"culture|prestige|executive presence)\b",
         ),
         "deep_patterns": (r"\b(?:angry woman|angry black|culture fit)\b",),
         "note": "Potentially subjective descriptors can carry different implications across identities.",
@@ -138,7 +140,7 @@ PILLAR_RULES = {
         "patterns": (
             r"\b(?:without accommodations|no accommodations|inaccessible|"
             r"wheelchair|screen reader|captions|disability|disabled|hour\w*|"
-            r"on[- ]site|schedule|subtitles|transcript|fast[- ]paced)\b",
+            r"on[- ]site|schedule|subtitles|transcript|fast[- ]paced|rhythm)\b",
         ),
         "deep_patterns": (r"\b(?:cognitive access|assistive technology|accessible format)\b",),
         "note": "Accessibility-related language was found; review whether the described needs are supported.",
@@ -147,7 +149,7 @@ PILLAR_RULES = {
         "patterns": (
             r"\b(?:all women|all men|women are naturally|men are naturally|"
             r"older workers|young and energetic|professional appearance|"
-            r"leadership roles|standard|traditional)\b",
+            r"leadership roles|standard|traditional|align naturally)\b",
         ),
         "deep_patterns": (
             r"\b(?:naturally suited|born to|people like them|aggressive)\b",
@@ -158,7 +160,7 @@ PILLAR_RULES = {
         "patterns": (
             r"\b(?:accent|grammar|non[- ]standard dialect|speak properly|"
             r"native speaker|broken english|dialect|vernacular|prose|"
-            r"communication rhythms)\b",
+            r"communication rhythms|polished clarity)\b",
         ),
         "deep_patterns": (r"\b(?:professional language|clear english|communication style)\b",),
         "note": "Language-variety terms can be used to unfairly judge dialect or fluency; review context.",
@@ -184,43 +186,50 @@ def evaluate_equity_payload(text: str, mode: str = "Standard Audit") -> dict:
             "note": rules["note"] if detected else "No matching terms found; this is not evidence that the content is equitable.",
         }
 
-    intersectional_insights = None
+    intersectional_explanation = None
     if deep_scan:
         flagged_pillars = {
             pillar
             for pillar, details in assessment.items()
             if details["status"] == "Potential signal"
         }
-        intersectional_insights = []
+        explanation_blocks = [
+            f"Analytical overview: The keyword screen marked {len(flagged_pillars)} of 5 pillars for potential signals. These phrase matches are prompts for contextual review, not confirmed barriers or findings of bias."
+        ]
 
-        if len(flagged_pillars) >= 3:
-            intersectional_insights.append(
-                "Multiple pillar keyword signals co-occur; consider a coordinated human review."
+        if {
+            "Accessibility Justice",
+            "Intersectional Microaggressions",
+        }.issubset(flagged_pillars):
+            explanation_blocks.append(
+                "Temporal and descriptor signals co-occur. Review their context, whether requirements are job-related, and whether reasonable alternatives or accommodations exist."
+            )
+        if {
+            "Dialectal Justice",
+            "Stereotypical Framing",
+        }.issubset(flagged_pillars):
+            explanation_blocks.append(
+                "Language-related and professional-standard signals co-occur. Review how communication criteria are defined and whether they assess job-relevant skills without privileging a particular dialect or style."
             )
         if {
             "Spatial/Economic Erasure",
             "Accessibility Justice",
         }.issubset(flagged_pillars):
-            intersectional_insights.append(
-                "Geographic and accessibility-related signals co-occur; review whether location and scheduling assumptions compound barriers."
+            explanation_blocks.append(
+                "Geographic and accessibility-related signals co-occur. Review whether location, commute, or schedule requirements could compound barriers for affected people."
             )
-        if {
-            "Intersectional Microaggressions",
-            "Dialectal Justice",
-        }.issubset(flagged_pillars):
-            intersectional_insights.append(
-                "Cultural and dialect-related signals co-occur; review whether the criteria impose narrow norms of culture or communication."
+        if len(flagged_pillars) >= 3:
+            explanation_blocks.append(
+                "Signals appeared in at least three pillars. A coordinated review may help determine whether these requirements interact in practice."
             )
-        if not intersectional_insights:
-            intersectional_insights.append(
-                "No cross-pillar rule combinations matched. This is not evidence that the content is equitable."
-            )
+
+        intersectional_explanation = explanation_blocks
 
     return {
         "mode": mode,
         "payload_length": len(text),
         "assessment": assessment,
-        "intersectional_insights": intersectional_insights,
+        "intersectional_explanation": intersectional_explanation,
     }
 
 
@@ -269,14 +278,14 @@ if st.button("Run Equity Audit", type="primary"):
             st.warning(results["error"])
         else:
             st.success(f"{selected_mode} complete.")
-            intersectional_insights = results["intersectional_insights"]
-            if intersectional_insights:
-                insights_html = "<br>".join(intersectional_insights)
+            intersectional_explanation = results["intersectional_explanation"]
+            if intersectional_explanation:
+                explanation_html = "<br><br>".join(intersectional_explanation)
                 st.markdown(
                     f"""
                     <div class="intersectional-banner">
-                        <strong>Deep Scan: Possible Cross-Pillar Signals</strong><br>
-                        {insights_html}
+                        <strong>Deep Intersectional Explanatory Breakdown</strong><br><br>
+                        {explanation_html}
                     </div>
                     """,
                     unsafe_allow_html=True,
