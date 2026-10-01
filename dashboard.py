@@ -1,193 +1,209 @@
+import re
+
 import streamlit as st
-import requests
+
 
 st.set_page_config(
     page_title="M.A.R.G.E. | The Equity Guardian",
-    page_icon="🛡️",
+    page_icon="🏹",
     layout="wide",
+    initial_sidebar_state="expanded",
 )
 
 st.markdown(
     """
     <style>
-    .stApp {
-        background-color: #121212;
-        color: #F5F2EB;
-    }
-    .main-header {
-        font-family: 'Helvetica Neue', sans-serif;
-        color: #D4AF37;
-        font-weight: 600;
-    }
-    .guardian-card {
-        background-color: #1E1B18;
-        border: 1px solid #D4AF37;
-        padding: 20px;
-        border-radius: 8px;
-        margin-bottom: 20px;
-    }
-    .guardian-quote {
-        background-color: #1E1B18;
-        border-left: 4px solid #D4AF37;
-        padding: 15px;
-        border-radius: 4px;
-        margin-bottom: 20px;
-        font-style: italic;
-        color: #E2DDD5;
-    }
-    .pillar-tag {
-        background-color: #2D2620;
-        color: #D4AF37;
-        padding: 4px 10px;
-        border-radius: 12px;
-        font-size: 0.85em;
-        font-weight: 600;
-        margin-right: 6px;
-        display: inline-block;
-        margin-bottom: 6px;
-    }
+        .stApp {
+            background-color: #121212;
+            color: #E0E0E0;
+        }
+        .marge-header-card {
+            background: linear-gradient(135deg, #1A1A1A 0%, #1E1E1E 100%);
+            border: 1px solid #333333;
+            border-left: 6px solid #D4AF37;
+            padding: 1.75rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+        }
+        .marge-title {
+            color: #D4AF37 !important;
+            font-family: Georgia, serif;
+            font-size: 2.25rem;
+            font-weight: 700;
+            margin: 0;
+        }
+        .marge-subtitle {
+            color: #A0A0A0;
+            font-size: 1.1rem;
+            margin-top: 0.4rem;
+            margin-bottom: 0.2rem;
+            font-style: italic;
+        }
+        .marge-tagline {
+            color: #888888;
+            font-size: 0.95rem;
+            margin: 0;
+        }
+        h2, h3 {
+            color: #D4AF37 !important;
+            font-weight: 600;
+        }
+        [data-testid="stSidebar"] {
+            background-color: #1A1A1A;
+            border-right: 1px solid #333333;
+        }
+        .stButton > button {
+            background-color: #D4AF37;
+            color: #121212;
+            font-weight: 600;
+            border: none;
+            border-radius: 6px;
+            padding: 0.5rem 1rem;
+            transition: background-color 0.2s ease;
+        }
+        .stButton > button:hover {
+            background-color: #C5A028;
+            color: #000000;
+        }
+        .equity-card {
+            background-color: #1E1E1E;
+            border: 1px solid #333333;
+            border-left: 4px solid #D4AF37;
+            padding: 1.1rem;
+            border-radius: 6px;
+            margin-bottom: 0.8rem;
+        }
     </style>
     """,
     unsafe_allow_html=True,
 )
 
-st.markdown(
-    '<h1 class="main-header">🛡️ M.A.R.G.E. (The Equity Guardian)</h1>',
-    unsafe_allow_html=True,
-)
-st.markdown("### Sociotechnical Equity Auditing Middleware & Protective Guardrail")
+
+PILLAR_RULES = {
+    "Spatial/Economic Erasure": {
+        "patterns": (
+            r"\b(?:bypass|exclude|exclusion|peripheral|low[- ]density|"
+            r"underserved|redlin\w*|low[- ]income|order volume is low)\b",
+        ),
+        "deep_patterns": (r"\b(?:food desert|transit desert|service desert)\b",),
+        "note": "Location, service access, or economic exclusion language needs context review.",
+    },
+    "Intersectional Microaggressions": {
+        "patterns": (
+            r"\b(?:aggressive|articulate|unprofessional|emotional|polished|"
+            r"assertive|traditional university)\b",
+        ),
+        "deep_patterns": (r"\b(?:angry woman|angry black|culture fit)\b",),
+        "note": "Potentially subjective descriptors can carry different implications across identities.",
+    },
+    "Accessibility Justice": {
+        "patterns": (
+            r"\b(?:without accommodations|no accommodations|inaccessible|"
+            r"wheelchair|screen reader|captions|disability|disabled)\b",
+        ),
+        "deep_patterns": (r"\b(?:cognitive access|assistive technology|accessible format)\b",),
+        "note": "Accessibility-related language was found; review whether the described needs are supported.",
+    },
+    "Stereotypical Framing": {
+        "patterns": (
+            r"\b(?:all women|all men|women are naturally|men are naturally|"
+            r"older workers|young and energetic|professional appearance)\b",
+        ),
+        "deep_patterns": (r"\b(?:naturally suited|born to|people like them)\b",),
+        "note": "Generalizations or appearance criteria may encode assumptions about a group.",
+    },
+    "Dialectal Justice": {
+        "patterns": (
+            r"\b(?:accent|grammar|non[- ]standard dialect|speak properly|"
+            r"native speaker|broken english)\b",
+        ),
+        "deep_patterns": (r"\b(?:professional language|clear english|communication style)\b",),
+        "note": "Language-variety terms can be used to unfairly judge dialect or fluency; review context.",
+    },
+}
+
+
+def evaluate_equity_payload(text: str, deep_scan: bool = False) -> dict:
+    """Run a lightweight keyword screen; this is not a semantic fairness audit."""
+    if len(text.strip()) < 10:
+        return {"error": "Please provide at least 10 characters for a useful keyword screen."}
+
+    content = text.lower()
+    assessment = {}
+    for pillar, rules in PILLAR_RULES.items():
+        patterns = rules["patterns"]
+        if deep_scan:
+            patterns += rules["deep_patterns"]
+        detected = any(re.search(pattern, content) for pattern in patterns)
+        assessment[pillar] = {
+            "status": "Potential signal" if detected else "No keyword signal detected",
+            "note": rules["note"] if detected else "No matching terms found; this is not evidence that the content is equitable.",
+        }
+
+    return {"payload_length": len(text), "assessment": assessment}
+
+
 st.markdown(
     """
-    <div class="guardian-quote">
-    "Designed with the spirit of radical care and protection, guarding technological
-    systems against erasure, bias, and microaggressions across the Five Pillars."
+    <div class="marge-header-card">
+        <h1 class="marge-title">M.A.R.G.E. 🏹</h1>
+        <div class="marge-subtitle">The Equity Guardian</div>
+        <div class="marge-tagline">Sociotechnical Middleware</div>
     </div>
     """,
     unsafe_allow_html=True,
 )
-
-st.sidebar.header("⚙️ Guardian Parameters")
-api_url = st.sidebar.text_input("FastAPI Endpoint", value="http://127.0.0.1:8000/evaluate")
-request_id = st.sidebar.text_input("Request ID", value="session-oshun-001")
-service_domains = {
-    "Recruitment & Hiring": "recruitment",
-    "Automated Delivery Routing": "delivery",
-    "Municipal Planning": "municipal_planning",
-    "Healthcare Logistics": "healthcare_logistics",
-}
-service_context = st.sidebar.selectbox("Service Domain", list(service_domains))
-strictness_level = st.sidebar.slider(
-    "Remediation Strictness",
-    min_value=1,
-    max_value=5,
-    value=3,
-    help="Passed to the API; the current backend does not yet apply this setting.",
+st.markdown(
+    "Welcome, Dr. C. M.A.R.G.E. is running a local keyword screen. Results are prompts for human review, not a certification of fairness."
 )
 
-col1, col2 = st.columns([2, 1])
-
-with col1:
-    st.markdown("#### Input Prompt / Payload")
-    prompt_input = st.text_area(
-        "Enter text to audit for equity risks:",
-        placeholder=(
-            "e.g., Optimize distribution routes across the metropolitan sector to "
-            "maximize efficiency, bypassing peripheral residential zones where "
-            "order volume is low."
-        ),
-        height=150,
+with st.sidebar:
+    st.header("Guardian Controls")
+    st.markdown("---")
+    selected_mode = st.radio(
+        "Evaluation Mode", ["Standard Audit", "Deep Intersectional Scan"]
     )
+    st.info("Oshun theme active: charcoal and honey-gold.")
+    st.caption("Self-contained mode: no API request or external service is used.")
 
-    if st.button("✨ Run Equity Audit", type="primary"):
-        if not prompt_input.strip():
-            st.warning("Please provide a prompt or payload to evaluate.")
+user_payload = st.text_area(
+    "Enter text payload for equity audit:",
+    placeholder="Paste text here to screen against the Five-Pillar Taxonomy...",
+    height=160,
+)
+
+if st.button("Run Equity Audit", type="primary"):
+    if not user_payload.strip():
+        st.error("Please enter some text before running the audit.")
+    else:
+        with st.spinner("M.A.R.G.E. is screening the payload..."):
+            results = evaluate_equity_payload(
+                user_payload,
+                deep_scan=selected_mode == "Deep Intersectional Scan",
+            )
+
+        if "error" in results:
+            st.warning(results["error"])
         else:
-            payload = {
-                "request_id": request_id,
-                "prompt": prompt_input,
-                "parameters": {
-                    "service": service_domains[service_context],
-                    "strictness": strictness_level,
-                },
-            }
-
-            with st.spinner(
-                "M.A.R.G.E. is analyzing structural and semantic equity risks with care..."
-            ):
-                try:
-                    response = requests.post(api_url, json=payload, timeout=15)
-                    if response.status_code == 200:
-                        data = response.json()
-
-                        st.success("Audit complete. Guardian protection protocol applied.")
-
-                        result_col1, result_col2 = st.columns(2)
-                        with result_col1:
-                            st.metric("Path Type", data.get("path_type", "Unknown"))
-                        with result_col2:
-                            st.metric(
-                                "Overall Approved",
-                                "Yes" if data.get("overall_approved") else "No",
-                            )
-
-                        st.markdown("### 📋 Structured Audit Output")
-                        st.json(data)
-
-                        evaluations = data.get("evaluations", [])
-                        if evaluations:
-                            st.markdown("### Evaluation Breakdown")
-                            for item in evaluations:
-                                with st.expander(item.get("pillar", "Unknown pillar")):
-                                    st.write(f"Flagged: {item.get('flagged')}")
-                                    st.write(f"Severity: {item.get('severity')}")
-                                    st.write(
-                                        f"Confidence: {item.get('confidence_score')}"
-                                    )
-                                    st.write(
-                                        item.get("reasoning", "No reasoning provided.")
-                                    )
-
-                        suggested_correction = data.get("suggested_correction")
-                        if suggested_correction:
-                            st.markdown("### Suggested Correction")
-                            st.info(suggested_correction)
-                    else:
-                        st.error(f"API Error: Status code {response.status_code}")
-                        st.text(response.text)
-                except requests.exceptions.ConnectionError:
-                    st.error(
-                        "Could not connect to the FastAPI backend. Ensure your Uvicorn "
-                        "server is running (`uvicorn app.main:app --reload`)."
-                    )
-                except requests.exceptions.Timeout:
-                    st.error("The FastAPI backend did not respond within 15 seconds.")
-                except requests.exceptions.RequestException as exc:
-                    st.error(f"The audit request failed: {exc}")
-                except ValueError as exc:
-                    st.error(f"The API returned an invalid JSON response: {exc}")
-
-with col2:
-    st.markdown("#### 🌟 Five-Pillar Framework")
-    st.markdown(
-        """
-        <div class="guardian-card">
-            <p style="color: #F5F2EB; font-size: 0.9em; margin-bottom: 12px;">
-            M.A.R.G.E. actively guards against systemic bias across five core dimensions of care:
-            </p>
-            <div>
-                <span class="pillar-tag">Stereotypical Framing</span>
-                <span class="pillar-tag">Intersectional Microaggressions</span>
-                <span class="pillar-tag">Accessibility Justice</span>
-                <span class="pillar-tag">Spatial &amp; Economic Erasure</span>
-                <span class="pillar-tag">Dialectal Justice</span>
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+            st.success("Keyword screen complete.")
+            st.markdown("### Five-Pillar Evaluation Results")
+            st.caption(
+                f"Mode: {selected_mode} | Payload length: {results['payload_length']} characters"
+            )
+            for pillar, details in results["assessment"].items():
+                st.markdown(
+                    f"""
+                    <div class="equity-card">
+                        <strong>{pillar}</strong><br>
+                        <span style="color: #D4AF37;">Status:</span> {details['status']}<br>
+                        <span style="color: #A0A0A0; font-size: 0.9rem;">{details['note']}</span>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
+            st.warning(
+                "This local keyword screen can miss contextual or implicit harms and can flag benign wording. Have affected people and domain experts review consequential decisions."
+            )
 
 st.markdown("---")
-st.markdown(
-    "<small style='color: #888;'>M.A.R.G.E. Middleware Dashboard • Powered by Python &amp; Streamlit</small>",
-    unsafe_allow_html=True,
-)
+st.caption("M.A.R.G.E. Middleware Dashboard • Self-contained keyword screening")
