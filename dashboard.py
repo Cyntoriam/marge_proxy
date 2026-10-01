@@ -150,7 +150,7 @@ PILLAR_RULES = {
             r"\b(?:without accommodations|no accommodations|inaccessible|"
             r"wheelchair|screen reader|captions|disability|disabled|hour\w*|"
             r"on[- ]site|schedule|subtitles|transcript|fast[- ]paced|rhythm|"
-            r"impromptu)\b",
+            r"impromptu|rapid[- ]fire)\b",
         ),
         "deep_patterns": (r"\b(?:cognitive access|assistive technology|accessible format)\b",),
         "note": "Accessibility-related language was found; review whether the described needs are supported.",
@@ -243,11 +243,64 @@ def evaluate_equity_payload(text: str, mode: str = "Standard Audit") -> dict:
             "Stereotypical Framing": "Define advancement and performance criteria using consistent, role-related outcomes.",
             "Dialectal Justice": "Assess communication only where relevant to the role; specify the skill and accept equivalent dialects and styles.",
         }
+        flagged_list = [
+            pillar for pillar in PILLAR_RULES if pillar in flagged_pillars
+        ]
         recommendations = [
             f"{pillar}: {recommendation_by_pillar[pillar]}"
-            for pillar in PILLAR_RULES
-            if pillar in flagged_pillars
+            for pillar in flagged_list
         ]
+        recommendation_title = "Pillar-Specific Remediation Recommendations"
+
+        if (
+            any(term in content for term in ("accelerator", "networking", "mentorship"))
+            and flagged_pillars.intersection(
+                {
+                    "Intersectional Microaggressions",
+                    "Accessibility Justice",
+                    "Dialectal Justice",
+                }
+            )
+        ):
+            recommendation_title = "Program Participation Reframing"
+            recommendations = [
+                f"Potential signals appeared in: {', '.join(flagged_list)}.",
+                "If these terms describe participation criteria, consider structured mentoring, published milestones, and multiple communication formats.",
+                "Example rewrite: The program offers structured mentoring, published milestones, and multiple ways to participate. Participants are assessed using transparent criteria tied to program goals.",
+            ]
+        elif (
+            any(term in content for term in ("executive search", "candidate", "headquarters"))
+            and flagged_pillars.intersection(
+                {
+                    "Spatial/Economic Erasure",
+                    "Accessibility Justice",
+                    "Intersectional Microaggressions",
+                }
+            )
+        ):
+            recommendation_title = "Executive Hiring Reframing"
+            recommendations = [
+                f"Potential signals appeared in: {', '.join(flagged_list)}.",
+                "State location and schedule expectations separately, clarify which are essential, and apply consistent role-related selection criteria.",
+                "Example rewrite: The role's location and schedule expectations are stated explicitly. Candidates are assessed against documented outcomes and consistent, role-related criteria.",
+            ]
+        elif (
+            any(term in content for term in ("innovation district", "community", "downtown corridor"))
+            and flagged_pillars.intersection(
+                {
+                    "Spatial/Economic Erasure",
+                    "Accessibility Justice",
+                    "Dialectal Justice",
+                }
+            )
+        ):
+            recommendation_title = "Community Planning Reframing"
+            recommendations = [
+                f"Potential signals appeared in: {', '.join(flagged_list)}.",
+                "Involve affected residents in planning, provide accessible participation formats, and explain how community input informs decisions.",
+                "Example rewrite: The planning process includes neighborhood consultation, accessible materials, and a published account of how community feedback informs decisions.",
+            ]
+
         if not recommendations:
             recommendations.append(
                 "No keyword rules triggered, so no automatic rewrite is suggested. This does not replace contextual human review."
@@ -259,6 +312,7 @@ def evaluate_equity_payload(text: str, mode: str = "Standard Audit") -> dict:
         "assessment": assessment,
         "intersectional_explanation": intersectional_explanation,
         "recommendations": recommendations,
+        "recommendation_title": recommendation_title if deep_scan else None,
     }
 
 
@@ -322,10 +376,11 @@ if st.button("Run Equity Audit", type="primary"):
             recommendations = results["recommendations"]
             if recommendations:
                 recommendations_html = "<br><br>".join(recommendations)
+                recommendation_title = results["recommendation_title"]
                 st.markdown(
                     f"""
                     <div class="recommendation-banner">
-                        <strong>Guardian Remediation Recommendations</strong><br><br>
+                        <strong>{recommendation_title}</strong><br><br>
                         {recommendations_html}
                     </div>
                     """,
