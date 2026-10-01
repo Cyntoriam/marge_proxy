@@ -119,6 +119,36 @@ st.markdown(
             color: #E0E0E0;
             line-height: 1.6;
         }
+        .artemis-scale-container {
+            background-color: #1A1A1A;
+            border: 1px solid #D4AF37;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        .scale-track {
+            position: relative;
+            width: 100%;
+            height: 16px;
+            background: linear-gradient(90deg, #D4AF37 0%, #E89B50 55%, #E57373 100%);
+            border-radius: 8px;
+            margin: 2rem 0 1rem;
+        }
+        .artemis-arrow-marker {
+            position: absolute;
+            top: -28px;
+            transform: translateX(-50%);
+            font-size: 1.8rem;
+            transition: left 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .scale-labels {
+            display: flex;
+            justify-content: space-between;
+            gap: 0.5rem;
+            color: #999999;
+            font-size: 0.8rem;
+        }
     </style>
     """,
     unsafe_allow_html=True,
@@ -150,7 +180,7 @@ PILLAR_RULES = {
             r"\b(?:without accommodations|no accommodations|inaccessible|"
             r"wheelchair|screen reader|captions|disability|disabled|hour\w*|"
             r"on[- ]site|schedule|subtitles|transcript|fast[- ]paced|rhythm|"
-            r"impromptu|rapid[- ]fire)\b",
+            r"impromptu|rapid[- ]fire|residency)\b",
         ),
         "deep_patterns": (r"\b(?:cognitive access|assistive technology|accessible format)\b",),
         "note": "Accessibility-related language was found; review whether the described needs are supported.",
@@ -196,6 +226,11 @@ def evaluate_equity_payload(text: str, mode: str = "Standard Audit") -> dict:
             "status": "Potential signal" if detected else "No keyword signal detected",
             "note": rules["note"] if detected else "No matching terms found; this is not evidence that the content is equitable.",
         }
+
+    matched_pillar_count = sum(
+        details["status"] == "Potential signal" for details in assessment.values()
+    )
+    keyword_signal_index = matched_pillar_count * 20
 
     intersectional_explanation = None
     recommendations = None
@@ -253,6 +288,22 @@ def evaluate_equity_payload(text: str, mode: str = "Standard Audit") -> dict:
         recommendation_title = "Pillar-Specific Remediation Recommendations"
 
         if (
+            any(term in content for term in ("fellowship", "residency", "pedigree"))
+            and flagged_pillars.intersection(
+                {
+                    "Spatial/Economic Erasure",
+                    "Accessibility Justice",
+                    "Intersectional Microaggressions",
+                }
+            )
+        ):
+            recommendation_title = "Fellowship Participation Review"
+            recommendations = [
+                f"Potential signals appeared in: {', '.join(flagged_list)}.",
+                "Clarify whether residency or proximity requirements are essential, and make selection criteria transparent and relevant to program outcomes.",
+                "Example rewrite: Fellowship requirements, including any in-person participation, are stated explicitly. Applicants are assessed using transparent criteria tied to the program's goals.",
+            ]
+        elif (
             any(term in content for term in ("accelerator", "networking", "mentorship"))
             and flagged_pillars.intersection(
                 {
@@ -309,6 +360,8 @@ def evaluate_equity_payload(text: str, mode: str = "Standard Audit") -> dict:
     return {
         "mode": mode,
         "payload_length": len(text),
+        "matched_pillar_count": matched_pillar_count,
+        "keyword_signal_index": keyword_signal_index,
         "assessment": assessment,
         "intersectional_explanation": intersectional_explanation,
         "recommendations": recommendations,
@@ -361,6 +414,36 @@ if st.button("Run Equity Audit", type="primary"):
             st.warning(results["error"])
         else:
             st.success(f"{selected_mode} complete.")
+            signal_index = results["keyword_signal_index"]
+            arrow_position = min(max(signal_index, 2), 98)
+            matched_pillar_count = results["matched_pillar_count"]
+            st.markdown(
+                f"""
+                <div class="artemis-scale-container">
+                    <div style="color: #D4AF37; font-weight: 600; text-transform: uppercase;">
+                        Artemis Keyword Signal Index
+                    </div>
+                    <div style="font-size: 1.6rem; font-weight: 700; color: #FFD700; margin-top: 0.5rem;">
+                        {signal_index} / 100
+                    </div>
+                    <div style="color: #CCCCCC;">
+                        {matched_pillar_count} of 5 pillar groups matched keyword rules
+                    </div>
+                    <div class="scale-track">
+                        <div class="artemis-arrow-marker" style="left: {arrow_position}%">🏹</div>
+                    </div>
+                    <div class="scale-labels">
+                        <span>0 groups matched</span>
+                        <span>2-3 groups matched</span>
+                        <span>5 groups matched</span>
+                    </div>
+                    <div style="color: #A0A0A0; font-size: 0.85rem; margin-top: 1rem;">
+                        Heuristic keyword count only. This is not an equity score, risk probability, or fairness certification; no matches do not establish safety.
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
             intersectional_explanation = results["intersectional_explanation"]
             if intersectional_explanation:
                 explanation_html = "<br><br>".join(intersectional_explanation)
