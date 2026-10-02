@@ -12,142 +12,130 @@ st.set_page_config(
 st.markdown(
     """
     <style>
-        .stApp {
-            background-color: #121212;
+        /* Force the main app background */
+        .stApp, [data-testid="stAppViewContainer"], [data-testid="stHeader"] {
+            background-color: #0D0D0D !important;
             background-image: 
-                radial-gradient(circle at 50% 20%, rgba(212, 175, 55, 0.07) 0%, transparent 40%),
-                linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
-            background-size: 100% 100%, 40px 40px, 40px 40px;
-            color: #E0E0E0;
+                radial-gradient(ellipse 80% 50% at 50% 0%, rgba(217, 83, 30, 0.35) 0%, rgba(212, 175, 55, 0.15) 40%, transparent 80%),
+                radial-gradient(circle at 50% 15%, rgba(255, 140, 0, 0.22) 0%, transparent 55%),
+                linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px) !important;
+            background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px !important;
+            color: #E0E0E0 !important;
         }
+        
+        /* Ensure blocks and containers pick up the rich dark contrast */
         .marge-header-card {
-            background: linear-gradient(135deg, #1A1A1A 0%, #161616 100%);
-            border: 2px solid #D4AF37;
+            background: linear-gradient(135deg, #1A120B 0%, #141414 100%) !important;
+            border: 2px solid #D9531E !important;
             padding: 2.5rem 2rem;
             border-radius: 12px;
             margin-bottom: 2rem;
             text-align: center;
-            box-shadow: 0 15px 35px rgba(212, 175, 55, 0.12);
+            box-shadow: 0 15px 40px rgba(217, 83, 30, 0.18);
         }
         .marge-title {
-            color: #FFD700 !important;
+            color: #FFB347 !important;
             font-family: Georgia, serif;
             font-size: 3rem;
             font-weight: 800;
             margin: 0;
-            text-shadow: 0 2px 10px rgba(212, 175, 55, 0.3);
+            text-shadow: 0 2px 15px rgba(217, 83, 30, 0.4);
         }
         .marge-fullname {
-            color: #D4AF37;
+            color: #D9531E !important;
             font-size: 1.05rem;
             font-weight: 600;
             text-transform: uppercase;
             margin-top: 0.5rem;
             margin-bottom: 0.75rem;
+            letter-spacing: 1px;
         }
         .marge-subtitle {
-            color: #CCCCCC;
+            color: #D4AF37 !important;
             font-size: 1.1rem;
             margin: 0 0 0.3rem;
             font-style: italic;
         }
         .chat-input-container {
-            background: rgba(26, 26, 26, 0.85);
-            border: 1px solid #D4AF37;
+            background: rgba(26, 18, 14, 0.85) !important;
+            border: 1px solid #D9531E !important;
             padding: 1.5rem;
             border-radius: 10px;
             margin-bottom: 1.5rem;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+            box-shadow: 0 8px 25px rgba(217, 83, 30, 0.12);
         }
         .about-card {
-            background: rgba(26, 26, 26, 0.9);
-            border: 1px solid #333333;
-            border-left: 4px solid #D4AF37;
+            background: rgba(26, 18, 14, 0.9) !important;
+            border: 1px solid #3d2417 !important;
+            border-left: 4px solid #D9531E !important;
             padding: 1.5rem;
             border-radius: 8px;
             margin-bottom: 1.2rem;
             line-height: 1.6;
         }
-        @media (max-width: 640px) {
-            .marge-header-card {
-                padding: 1.75rem 1rem;
-            }
-            .marge-title {
-                font-size: 2.1rem;
-            }
-            .marge-fullname {
-                font-size: 0.85rem;
-            }
-        }
-        h2, h3 {
-            color: #D4AF37 !important;
-            font-weight: 600;
-        }
         [data-testid="stSidebar"] {
-            background-color: #1A1A1A;
-            border-right: 1px solid #333333;
+            background-color: #140E0A !important;
+            border-right: 1px solid #3d2417 !important;
         }
         .stButton > button {
-            background-color: #D4AF37;
-            color: #121212;
+            background: linear-gradient(135deg, #D9531E 0%, #C84512 100%) !important;
+            color: #FFFFFF !important;
             font-weight: 600;
             border: none;
             border-radius: 6px;
             padding: 0.5rem 1rem;
-            transition: background-color 0.2s ease;
-        }
-        .stButton > button:hover {
-            background-color: #C5A028;
-            color: #000000;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(217, 83, 30, 0.3);
         }
         .equity-card {
-            background-color: #1E1E1E;
-            border: 1px solid #333333;
-            border-left: 4px solid #D4AF37;
+            background-color: #1A120B !important;
+            border: 1px solid #3d2417 !important;
+            border-left: 4px solid #D4AF37 !important;
             padding: 1.1rem;
             border-radius: 6px;
             margin-bottom: 0.8rem;
         }
         .flagged-card {
-            background-color: #1E1E1E;
-            border: 1px solid #553333;
-            border-left: 4px solid #E57373;
+            background-color: #1A120B !important;
+            border: 1px solid #553333 !important;
+            border-left: 4px solid #E57373 !important;
             padding: 1.1rem;
             border-radius: 6px;
             margin-bottom: 0.8rem;
         }
         .intersectional-banner {
-            background: rgba(212, 175, 55, 0.08);
-            border: 1px solid #D4AF37;
+            background: rgba(217, 83, 30, 0.12) !important;
+            border: 1px solid #D9531E !important;
             padding: 1rem;
             border-radius: 8px;
             margin-bottom: 1.5rem;
-            color: #E0E0E0;
+            color: #E0E0E0 !important;
             line-height: 1.6;
         }
         .recommendation-banner {
-            background: rgba(76, 175, 80, 0.08);
-            border: 1px solid #81C784;
+            background: rgba(76, 175, 80, 0.1) !important;
+            border: 1px solid #81C784 !important;
             padding: 1rem;
             border-radius: 8px;
             margin: 1.5rem 0;
-            color: #E0E0E0;
+            color: #E0E0E0 !important;
             line-height: 1.6;
         }
         .guardian-scale-container {
-            background-color: #1A1A1A;
-            border: 1px solid #D4AF37;
+            background-color: #1A120B !important;
+            border: 1px solid #D9531E !important;
             padding: 1.5rem;
             border-radius: 8px;
             margin-bottom: 1.5rem;
             text-align: center;
+            box-shadow: 0 8px 25px rgba(217, 83, 30, 0.1);
         }
         .scale-track {
             position: relative;
             width: 100%;
             height: 16px;
-            background: linear-gradient(90deg, #D4AF37 0%, #E89B50 55%, #E57373 100%);
+            background: linear-gradient(90deg, #D4AF37 0%, #D9531E 55%, #E57373 100%) !important;
             border-radius: 8px;
             margin: 2rem 0 1rem;
         }
@@ -157,13 +145,6 @@ st.markdown(
             transform: translateX(-50%);
             font-size: 1.8rem;
             transition: left 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .scale-labels {
-            display: flex;
-            justify-content: space-between;
-            gap: 0.5rem;
-            color: #999999;
-            font-size: 0.8rem;
         }
     </style>
     """,
