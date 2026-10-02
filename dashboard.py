@@ -9,37 +9,38 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# Sidebar Configuration & Preferences (Visitor Portal at the top)
+# Initialize session state for navigation if not set
+if "app_section" not in st.session_state:
+    st.session_state.app_section = "🏹 The Guardian Audit"
+
+# Sidebar Configuration & Preferences
 with st.sidebar:
     st.header("Visitor Portal")
     visitor_name = st.text_input("Your Name / Handle", value="Pocketdoc", placeholder="Enter your name...")
 
     st.markdown("---")
     st.header("Navigation Panel")
-    app_section = st.selectbox(
-        "Select View",
-        ["🏹 The Guardian Audit", "📖 About & User Guide"],
-    )
+
+    # Clean list navigation using clickable buttons styled as list items
+    if st.button("🏹 The Guardian Audit", use_container_width=True):
+        st.session_state.app_section = "🏹 The Guardian Audit"
+    if st.button("📖 About & User Guide", use_container_width=True):
+        st.session_state.app_section = "📖 About & User Guide"
+
+    app_section = st.session_state.app_section
 
     st.markdown("---")
     st.header("Guardian Controls & Preferences")
 
-    # Theme Toggle
     theme_choice = st.selectbox(
         "Theme Mode",
         ["Dark (Oshun Sunrise)", "Light (Radiant Day)"],
     )
 
-    # Sound Toggle for Sensory Accessibility
-    sound_enabled = st.toggle(
-        "Enable Audio Cues",
-        value=True,
-        help="Plays a gentle ambient chime upon audit completion.",
-    )
+    sound_enabled = st.toggle("Enable Audio Cues", value=True, help="Plays a gentle ambient chime upon audit completion.")
 
     selected_mode = st.radio(
-        "Evaluation Mode",
-        ["Standard Audit", "Deep Intersectional Scan"],
+        "Evaluation Mode", ["Standard Audit", "Deep Intersectional Scan"]
     )
 
     if selected_mode == "Deep Intersectional Scan":
@@ -47,11 +48,11 @@ with st.sidebar:
     else:
         st.info("Standard Audit active: baseline Heuristic Equity Evaluation.")
 
-    st.caption("M.A.R.G.E. v2.4 • Multi-sensory equity middleware.")
+    st.caption("M.A.R.G.E. v2.7 • Multi-sensory equity middleware.")
 
 is_dark_theme = "Dark" in theme_choice
 
-# Dynamic Theme CSS Injection
+# Harmonized Theme CSS Injection for both Light and Dark modes
 if is_dark_theme:
     theme_css = """
         .stApp, [data-testid="stAppViewContainer"], [data-testid="stHeader"] {
@@ -90,15 +91,20 @@ if is_dark_theme:
             background-color: #140E0A !important;
             border-right: 1px solid #3d2417 !important;
         }
+        input, textarea {
+            background-color: #1A120B !important;
+            color: #E0E0E0 !important;
+            border: 1px solid #3d2417 !important;
+        }
     """
 else:
     theme_css = """
         .stApp, [data-testid="stAppViewContainer"], [data-testid="stHeader"] {
-            background-color: #FFF8F0 !important;
+            background-color: #FFF9F2 !important;
             background-image:
-                radial-gradient(ellipse 80% 50% at 50% 0%, rgba(217, 83, 30, 0.12) 0%, rgba(212, 175, 55, 0.08) 40%, transparent 80%),
-                linear-gradient(rgba(0, 0, 0, 0.02) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 0, 0, 0.02) 1px, transparent 1px) !important;
+                radial-gradient(ellipse 80% 50% at 50% 0%, rgba(217, 83, 30, 0.10) 0%, rgba(212, 175, 55, 0.06) 40%, transparent 80%),
+                linear-gradient(rgba(0, 0, 0, 0.015) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 0, 0, 0.015) 1px, transparent 1px) !important;
             background-size: 100% 100%, 40px 40px, 40px 40px !important;
             color: #2C2C2C !important;
         }
@@ -113,20 +119,27 @@ else:
         }
         .chat-input-container {
             background: #FFFFFF !important;
-            border: 1px solid #D9531E !important;
+            border: 1px solid #E6D5C3 !important;
             padding: 1.5rem;
             border-radius: 10px;
             margin-bottom: 1.5rem;
-            box-shadow: 0 6px 20px rgba(217, 83, 30, 0.08);
+            box-shadow: 0 6px 20px rgba(217, 83, 30, 0.06);
         }
         .about-card, .equity-card, .flagged-card, .guardian-scale-container {
             background-color: #FFFFFF !important;
             border: 1px solid #E6D5C3 !important;
             color: #2C2C2C !important;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
         }
         [data-testid="stSidebar"] {
             background-color: #FDF5ED !important;
             border-right: 1px solid #E6D5C3 !important;
+            color: #2C2C2C !important;
+        }
+        input, textarea {
+            background-color: #FFFFFF !important;
+            color: #2C2C2C !important;
+            border: 1px solid #D6C2AB !important;
         }
     """
 
@@ -135,15 +148,15 @@ st.markdown(
     <style>
         {theme_css}
         .marge-title {{
-            color: #FFB347 !important;
+            color: #D9531E !important;
             font-family: Georgia, serif;
             font-size: 3rem;
             font-weight: 800;
             margin: 0;
-            text-shadow: 0 2px 15px rgba(217, 83, 30, 0.4);
+            text-shadow: 0 2px 15px rgba(217, 83, 30, 0.2);
         }}
         .marge-fullname {{
-            color: #D9531E !important;
+            color: #C84512 !important;
             font-size: 1.05rem;
             font-weight: 600;
             text-transform: uppercase;
@@ -152,7 +165,7 @@ st.markdown(
             letter-spacing: 1px;
         }}
         .marge-subtitle {{
-            color: #D4AF37 !important;
+            color: #B8860B !important;
             font-size: 1.1rem;
             margin: 0 0 0.3rem;
             font-style: italic;
@@ -168,7 +181,6 @@ st.markdown(
             box-shadow: 0 4px 12px rgba(217, 83, 30, 0.3);
         }}
         .intersectional-banner {{
-            background: rgba(217, 83, 30, 0.12) !important;
             border: 1px solid #D9531E !important;
             padding: 1rem;
             border-radius: 8px;
@@ -176,7 +188,6 @@ st.markdown(
             line-height: 1.6;
         }}
         .recommendation-banner {{
-            background: rgba(76, 175, 80, 0.1) !important;
             border: 1px solid #81C784 !important;
             padding: 1rem;
             border-radius: 8px;
@@ -214,6 +225,7 @@ PILLAR_RULES = {
         ),
         "deep_patterns": (r"\b(?:food desert|transit desert|service desert)\b",),
         "note": "Location, service access, or economic exclusion language needs context review.",
+        "rewrite": "Offer flexible geographic or remote participation paths; replace restrictive location qualifiers with accessible access points.",
     },
     "Intersectional Microaggressions": {
         "patterns": (
@@ -224,6 +236,7 @@ PILLAR_RULES = {
         ),
         "deep_patterns": (r"\b(?:angry woman|angry black|culture fit)\b",),
         "note": "Potentially subjective descriptors can carry different implications across identities.",
+        "rewrite": "Substitute subjective demeanor or prestige filters with explicit, competency-based contributions and role criteria.",
     },
     "Accessibility Justice": {
         "patterns": (
@@ -235,6 +248,7 @@ PILLAR_RULES = {
         ),
         "deep_patterns": (r"\b(?:cognitive access|assistive technology|accessible format)\b",),
         "note": "Accessibility-related language was found; review whether the described needs are supported.",
+        "rewrite": "Replace rigid scheduling, rapid pacing, or unannounced expectations with structured timelines, async options, and clear accommodations.",
     },
     "Stereotypical Framing": {
         "patterns": (
@@ -247,6 +261,7 @@ PILLAR_RULES = {
             r"\b(?:naturally suited|born to|people like them|aggressive)\b",
         ),
         "note": "Generalizations or appearance criteria may encode assumptions about a group.",
+        "rewrite": "Eliminate demographic or stylistic generalizations; evaluate performance against consistent, objective project outcomes.",
     },
     "Dialectal Justice": {
         "patterns": (
@@ -256,6 +271,7 @@ PILLAR_RULES = {
         ),
         "deep_patterns": (r"\b(?:professional language|clear english|communication style)\b",),
         "note": "Language-variety terms can be used to unfairly judge dialect or fluency; review context.",
+        "rewrite": "Focus evaluation solely on functional clarity rather than specific dialect, cadence, or linguistic style.",
     },
 }
 
@@ -275,6 +291,7 @@ def evaluate_equity_payload(text: str, mode: str = "Standard Audit") -> dict:
         assessment[pillar] = {
             "status": "Potential signal" if detected else "No pattern signal detected",
             "note": rules["note"] if detected else "No matching pattern found; this is not evidence that the content is equitable.",
+            "rewrite": rules["rewrite"] if detected else "",
         }
 
     matched_pillar_count = sum(
@@ -314,31 +331,22 @@ def evaluate_equity_payload(text: str, mode: str = "Standard Audit") -> dict:
 
         intersectional_explanation = explanation_blocks
 
-        recommendation_by_pillar = {
-            "Spatial/Economic Erasure": "Review whether location, commute, or relocation requirements are essential; consider equivalent access paths where practical.",
-            "Intersectional Microaggressions": "Replace subjective culture or presence language with observable, role-related criteria.",
-            "Accessibility Justice": "Clarify essential timing or pace, consider structured alternatives, and document available accommodations.",
-            "Stereotypical Framing": "Define advancement and performance criteria using consistent, role-related outcomes.",
-            "Dialectal Justice": "Assess communication only where relevant to the role; specify the skill and accept equivalent dialects and styles.",
-        }
-        flagged_list = [pillar for pillar in PILLAR_RULES if pillar in flagged_pillars]
-
         recommendations = [
-            f"{pillar}: {recommendation_by_pillar[pillar]}"
-            for pillar in flagged_list
+            f"**{pillar} Rewrite Suggestion:** {PILLAR_RULES[pillar]['rewrite']}"
+            for pillar in PILLAR_RULES if pillar in flagged_pillars
         ]
-        recommendation_title = "Pillar-Specific Remediation Recommendations"
+        recommendation_title = "Actionable Pillar Rewrite Suggestions"
 
         if (
             any(term in content for term in ("velocity", "cadence", "huddles", "vanguard innovation lab"))
             and flagged_pillars.intersection({"Accessibility Justice", "Dialectal Justice", "Stereotypical Framing"})
         ):
-            recommendation_title = "Innovation Lab Participation Review & Recommendations"
-            lab_specific_note = f"Potential signals appeared in: {', '.join(flagged_list)}. If velocity, cadence, or huddles are participation expectations, clarify their purpose and consider outcome-based milestones, scheduled collaboration, and asynchronous ways to contribute."
+            recommendation_title = "Innovation Lab Comprehensive Rewrite Plan"
+            lab_specific_note = "<strong>Suggested Inclusive Revision:</strong> 'Seeking collaborative participants for our innovation fellowship. Contributions may be submitted through scheduled syncs or structured asynchronous milestones, supporting diverse communication styles and flexible access.'"
             recommendations.insert(0, lab_specific_note)
-        elif flagged_list:
+        elif flagged_list := [p for p in PILLAR_RULES if p in flagged_pillars]:
             recommendations.append(
-                "Scale-up review: Pilot the proposed changes with affected participants, assign an accountable owner, and review similar materials before adopting a broader policy."
+                "**Next Step:** Pilot these rewritten guidelines with your review committee before broader publication."
             )
 
         if not recommendations:
@@ -381,22 +389,21 @@ if app_section == "📖 About & User Guide":
 
     st.markdown(
         """
-        <div class="about-card">
-            <h3 style="margin-top:0; color: #FFB347;">1. Personalize Your Session</h3>
+        <div class="about-card" style="padding: 1.5rem; border-radius: 8px; margin-bottom: 1.2rem;">
+            <h3 style="margin-top:0; color: #D9531E;">1. Personalize Your Session</h3>
             <p>In the sidebar under <b>Visitor Portal</b>, enter your name or handle. M.A.R.G.E. greets you personally and tailors the audit context.</p>
         </div>
-        <div class="about-card">
-            <h3 style="margin-top:0; color: #FFB347;">2. Choose Theme & Accessibility Cues</h3>
+        <div class="about-card" style="padding: 1.5rem; border-radius: 8px; margin-bottom: 1.2rem;">
+            <h3 style="margin-top:0; color: #D9531E;">2. Choose Theme & Accessibility Cues</h3>
             <p>Toggle between <b>Dark (Oshun Sunrise)</b> and <b>Light (Radiant Day)</b> themes, and enable/disable ambient audio feedback in the sidebar controls.</p>
         </div>
-        <div class="about-card">
-            <h3 style="margin-top:0; color: #FFB347;">3. Select Evaluation Mode</h3>
-            <p><b>Standard Audit:</b> Baseline Heuristic Equity Evaluation across the Five-Pillar Taxonomy.<br>
-            <b>Deep Intersectional Scan:</b> Compound co-occurrence analysis evaluating how overlapping terms interact.</p>
+        <div class="about-card" style="padding: 1.5rem; border-radius: 8px; margin-bottom: 1.2rem;">
+            <h3 style="margin-top:0; color: #D9531E;">3. Select Evaluation Mode & Use Voice Features</h3>
+            <p>Use the <b>🎤 Speak-to-Text</b> button inside the payload box to dictate text, and use the <b>🔊 Read Results Aloud</b> feature for screen-reading support.</p>
         </div>
-        <div class="about-card">
-            <h3 style="margin-top:0; color: #FFB347;">4. Run the Guardian Audit</h3>
-            <p>Paste text payloads into the main input box to check for potential access barriers and review actionable remediation recommendations.</p>
+        <div class="about-card" style="padding: 1.5rem; border-radius: 8px; margin-bottom: 1.2rem;">
+            <h3 style="margin-top:0; color: #D9531E;">4. Run the Guardian Audit & Rewrites</h3>
+            <p>Paste or dictate text payloads to check for access barriers and receive specific, actionable rewrite suggestions.</p>
         </div>
         """,
         unsafe_allow_html=True,
@@ -414,20 +421,63 @@ else:
     st.markdown(
         f"""
         <div class="chat-input-container">
-            <div style="color: #FFB347; font-weight: 700; font-size: 1.1rem; margin-bottom: 0.4rem;">
+            <div style="color: #D9531E; font-weight: 700; font-size: 1.1rem; margin-bottom: 0.4rem;">
                 🏹 What text, policy, or vision are we guarding today, {greeting_name}?
             </div>
-            <div style="color: #999999; font-size: 0.9rem; margin-bottom: 0.8rem;">
-                Drop your program description, job posting, or community plan below. M.A.R.G.E. will scan it across the Five-Pillar Taxonomy.
+            <div style="font-size: 0.9rem; margin-bottom: 0.8rem; opacity: 0.8;">
+                Drop your program description, job posting, or community plan below (or use speech-to-text). M.A.R.G.E. will scan it across the Five-Pillar Taxonomy and provide rewrite suggestions.
             </div>
         </div>
         """,
         unsafe_allow_html=True,
     )
 
+    # Speech-to-Text & Text Area HTML Integration
+    st.markdown(
+        """
+        <div style="margin-bottom: 0.5rem;">
+            <button onclick="startDictation()" style="background: linear-gradient(135deg, #D9531E 0%, #C84512 100%); color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 12px rgba(217, 83, 30, 0.3);">
+                🎤 Click to Speak / Dictate Text
+            </button>
+            <span id="speechStatus" style="margin-left: 1rem; font-size: 0.9rem; font-style: italic; opacity: 0.8;"></span>
+        </div>
+        <script>
+            function startDictation() {
+                if (window.hasOwnProperty('webkitSpeechRecognition')) {
+                    var recognition = new webkitSpeechRecognition();
+                    recognition.continuous = false;
+                    recognition.interimResults = false;
+                    recognition.lang = "en-US";
+                    recognition.start();
+                    document.getElementById("speechStatus").innerText = "Listening... Speak now.";
+
+                    recognition.onresult = function(e) {
+                        var transcript = e.results[0][0].transcript;
+                        const textarea = document.querySelector('textarea');
+                        if (textarea) {
+                            textarea.value = textarea.value ? textarea.value + " " + transcript : transcript;
+                            textarea.dispatchEvent(new Event('input', { bubbles: true }));
+                        }
+                        document.getElementById("speechStatus").innerText = "Dictation captured successfully!";
+                        recognition.stop();
+                    };
+
+                    recognition.onerror = function(e) {
+                        document.getElementById("speechStatus").innerText = "Speech recognition error. Please try again.";
+                        recognition.stop();
+                    }
+                } else {
+                    document.getElementById("speechStatus").innerText = "Speech recognition not supported in this browser.";
+                }
+            }
+        </script>
+        """,
+        unsafe_allow_html=True,
+    )
+
     user_payload = st.text_area(
         "Payload Content Box",
-        placeholder="Type or paste text here (e.g., fellowship requirements, community blueprint, team communication norms)...",
+        placeholder="Type, paste, or dictate text here...",
         height=160,
         label_visibility="collapsed",
     )
@@ -440,7 +490,6 @@ else:
         if not user_payload.strip():
             st.error("Please enter some text before running the audit.")
         else:
-            # Optional sound cue integration via HTML5 Audio API if enabled
             if sound_enabled:
                 st.markdown(
                     """
@@ -462,30 +511,67 @@ else:
                 arrow_position = min(max(signal_index, 2), 98)
                 matched_pillar_count = results["matched_pillar_count"]
 
+                # Prepare summary text for the screen reader
+                summary_speech_text = f"Audit complete for {greeting_name}. Guardian Index is {signal_index} out of 100, with {matched_pillar_count} of 5 pillar groups matching heuristic rules."
+
                 st.markdown(
                     f"""
-                    <div class="guardian-scale-container">
+                    <div class="guardian-scale-container" style="padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem; text-align: center;">
                         <div style="color: #D9531E; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">
                             Guardian Index
                         </div>
-                        <div style="font-size: 1.6rem; font-weight: 700; color: #FFB347; margin-top: 0.5rem;">
+                        <div style="font-size: 1.6rem; font-weight: 700; margin-top: 0.5rem;">
                             {signal_index} / 100
                         </div>
-                        <div style="color: #999999;">
+                        <div style="opacity: 0.8;">
                             {matched_pillar_count} of 5 pillar groups matched heuristic rules
                         </div>
                         <div class="scale-track">
                             <div class="guardian-arrow-marker" style="left: {arrow_position}%">🏹</div>
                         </div>
-                        <div class="scale-labels" style="display: flex; justify-content: space-between; font-size: 0.8rem; color: #888888;">
+                        <div class="scale-labels" style="display: flex; justify-content: space-between; font-size: 0.8rem; opacity: 0.8;">
                             <span>0 groups matched</span>
                             <span>2-3 groups matched</span>
                             <span>5 groups matched</span>
                         </div>
-                        <div style="color: #888888; font-size: 0.85rem; margin-top: 1rem;">
+                        <div style="font-size: 0.85rem; margin-top: 1rem; opacity: 0.7;">
                             Heuristic pattern count only. This is not an equity score or risk probability.
                         </div>
                     </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
+
+                # Text-to-Speech / Screen Reader Button Widget
+                full_results_text = f"Guardian Index {signal_index} out of 100. {matched_pillar_count} pillar groups matched. "
+                for pillar, details in results["assessment"].items():
+                    full_results_text += f"{pillar}: {details['status']}. "
+                    if details['rewrite']:
+                        full_results_text += f"Suggested rewrite: {details['rewrite']} "
+
+                safe_speech_string = full_results_text.replace('"', '\\"').replace("'", "\\'")
+                st.markdown(
+                    f"""
+                    <div style="margin-bottom: 1.5rem; text-align: center;">
+                        <button onclick="speakResults('{safe_speech_string}')" style="background: linear-gradient(135deg, #D4AF37 0%, #B8860B 100%); color: #0D0D0D; border: none; padding: 0.6rem 1.2rem; border-radius: 6px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);">
+                            🔊 Read Results Aloud (Screen Reader)
+                        </button>
+                        <button onclick="window.speechSynthesis.cancel()" style="background: transparent; color: inherit; border: 1px solid #D9531E; padding: 0.6rem 1rem; border-radius: 6px; font-weight: 600; cursor: pointer; margin-left: 0.5rem;">
+                            ⏹ Stop Speech
+                        </button>
+                    </div>
+                    <script>
+                        function speakResults(textToSpeak) {{
+                            if ('speechSynthesis' in window) {{
+                                window.speechSynthesis.cancel();
+                                var utterance = new SpeechSynthesisUtterance(textToSpeak);
+                                utterance.rate = 1.0;
+                                window.speechSynthesis.speak(utterance);
+                            }} else {{
+                                alert('Text-to-speech is not supported by your browser.');
+                            }}
+                        }}
+                    </script>
                     """,
                     unsafe_allow_html=True,
                 )
@@ -495,7 +581,7 @@ else:
                     explanation_html = "<br><br>".join(intersectional_explanation)
                     st.markdown(
                         f"""
-                        <div class="intersectional-banner">
+                        <div class="intersectional-banner" style="background: rgba(217, 83, 30, 0.08);">
                             <strong>Deep Intersectional Explanatory Breakdown</strong><br><br>
                             {explanation_html}
                         </div>
@@ -506,10 +592,10 @@ else:
                 recommendations = results["recommendations"]
                 if recommendations:
                     recommendations_html = "<br><br>".join(recommendations)
-                    recommendation_title = results.get("recommendation_title") or "Pillar-Specific Recommendations"
+                    recommendation_title = results.get("recommendation_title") or "Pillar-Specific Rewrite Suggestions"
                     st.markdown(
                         f"""
-                        <div class="recommendation-banner">
+                        <div class="recommendation-banner" style="background: rgba(76, 175, 80, 0.08);">
                             <strong>{recommendation_title}</strong><br><br>
                             {recommendations_html}
                         </div>
@@ -517,21 +603,24 @@ else:
                         unsafe_allow_html=True,
                     )
 
-                st.markdown("### Five-Pillar Evaluation Results")
+                st.markdown("### Five-Pillar Evaluation Results & Rewrites")
                 st.caption(
                     f"Mode: {selected_mode} | Payload length: {results['payload_length']} characters"
                 )
                 for pillar, details in results["assessment"].items():
                     is_flagged = details["status"] == "Potential signal"
                     card_class = "flagged-card" if is_flagged else "equity-card"
-                    status_color = "#E57373" if is_flagged else "#FFB347"
-                    note_color = "#CCCCCC" if is_flagged else "#888888"
+                    status_color = "#E57373" if is_flagged else "#D9531E"
+
+                    rewrite_html = f"<br><span style='color: #81C784; font-size: 0.9rem;'><strong>Suggested Rewrite:</strong> {details['rewrite']}</span>" if is_flagged else ""
+
                     st.markdown(
                         f"""
                         <div class="{card_class}" style="padding: 1.1rem; border-radius: 6px; margin-bottom: 0.8rem; border-left: 4px solid {status_color};">
                             <strong>{pillar}</strong><br>
                             <span style="color: {status_color};">Status: {details['status']}</span><br>
-                            <span style="color: {note_color}; font-size: 0.9rem;">{details['note']}</span>
+                            <span style="font-size: 0.9rem; opacity: 0.85;">{details['note']}</span>
+                            {rewrite_html}
                         </div>
                         """,
                         unsafe_allow_html=True,
