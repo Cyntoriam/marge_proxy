@@ -26,7 +26,7 @@ if "current_payload" not in st.session_state:
 with st.sidebar:
     st.header("Visitor Portal")
     visitor_name = st.text_input("Your Name / Handle", value="Pocketdoc", placeholder="Enter your name...")
-    
+
     st.markdown("---")
     st.header("Navigation Panel")
     
@@ -34,7 +34,7 @@ with st.sidebar:
         st.session_state.app_section = "🏹 The Guardian Audit"
     if st.button("📖 About & User Guide", use_container_width=True):
         st.session_state.app_section = "📖 About & User Guide"
-        
+
     app_section = st.session_state.app_section
     
     st.markdown("---")
@@ -355,15 +355,18 @@ st.set_page_config(
     layout="wide"
 )
 
-# --- Header with Tooltip Setup ---
+# --- Original Header Style (with Acronym & Tooltip) ---
 st.markdown(
     """
-    <h1 title="Multimodal Automated Real-time Guardian Engine">
-        M.A.R.G.E. <span style="font-size: 0.5em; color: gray;">v2.10</span>
-    </h1>
-    <p style="margin-top: -15px; color: #666;">
-        <em>Multimodal Automated Real-time Guardian Engine</em> — Chat-Driven Equity & Safety Audit
-    </p>
+    <div style="padding: 10px 0;">
+        <h1 style="margin-bottom: 0px;" title="Multimodal Automated Real-time Guardian Engine">
+            M.A.R.G.E. v2.10
+        </h1>
+        <p style="font-size: 1.1em; color: #555; margin-top: 4px;">
+            <strong>Multimodal Automated Real-time Guardian Engine</strong>
+        </p>
+    </div>
+    <hr style="margin-top: 0px; margin-bottom: 20px;">
     """,
     unsafe_allow_html=True
 )
@@ -389,7 +392,7 @@ def render_artemis_bow_target(score: int, label: str = "Guardian Index"):
     html_content = f"""
     <div style="background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 8px; padding: 12px; margin: 10px 0; font-family: sans-serif;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-            <span style="font-weight: bold; font-size: 0.95em; color: #333;">🏹 {label}: <code>{clamped_score}/100</code></span>
+            <span style="font-weight: bold; font-size: 0.95em; color: #333;">🏹 {label} Target: <code>{clamped_score}/100</code></span>
             <span style="font-size: 0.85em; font-weight: bold; color: {color};">{status}</span>
         </div>
         <div style="position: relative; background: #e9ecef; height: 12px; border-radius: 6px; width: 100%;">
@@ -434,10 +437,12 @@ for message in st.session_state.messages:
 prompt = st.chat_input("Type your policy text or respond to M.A.R.G.E...")
 
 if prompt:
+    # 1. Append User Message to History & UI
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
 
+    # 2. Sequential Conversational State Machine Logic
     with st.chat_message("assistant"):
         response_content = ""
         current_score = None
@@ -454,11 +459,7 @@ if prompt:
                 "🛡️ **Step 1: Standard Guardian Audit Complete**\n\n"
                 f"*Analyzing text payload (`{len(prompt)} characters`)*...\n\n"
                 "* **Pillar Breakdown:**\n"
-                "  * Inclusion: 88%\n"
-                "  * Clarity: 90%\n"
-                "  * Safety: 85%\n"
-                "  * Equity: 72% *(Attention needed)*\n"
-                "  * Access: 87%\n\n"
+                "  * Inclusion: 88%\n  * Clarity: 90%\n  * Safety: 85%\n  * Equity: 72% *(Attention needed)*\n  * Access: 87%\n\n"
                 "Would you like me to run the **Deep Intersectional Scan** next? *(Type 'yes' or provide instructions)*"
             )
             st.session_state.workflow_step = 1
@@ -513,32 +514,22 @@ if prompt:
                     "The approved changes have been successfully written into the document payload buffer.\n\n"
                     "🎉 *Workflow sequence completed successfully!* Paste any new text below to start a fresh audit cycle."
                 )
-                st.session_state.workflow_step = 0
+                st.session_state.workflow_step = 0  # Reset for next run
             else:
                 response_content = "Approval pending. Let me know if you would like to tweak the suggested rewrite line-items."
 
         else:
             response_content = "Ready for the next input. Paste new text to begin another audit cycle."
 
+        # Render message response to UI
         st.markdown(response_content)
 
         if current_score is not None:
             render_artemis_bow_target(current_score, score_label)
 
+        # Save assistant message in session history
         msg_payload = {"role": "assistant", "content": response_content}
         if current_score is not None:
             msg_payload["score_val"] = current_score
             msg_payload["score_label"] = score_label
         st.session_state.messages.append(msg_payload)
-
-# Optional helper summary at the bottom for the existing evaluator contract
-if st.button("Run Guardian Index Snapshot"):
-    if st.session_state.target_text:
-        results = evaluate_equity_payload(st.session_state.target_text, mode="Standard Audit")
-        st.metric("Guardian Index", results["guardian_signal_index"])
-        st.caption(f"Matched pillars: {results['matched_pillar_count']} / 5")
-    else:
-        st.info("Paste text in the chat before running the guardian snapshot.")
-
-st.markdown("---")
-st.caption("M.A.R.G.E. • Multi-sensory Equity Guardian Engine")
