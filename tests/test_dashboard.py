@@ -24,6 +24,17 @@ class DashboardBrandingTest(unittest.TestCase):
         self.assertNotIn("keyword_signal_index", result)
         self.assertIn("assessment", result)
 
+    def test_deep_scan_does_not_double_count_aggressive_signal(self):
+        namespace = {}
+        exec(DASHBOARD_PATH.read_text(), namespace)
+        result = namespace["evaluate_equity_payload"](
+            "People from the inner city are described as aggressive in meetings.",
+            mode="Deep Intersectional Scan",
+        )
+
+        self.assertEqual(result["matched_pillar_count"], 2)
+        self.assertEqual(result["guardian_signal_index"], 60)
+
 
 if __name__ == "__main__":
     unittest.main()

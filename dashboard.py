@@ -7,8 +7,8 @@ from app.tiers.tier2_judge import run_async_marge_audit
 
 
 st.set_page_config(
-    page_title="M.A.R.G.E. | The Equity Guardian",
-    page_icon="🏹",
+    page_title="M.A.R.G.E. | Multimodal Automated Real-time Guardian Engine",
+    page_icon="🛡️",
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -17,6 +17,8 @@ if "app_section" not in st.session_state:
     st.session_state.app_section = "🏹 The Guardian Audit"
 if "current_payload" not in st.session_state:
     st.session_state.current_payload = ""
+if "last_results" not in st.session_state:
+    st.session_state.last_results = None
 
 with st.sidebar:
     st.header("Visitor Portal")
@@ -32,6 +34,11 @@ with st.sidebar:
         value=os.environ.get("OPENAI_API_KEY", ""),
         help="Used only for this Streamlit session; it is not written to project files.",
     ).strip()
+    ai_engine_mode = st.toggle(
+        "Enable AI-to-AI Engine (Async OpenAI)",
+        value=False,
+        help="Use structured OpenAI evaluation when a key is configured.",
+    )
     st.markdown("---")
     st.header("Navigation Panel")
     if st.button("🏹 The Guardian Audit", use_container_width=True):
@@ -217,7 +224,8 @@ PILLAR_RULES = {
         "patterns": (
             r"\b(?:bypass|exclude|exclusion|peripheral|low[- ]density|"
             r"underserved|redlin\w*|low[- ]income|order volume is low|"
-            r"relocat\w*|suburban|headquarters|corridor|downtown|commute|"
+            r"relocat\w*|suburban|headquarters|corridor|downtown|commute|inner city|"
+            r"those people|you people|they always|"
             r"on[- ]?site|campus hub)\b",
         ),
         "deep_patterns": (r"\b(?:food desert|transit desert|service desert)\b",),
@@ -226,8 +234,9 @@ PILLAR_RULES = {
     },
     "Intersectional Microaggressions": {
         "patterns": (
-            r"\b(?:aggressive|articulate|unprofessional|emotional|polished|"
-            r"assertive|traditional university|pedigree|assimilation|backward|"
+            r"\b(?:aggressive|articulate|so articulate|unprofessional|emotional|polished|"
+            r"assertive|bossy|where are you really from|you don't look like|"
+            r"traditional university|pedigree|assimilation|backward|"
             r"culture|prestige|executive presence|institutional culture|"
             r"etiquette)\b",
         ),
@@ -255,7 +264,7 @@ PILLAR_RULES = {
             r"high[- ]potential|impeccable|pathfinders)\b",
         ),
         "deep_patterns": (
-            r"\b(?:naturally suited|born to|people like them|aggressive)\b",
+            r"\b(?:naturally suited|born to|people like them)\b",
         ),
         "note": "Generalizations or appearance criteria may encode assumptions about a group.",
         "rewrite": "Eliminate demographic or stylistic generalizations; evaluate performance against consistent, objective project outcomes.",
@@ -294,7 +303,7 @@ def evaluate_equity_payload(text: str, mode: str = "Standard Audit") -> dict:
     matched_pillar_count = sum(
         details["status"] == "Potential signal" for details in assessment.values()
     )
-    guardian_signal_index = matched_pillar_count * 20
+    guardian_signal_index = max(100 - matched_pillar_count * 20, 0)
 
     intersectional_explanation = None
     recommendations = None
@@ -337,38 +346,60 @@ def render_header():
     st.markdown("""
         <style>
             .marge-header {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
+                background: linear-gradient(135deg, #17120e 0%, #251913 55%, #301a16 100%);
+                padding: 2rem;
+                border-radius: 12px;
+                color: #f3f3f8;
+                margin-bottom: 2rem;
+                box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+                border: 1px solid rgba(212, 175, 55, 0.3);
                 text-align: center;
-                padding: 1.2rem 0 0.8rem 0;
-                margin-bottom: 1.5rem;
-                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             }
             .marge-icon {
-                font-size: 1.5rem;
-                margin-bottom: 0.2rem;
+                font-size: 2.5rem;
             }
             .marge-title {
-                font-size: 1.8rem;
-                font-weight: 700;
-                letter-spacing: 0.05em;
-                margin: 0;
-                color: #FAFAFA;
+                font-size: 2.5rem;
+                font-weight: 800;
+                margin-bottom: 0.5rem;
+                color: #D4AF37;
+                letter-spacing: 0;
             }
             .marge-subtitle {
-                font-size: 0.9rem;
+                font-size: 1.05rem;
+                color: #E0D8CF;
                 font-weight: 400;
-                color: #A0A0A0;
-                margin-top: 0.3rem;
-                letter-spacing: 0.02em;
+            }
+            .marge-subtitle em {
+                color: #00C9A7;
+                font-style: italic;
+                font-weight: 600;
+            }
+            .guardian-card {
+                background: rgba(38, 31, 27, 0.82);
+                padding: 1.25rem;
+                border-radius: 8px;
+                border-left: 4px solid #D9531E;
+                margin-bottom: 1rem;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.16);
+            }
+            .stMarkdown ul {
+                list-style: none;
+                padding-left: 0;
+            }
+            .stMarkdown ul li::before {
+                content: "🏹 ";
+                color: #D4AF37;
+                font-weight: bold;
+                display: inline-block;
+                width: 1.5em;
+                margin-left: -1.5em;
             }
         </style>
         <div class="marge-header">
             <div class="marge-icon">🏹</div>
-            <h1 class="marge-title">M.A.R.G.E.</h1>
-            <div class="marge-subtitle">Multimodal Automated Real-time Guardian Engine &bull; Equity Audit Dashboard</div>
+            <h1 class="marge-title">🏹 M.A.R.G.E. 🛡️</h1>
+            <div class="marge-subtitle">Multimodal Automated Real-time Guardian Engine — <em>The Equity Guardian</em></div>
         </div>
     """, unsafe_allow_html=True)
 
@@ -406,11 +437,11 @@ def _normalize_ai_results(audit_payload):
 
 
 FIVE_PILLARS = {
-    "Pillar 1: Representational Justice": "Evaluates visual, textual, and cultural tokenism to ensure balanced demographic representation.",
-    "Pillar 2: Linguistic Equity": "Detects bias against dialectal variations, non-standard syntax, and socio-economic speech markers.",
-    "Pillar 3: Intersectional Safety": "Identifies compounding vulnerabilities where overlapping identities amplify algorithmic harm.",
-    "Pillar 4: Empathy & Pro-social Alignment": "Considers whether model outputs support psychological safety and emotional well-being.",
-    "Pillar 5: Autonomous Self-Correction": "Describes the goal of generating equitable alternatives for human review.",
+    "Pillar 1: Representational Justice": "Evaluates visual, textual, and cultural tokenism to ensure balanced demographic representation and accurate contextual framing.",
+    "Pillar 2: Linguistic Equity": "Detects systemic bias against dialectal variations, non-standard syntax, regional phrasing, and socio-economic speech markers.",
+    "Pillar 3: Intersectional Safety": "Identifies compounding vulnerabilities where overlapping identities such as race, gender, and socioeconomic status amplify algorithmic microaggressions or harm.",
+    "Pillar 4: Empathy & Pro-social Alignment": "Measures whether model or document outputs foster psychological safety, validation, and emotional well-being instead of alienation.",
+    "Pillar 5: Autonomous Self-Correction": "Drives remediation by generating equitable alternatives for human review.",
 }
 
 
@@ -433,103 +464,177 @@ def _corrected_draft(original: str, audit_payload) -> str:
 	return corrected
 
 
+def _remediate_local_text(original: str) -> str:
+    substitutions = (
+        (r"\bthose people\b", "people in the specific community"),
+        (r"\byou people\b", "members of this community"),
+        (r"\bthey always\b", "some people may"),
+        (r"\binner city\b", "[specific community context needed]"),
+        (r"\bso articulate\b", "communicates clearly"),
+        (r"\bwhere are you really from\b", "what places have shaped your experience"),
+        (r"\byou don't look like\b", "[reframed without an appearance-based assumption]"),
+        (r"\baggressive\b", "direct in communication style"),
+        (r"\bbossy\b", "assertive"),
+    )
+    revised = original
+    for pattern, replacement in substitutions:
+        revised = re.sub(pattern, replacement, revised, flags=re.IGNORECASE)
+    return revised
+
+
 def main():
-	render_header()
-	greeting_name = html.escape(visitor_name.strip() or "Traveler")
-	if app_section == "📖 About & User Guide":
-		st.markdown(f"### Welcome to the M.A.R.G.E. Knowledge Base, {greeting_name}!")
-		st.markdown("M.A.R.G.E. combines heuristic and optional structured AI review. All findings require human judgment.")
-		return
+    render_header()
+    greeting_name = html.escape(visitor_name.strip() or "Traveler")
+    if app_section == "📖 About & User Guide":
+        st.markdown(f"### Welcome to the M.A.R.G.E. Knowledge Base, {greeting_name}!")
+        st.markdown("M.A.R.G.E. reviews text for potential equity and access signals. Findings are heuristic or AI-assisted and require human judgment.")
+        return
 
-	tab_chat, tab_ai_engine, tab_pillars = st.tabs(
-		["💬 Conversational Guardian", "⚡ AI-to-AI Async Engine", "🏛️ Five-Pillar Taxonomy"]
-	)
+    tab_scanner, tab_pillars = st.tabs(
+        ["🔍 Document & Idea Scanner", "🏛️ Five-Pillar Taxonomy"]
+    )
 
-	with tab_chat:
-		st.subheader("Conversational Equity Guidance")
-		st.markdown("Review policy language conversationally; findings are generated by the local heuristic evaluator.")
-		chat_scan = st.selectbox(
-			"Conversational scan depth",
-			["Standard Guardian Scan", "Deep Architectural Scan"],
-			key="chat_scan_depth",
-		)
-		if "chat_history" not in st.session_state:
-			st.session_state.chat_history = [{
-				"role": "marge",
-				"text": "Greetings! Share policy language or a prompt and I will review it against the local equity heuristics.",
-			}]
-		for message in st.session_state.chat_history:
-			with st.chat_message("assistant" if message["role"] == "marge" else "user"):
-				st.write(message["text"])
+    with tab_scanner:
+        st.subheader("Asynchronous Microaggression & Bias Guardian Audit")
+        st.markdown("Scan policy text or uploaded documents across the Five Pillars, calculate a Guardian Index, and review proposed neutralizations before using them.")
+        input_mode = st.radio(
+            "Select Input Source:",
+            ["Direct Text Input", "Simulated Document Upload"],
+            horizontal=True,
+        )
 
-		user_prompt = st.chat_input("Ask M.A.R.G.E. to review policy language or a prompt...")
-		if user_prompt:
-			st.session_state.chat_history.append({"role": "user", "text": user_prompt})
-			mode = "Deep Intersectional Scan" if chat_scan == "Deep Architectural Scan" else "Standard Audit"
-			result = evaluate_equity_payload(user_prompt, mode=mode)
-			if "error" in result:
-				response = result["error"]
-			else:
-				flagged = [name for name, item in result["assessment"].items() if item["status"] == "Potential signal"]
-				response = f"Guardian Index: {result['guardian_signal_index']}/100. "
-				response += "Potential signals: " + ", ".join(flagged) if flagged else "No heuristic signals matched; this does not establish equity."
-			st.session_state.chat_history.append({"role": "marge", "text": response})
-			st.rerun()
+        if input_mode == "Direct Text Input":
+            target_input = st.text_area(
+                "Enter idea, policy, or text excerpt to scan:",
+                value=st.session_state.current_payload or "Some folks from the inner city are just not cut out for tech leadership; they are often too aggressive when speaking up.",
+                height=150,
+                key="scanner_text_input",
+            )
+        else:
+            uploaded_doc = st.file_uploader(
+                "Upload a text or policy document", type=["txt", "md"]
+            )
+            if uploaded_doc is not None:
+                target_input = uploaded_doc.getvalue().decode("utf-8", errors="replace")
+                st.text_area("Scanned document preview", value=target_input, height=150, disabled=True)
+            else:
+                target_input = st.session_state.current_payload or "Sample policy text: Certain groups are always too articulate during reviews, which can disrupt the standard workflow."
+                st.info("Upload a `.txt` or `.md` file, or run the sample text shown below.")
+                st.text_area("Sample document preview", value=target_input, height=120, disabled=True)
+        st.session_state.current_payload = target_input
 
-	with tab_ai_engine:
-		st.subheader("Asynchronous Model Interception & Self-Correction")
-		st.markdown("Submit external model text for structured OpenAI review. Suggested replacements are drafts for human review; nothing is dispatched automatically.")
-		scan_type = st.selectbox(
-			"AI audit depth",
-			["Standard Guardian Scan", "Deep Architectural Scan"],
-			key="async_scan_depth",
-		)
-		target_output = st.text_area(
-			"External AI Model Output to Audit",
-			value=st.session_state.current_payload or "All people from low-income communities always struggle with digital literacy and cannot adopt advanced tools.",
-			height=140,
-			key="async_target_output",
-		)
-		if st.button("Run Asynchronous M.A.R.G.E. Audit"):
-			if not target_output.strip():
-				st.error("Enter model output before starting the audit.")
-			elif not openai_api_key and not (os.environ.get("OPENAI_API_KEY") or os.environ.get("LLM_API_KEY")):
-				st.error("Enter an OpenAI API key in the sidebar or configure it in the server environment.")
-			else:
-				with st.spinner("M.A.R.G.E. is asynchronously auditing across the evaluator pillars..."):
-					audit_payload = asyncio.run(
-						run_async_marge_audit(target_output, scan_type, api_key=openai_api_key or None)
-					)
-				corrected = _corrected_draft(target_output, audit_payload)
-				used_fallback = any("Illustrative fallback only" in item.why_flagged for item in audit_payload.evaluations)
-				left, right = st.columns(2)
-				with left:
-					st.error("Original model output")
-					st.write(target_output)
-					st.metric("Guardian Index", f"{audit_payload.overall_guardian_index}%")
-				with right:
-					st.success("Suggested revised draft" if corrected != target_output else "No exact-clause rewrite available")
-					st.write(corrected)
-				if used_fallback:
-					st.warning("Illustrative fallback only; no live model evaluation was completed.")
-				violations = [item for item in audit_payload.evaluations if item.bias_detected]
-				if violations:
-					st.markdown("#### Flagged findings")
-					for item in violations:
-						st.markdown(f"**{item.pillar_name}** · {item.confidence_score:.0%} confidence")
-						st.write(item.why_flagged)
-				st.markdown("#### Structured response")
-				st.json(audit_payload.model_dump(mode="json"))
+        if st.button("🏹 Release Guardian Audit", type="primary"):
+            if len(target_input.strip()) < 10:
+                st.error("Please provide at least 10 characters to run the audit.")
+            elif ai_engine_mode and not (
+                openai_api_key or os.environ.get("OPENAI_API_KEY") or os.environ.get("LLM_API_KEY")
+            ):
+                st.error("Enter an OpenAI API key in the sidebar or configure one in the server environment.")
+            else:
+                with st.spinner("M.A.R.G.E. is auditing the text through the five pillars..."):
+                    if ai_engine_mode:
+                        audit_payload = asyncio.run(
+                            run_async_marge_audit(
+                                target_input,
+                                "Deep Architectural Scan",
+                                api_key=openai_api_key or None,
+                            )
+                        )
+                        assessment = _normalize_ai_results(audit_payload)
+                        violations = [
+                            {
+                                "pillar": item.pillar_name,
+                                "issue": " ".join(part for part in (item.observation, item.why_flagged) if part),
+                                "remedy": item.suggested_rewrite,
+                            }
+                            for item in audit_payload.evaluations
+                            if item.bias_detected
+                        ]
+                        remediated = _corrected_draft(target_input, audit_payload)
+                        used_fallback = assessment["used_fallback"]
+                        guardian_index = audit_payload.overall_guardian_index
+                    else:
+                        local_result = evaluate_equity_payload(
+                            target_input, mode="Deep Intersectional Scan"
+                        )
+                        assessment = local_result
+                        violations = [
+                            {
+                                "pillar": name,
+                                "issue": details["note"],
+                                "remedy": details["rewrite"],
+                            }
+                            for name, details in local_result["assessment"].items()
+                            if details["status"] == "Potential signal"
+                        ]
+                        used_fallback = False
+                        guardian_index = local_result["guardian_signal_index"]
+                        remediated = _remediate_local_text(target_input)
 
-	with tab_pillars:
-		st.subheader("Five-Pillar Taxonomy Reference")
-		st.caption("Conceptual framework reference. Automated findings use the evaluator's own labels, shown in each audit result.")
-		for pillar, description in FIVE_PILLARS.items():
-			with st.container():
-				st.markdown(f"**{pillar}**")
-				st.write(description)
-				st.divider()
+                    remedies = [item["remedy"] for item in violations if item["remedy"]]
+                    if remediated == target_input and remedies:
+                        remediated += "\n\nSuggested revisions for human review:\n" + "\n".join(
+                            f"- {remedy}" for remedy in remedies
+                        )
+                    st.session_state.last_results = {
+                        "original": target_input,
+                        "remediated": remediated,
+                        "violations": violations,
+                        "guardian_index": guardian_index,
+                        "bow_rating": "🏹" * max(1, round(guardian_index / 20)) + f" (Guardian Index: {guardian_index}/100)",
+                        "status": "Guardian remediation draft prepared" if violations else "No matching heuristic signals",
+                        "assessment": assessment,
+                        "used_fallback": used_fallback,
+                    }
+
+        result = st.session_state.last_results
+        if result and result["original"] == target_input:
+            st.markdown("---")
+            st.subheader("🛡️ Guardian Index Score & Rating")
+            score_col, bow_col = st.columns([1, 2])
+            with score_col:
+                st.metric("Guardian Index Score", f"{result['guardian_index']}/100")
+            with bow_col:
+                st.markdown("**Artemis Bow Rating**")
+                st.markdown(f"### {result['bow_rating']}")
+
+            if result["used_fallback"]:
+                st.warning("Illustrative fallback shown; no live model evaluation was completed.")
+
+            original_col, revised_col = st.columns(2)
+            with original_col:
+                st.error("Original input / scanned document")
+                st.write(result["original"])
+            with revised_col:
+                st.success(f"🟢 M.A.R.G.E. Guardian-Supported Output ({result['status']})")
+                st.write(result["remediated"])
+                st.caption("Suggested text is a draft for human review; the source document is unchanged.")
+
+            st.markdown("### 🏛️ Detailed Pillar Flag & Protection Log")
+            if result["violations"]:
+                for violation in result["violations"]:
+                    st.markdown(f"**Pillar flagged:** {violation['pillar']}")
+                    st.write(f"Issue identified: {violation['issue']}")
+                    if violation["remedy"]:
+                        st.write(f"Suggested remedy: {violation['remedy']}")
+                    st.divider()
+            else:
+                st.info("No signals matched the evaluator's rules. This is not proof that the text is equitable.")
+
+    with tab_pillars:
+        st.subheader("The Five-Pillar Taxonomy Reference")
+        st.caption("Conceptual reference. Automated findings use the evaluator labels shown in the audit log.")
+        for pillar, description in FIVE_PILLARS.items():
+            st.markdown(
+                f"""
+                <div class="guardian-card">
+                    <strong>{pillar}</strong><br>
+                    <span style="color: #E0D8CF;">{description}</span>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
 
 
 if __name__ == "__main__":
-	main()
+    main()
