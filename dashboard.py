@@ -181,7 +181,8 @@ PILLAR_RULES = {
             r"\b(?:without accommodations|no accommodations|inaccessible|"
             r"wheelchair|screen reader|captions|disability|disabled|hour\w*|"
             r"on[- ]site|schedule|subtitles|transcript|fast[- ]paced|rhythm|"
-            r"impromptu|rapid[- ]fire|residency|uninterrupted|evening)\b",
+            r"impromptu|rapid[- ]fire|residency|uninterrupted|evening|"
+            r"velocity|huddles)\b",
         ),
         "deep_patterns": (r"\b(?:cognitive access|assistive technology|accessible format)\b",),
         "note": "Accessibility-related language was found; review whether the described needs are supported.",
@@ -191,7 +192,7 @@ PILLAR_RULES = {
             r"\b(?:all women|all men|women are naturally|men are naturally|"
             r"older workers|young and energetic|professional appearance|"
             r"leadership roles|standard|traditional|align naturally|"
-            r"high[- ]potential|impeccable)\b",
+            r"high[- ]potential|impeccable|pathfinders)\b",
         ),
         "deep_patterns": (
             r"\b(?:naturally suited|born to|people like them|aggressive)\b",
@@ -202,7 +203,7 @@ PILLAR_RULES = {
         "patterns": (
             r"\b(?:accent|grammar|non[- ]standard dialect|speak properly|"
             r"native speaker|broken english|dialect|vernacular|prose|"
-            r"communication rhythms|polished clarity|direct|discourse)\b",
+            r"communication rhythms|polished clarity|direct|discourse|cadence)\b",
         ),
         "deep_patterns": (r"\b(?:professional language|clear english|communication style)\b",),
         "note": "Language-variety terms can be used to unfairly judge dialect or fluency; review context.",
@@ -289,6 +290,22 @@ def evaluate_equity_payload(text: str, mode: str = "Standard Audit") -> dict:
         recommendation_title = "Pillar-Specific Remediation Recommendations"
 
         if (
+            any(term in content for term in ("velocity", "cadence", "huddles", "vanguard innovation lab"))
+            and flagged_pillars.intersection(
+                {
+                    "Accessibility Justice",
+                    "Dialectal Justice",
+                    "Stereotypical Framing",
+                }
+            )
+        ):
+            recommendation_title = "Innovation Lab Participation Review"
+            recommendations = [
+                f"Potential signals appeared in: {', '.join(flagged_list)}.",
+                "If velocity, cadence, or huddles are participation expectations, clarify their purpose and consider outcome-based milestones, scheduled collaboration, and asynchronous ways to contribute.",
+                "Example rewrite: The Innovation Lab uses published project milestones and scheduled collaboration. Participants can contribute through accessible live or asynchronous formats, with progress assessed against agreed outcomes.",
+            ]
+        elif (
             any(term in content for term in ("fellowship", "residency", "pedigree"))
             and flagged_pillars.intersection(
                 {
