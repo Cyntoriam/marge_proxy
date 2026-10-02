@@ -387,8 +387,8 @@ def render_human_mode(scan_type: str):
 
 
 def render_ai_engine_mode(scan_type: str):
-    st.markdown("### ⚙️ M.A.R.G.E. AI-to-AI Self-Correction Engine")
-    st.markdown("*Run a structured audit with OpenAI. A key entered here is used for this session; otherwise the server environment key is used. The audit prepares a directive but does not dispatch downstream changes.*")
+    st.markdown("### ⚙️ M.A.R.G.E. Asynchronous AI-to-AI Engine")
+    st.markdown("*Run asynchronous structured evaluations against OpenAI at the selected scan depth. The self-correction directive is prepared for review, not automatically dispatched.*")
 
     openai_api_key = st.sidebar.text_input(
         "OpenAI API Key",
@@ -402,7 +402,7 @@ def render_ai_engine_mode(scan_type: str):
         height=100,
     )
 
-    if st.button(f"Execute {scan_type}"):
+    if st.button(f"Execute Async {scan_type}"):
         if not policy_input.strip():
             st.warning("Enter policy text before running the architectural audit.")
             return
@@ -412,7 +412,7 @@ def render_ai_engine_mode(scan_type: str):
             st.error("Enter an OpenAI API key or configure OPENAI_API_KEY / LLM_API_KEY on the server.")
             return
 
-        with st.spinner(f"Running {scan_type}..."):
+        with st.spinner(f"Running asynchronous M.A.R.G.E. evaluation via OpenAI..."):
             audit_payload = asyncio.run(
                 run_async_marge_audit(
                     policy_input, scan_type, api_key=openai_api_key or None
@@ -435,7 +435,7 @@ def render_ai_engine_mode(scan_type: str):
             st.metric("Guardian Index", audit_payload.overall_guardian_index)
 
         with col2:
-            st.markdown("#### ⚙️ AI Schema & Directive Payload")
+            st.markdown("#### ⚙️ Async OpenAI Schema Payload")
             st.code(audit_payload.model_dump_json(indent=2), language="json")
 
         if used_fallback:
@@ -446,24 +446,34 @@ def render_ai_engine_mode(scan_type: str):
 
 def main():
     render_header()
-    st.sidebar.markdown("### ⚙️ Guardian Controls")
-    interaction_mode = st.sidebar.radio(
-        "Select Interaction Mode",
-        options=[
-            "💬 Human Conversational & Mentorship",
-            "⚙️ AI-to-AI Architectural Engine",
-        ],
-    )
-    scan_type = st.sidebar.selectbox(
-        "Audit Depth",
-        options=["Standard Guardian Scan", "Deep Architectural Scan"],
-        index=0,
-    )
+    if "interaction_mode" not in st.session_state:
+        st.session_state.interaction_mode = "💬 Human Conversational & Mentorship"
+    if "scan_type" not in st.session_state:
+        st.session_state.scan_type = "Standard Guardian Scan"
 
-    if interaction_mode == "💬 Human Conversational & Mentorship":
-        render_human_mode(scan_type)
+    with st.sidebar:
+        st.markdown("### ⚙️ Guardian Navigation")
+        st.markdown("Select an interaction mode:")
+
+        if st.button("💬 Human Conversational & Mentorship", use_container_width=True):
+            st.session_state.interaction_mode = "💬 Human Conversational & Mentorship"
+        if st.button("⚙️ AI-to-AI Architectural Engine", use_container_width=True):
+            st.session_state.interaction_mode = "⚙️ AI-to-AI Architectural Engine"
+
+        st.markdown("---")
+        st.markdown("### 🔍 Audit Depth")
+        if st.button("📌 Standard Guardian Scan", use_container_width=True):
+            st.session_state.scan_type = "Standard Guardian Scan"
+        if st.button("🔬 Deep Architectural Scan", use_container_width=True):
+            st.session_state.scan_type = "Deep Architectural Scan"
+
+        st.markdown(f"**Active Mode:** `{st.session_state.interaction_mode}`")
+        st.markdown(f"**Active Depth:** `{st.session_state.scan_type}`")
+
+    if st.session_state.interaction_mode == "💬 Human Conversational & Mentorship":
+        render_human_mode(st.session_state.scan_type)
     else:
-        render_ai_engine_mode(scan_type)
+        render_ai_engine_mode(st.session_state.scan_type)
 
 
 if globals().get("__name__") == "__main__":
