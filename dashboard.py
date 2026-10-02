@@ -119,7 +119,7 @@ st.markdown(
             color: #E0E0E0;
             line-height: 1.6;
         }
-        .artemis-scale-container {
+        .guardian-scale-container {
             background-color: #1A1A1A;
             border: 1px solid #D4AF37;
             padding: 1.5rem;
@@ -135,7 +135,7 @@ st.markdown(
             border-radius: 8px;
             margin: 2rem 0 1rem;
         }
-        .artemis-arrow-marker {
+        .guardian-arrow-marker {
             position: absolute;
             top: -28px;
             transform: translateX(-50%);
@@ -442,9 +442,9 @@ if st.button("Run Equity Audit", type="primary"):
             matched_pillar_count = results["matched_pillar_count"]
             st.markdown(
                 f"""
-                <div class="artemis-scale-container">
+                <div class="guardian-scale-container">
                     <div style="color: #D4AF37; font-weight: 600; text-transform: uppercase;">
-                        Artemis Keyword Signal Index
+                        M.A.R.G.E. Guardian Index
                     </div>
                     <div style="font-size: 1.6rem; font-weight: 700; color: #FFD700; margin-top: 0.5rem;">
                         {signal_index} / 100
@@ -453,7 +453,7 @@ if st.button("Run Equity Audit", type="primary"):
                         {matched_pillar_count} of 5 pillar groups matched keyword rules
                     </div>
                     <div class="scale-track">
-                        <div class="artemis-arrow-marker" style="left: {arrow_position}%">🏹</div>
+                        <div class="guardian-arrow-marker" style="left: {arrow_position}%">🏹</div>
                     </div>
                     <div class="scale-labels">
                         <span>0 groups matched</span>
