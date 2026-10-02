@@ -348,20 +348,6 @@ def evaluate_equity_payload(text: str, mode: str = "Standard Audit") -> dict:
     }
 
 
-# Header with Option 3 Tooltip Integration
-st.markdown(
-    """
-    <div class="marge-header-card">
-        <h1 class="marge-title">
-            <span title="Multimodal Automated Real-time Guardian Engine">M.A.R.G.E.</span> 🏹
-        </h1>
-        <div class="marge-fullname" title="Multimodal Automated Real-time Guardian Engine">Multimodal Automated Real-time Guardian Engine</div>
-        <div class="marge-subtitle">The Equity Guardian</div>
-    </div>
-    """,
-    unsafe_allow_html=True,
-)
-
 # --- Page Configuration ---
 st.set_page_config(
     page_title="M.A.R.G.E. v2.10",
@@ -382,6 +368,43 @@ st.markdown(
     unsafe_allow_html=True
 )
 
+# --- Helper Component: Artemis Bow Sliding Scale on Target ---
+def render_artemis_bow_target(score: int, label: str = "Guardian Index"):
+    """
+    Renders a visual Artemis bow sliding scale on a target representation.
+    Score ranges from 0 to 100.
+    """
+    clamped_score = max(0, min(100, score))
+
+    if clamped_score >= 80:
+        color = "#2e7d32"
+        status = "Optimal Alignment"
+    elif clamped_score >= 60:
+        color = "#f57c00"
+        status = "Moderate Drift"
+    else:
+        color = "#c62828"
+        status = "Critical Deflection"
+
+    html_content = f"""
+    <div style="background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 8px; padding: 12px; margin: 10px 0; font-family: sans-serif;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <span style="font-weight: bold; font-size: 0.95em; color: #333;">🏹 {label}: <code>{clamped_score}/100</code></span>
+            <span style="font-size: 0.85em; font-weight: bold; color: {color};">{status}</span>
+        </div>
+        <div style="position: relative; background: #e9ecef; height: 12px; border-radius: 6px; width: 100%;">
+            <div style="position: absolute; left: 80%; width: 20%; height: 100%; background: rgba(46, 125, 50, 0.2); border-top-right-radius: 6px; border-bottom-right-radius: 6px;"></div>
+            <div style="position: absolute; left: calc({clamped_score}% - 6px); top: -4px; width: 12px; height: 20px; background: {color}; border: 2px solid white; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);"></div>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 0.75em; color: #666; margin-top: 4px;">
+            <span>0 (Deflected)</span>
+            <span>50 (Mid-Range)</span>
+            <span>100 (Bullseye)</span>
+        </div>
+    </div>
+    """
+    st.markdown(html_content, unsafe_allow_html=True)
+
 # --- Initialize Session State for Chat & Workflow Phase ---
 if "messages" not in st.session_state:
     st.session_state.messages = [
@@ -395,7 +418,7 @@ if "messages" not in st.session_state:
     ]
 
 if "workflow_step" not in st.session_state:
-    st.session_state.workflow_step = 0  # 0: Waiting for text, 1: Audit Done, 2: Deep Scan Done, 3: Recommendations Done, 4: Rewrites Done, 5: Applied
+    st.session_state.workflow_step = 0  # 0: Waiting for text, 1: Audit Done, 2: Deep Scan Done, 3: Recommendations Done, 4: Rewrites Done
 
 if "target_text" not in st.session_state:
     st.session_state.target_text = ""
@@ -404,8 +427,10 @@ if "target_text" not in st.session_state:
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
+        if "score_val" in message:
+            render_artemis_bow_target(message["score_val"], message.get("score_label", "Guardian Index"))
 
-# --- Chat Input Box (with Speech-to-Text Ergonomics Below) ---
+# --- Chat Input Box (Pinned to Bottom with Speech-to-Text Ergonomics) ---
 prompt = st.chat_input("Type your policy text or respond to M.A.R.G.E...")
 
 if prompt:
@@ -415,14 +440,19 @@ if prompt:
 
     with st.chat_message("assistant"):
         response_content = ""
+        current_score = None
+        score_label = "Guardian Index"
+
         current_step = st.session_state.workflow_step
 
         if current_step == 0:
             st.session_state.target_text = prompt
+            current_score = 84
+            score_label = "Standard Guardian Index"
+
             response_content = (
                 "🛡️ **Step 1: Standard Guardian Audit Complete**\n\n"
-                f"* Analyzing text payload (`{len(prompt)} characters`)*...\n\n"
-                "* **Guardian Index:** `84 / 100` (Low Risk)\n"
+                f"*Analyzing text payload (`{len(prompt)} characters`)*...\n\n"
                 "* **Pillar Breakdown:**\n"
                 "  * Inclusion: 88%\n"
                 "  * Clarity: 90%\n"
@@ -434,7 +464,9 @@ if prompt:
             st.session_state.workflow_step = 1
 
         elif current_step == 1:
-            if "yes" in prompt.lower() or "proceed" in prompt.lower() or "run" in prompt.lower():
+            if any(word in prompt.lower() for word in ["yes", "proceed", "run", "sure"]):
+                current_score = 76
+                score_label = "Deep Intersectional Score"
                 response_content = (
                     "🔍 **Step 2: Deep Intersectional Scan Complete**\n\n"
                     "Compound signal analysis identified subtle exclusionary phrasing under *Equity* regarding target demographics.\n\n"
@@ -442,10 +474,12 @@ if prompt:
                 )
                 st.session_state.workflow_step = 2
             else:
-                response_content = "Understood. Skipping deep scan. Type 'restart' to begin a new audit with different text."
+                response_content = "Understood. Skipping deep scan. Type a new policy text or 'restart' to begin a fresh audit."
 
         elif current_step == 2:
-            if "yes" in prompt.lower() or "proceed" in prompt.lower():
+            if any(word in prompt.lower() for word in ["yes", "proceed", "sure"]):
+                current_score = 80
+                score_label = "Recommendation Alignment"
                 response_content = (
                     "💡 **Step 3: Recommendations & Suggestions**\n\n"
                     "1. Replace ambiguous qualifiers with universally accessible terms.\n"
@@ -457,7 +491,9 @@ if prompt:
                 response_content = "Paused recommendations. Let me know how else I can adjust the text."
 
         elif current_step == 3:
-            if "yes" in prompt.lower() or "review" in prompt.lower():
+            if any(word in prompt.lower() for word in ["yes", "review", "sure"]):
+                current_score = 92
+                score_label = "Optimized Rewrite Index"
                 response_content = (
                     "✍️ **Step 4: Rewrite Generation & Review**\n\n"
                     "**Original:** *'All qualified applicants must complete the primary review process.'*\n"
@@ -469,11 +505,13 @@ if prompt:
                 response_content = "Review skipped. Tell me if you'd like custom rewrite constraints."
 
         elif current_step == 4:
-            if "approve" in prompt.lower() or "yes" in prompt.lower():
+            if any(word in prompt.lower() for word in ["approve", "yes", "apply", "finalize"]):
+                current_score = 98
+                score_label = "Final Bullseye Index"
                 response_content = (
                     "✅ **Step 5: Final Approval & Application Complete**\n\n"
                     "The approved changes have been successfully written into the document payload buffer.\n\n"
-                    "🎉 *Workflow sequence completed successfully!* Type any new text to start a fresh audit."
+                    "🎉 *Workflow sequence completed successfully!* Paste any new text below to start a fresh audit cycle."
                 )
                 st.session_state.workflow_step = 0
             else:
@@ -483,7 +521,15 @@ if prompt:
             response_content = "Ready for the next input. Paste new text to begin another audit cycle."
 
         st.markdown(response_content)
-        st.session_state.messages.append({"role": "assistant", "content": response_content})
+
+        if current_score is not None:
+            render_artemis_bow_target(current_score, score_label)
+
+        msg_payload = {"role": "assistant", "content": response_content}
+        if current_score is not None:
+            msg_payload["score_val"] = current_score
+            msg_payload["score_label"] = score_label
+        st.session_state.messages.append(msg_payload)
 
 # Optional helper summary at the bottom for the existing evaluator contract
 if st.button("Run Guardian Index Snapshot"):
