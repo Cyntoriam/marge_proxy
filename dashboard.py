@@ -1,7 +1,8 @@
+import asyncio
+import os
 import re
-import json
 import streamlit as st
-from app.schemas import MargeAuditResponse, PillarEvaluation
+from app.tiers.tier2_judge import run_async_marge_audit
 
 
 st.set_page_config(
@@ -10,44 +11,14 @@ st.set_page_config(
     layout="wide",
 )
 
-# Initialize session state for navigation & workflow steps
-if "app_section" not in st.session_state:
-    st.session_state.app_section = "🏹 The Guardian Audit"
-
-if "audit_step" not in st.session_state:
-    st.session_state.audit_step = "idle" # idle, audited, deep_scanned, recommendations_offered, rewrites_generated, rewrites_applied
-
-if "last_results" not in st.session_state:
-    st.session_state.last_results = None
-
-if "current_payload" not in st.session_state:
-    st.session_state.current_payload = ""
-
-# Sidebar Configuration & Preferences
+# Sidebar theme preferences
 with st.sidebar:
-    st.header("Visitor Portal")
-    visitor_name = st.text_input("Your Name / Handle", value="Pocketdoc", placeholder="Enter your name...")
-
-    st.markdown("---")
-    st.header("Navigation Panel")
-    
-    if st.button("🏹 The Guardian Audit", use_container_width=True):
-        st.session_state.app_section = "🏹 The Guardian Audit"
-    if st.button("📖 About & User Guide", use_container_width=True):
-        st.session_state.app_section = "📖 About & User Guide"
-
-    app_section = st.session_state.app_section
-    
-    st.markdown("---")
-    st.header("Guardian Controls & Preferences")
-    
+    st.header("Guardian Preferences")
     theme_choice = st.selectbox(
         "Theme Mode", 
         ["Dark (Oshun Sunrise)", "Light (Radiant Day)"]
     )
-    
-    sound_enabled = st.toggle("Enable Audio Cues", value=True, help="Plays a gentle ambient chime upon audit completion.")
-        
+
     st.caption("M.A.R.G.E. v2.10 • Multi-sensory equity middleware.")
 
 is_dark_theme = "Dark" in theme_choice
@@ -335,57 +306,165 @@ def evaluate_equity_payload(text: str, mode: str = "Standard Audit") -> dict:
     }
 
 
-def render_marge_ai_engine_view():
+def render_header():
     st.markdown("""
-        ### 🏹 M.A.R.G.E. Architectural Core: AI-to-AI Bias Self-Correction
-        *M.A.R.G.E. provides structured correction directives for downstream LLM pipelines. This view demonstrates the response contract; it does not connect to live model inference.*
-    """)
+        <style>
+            .marge-header-container {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                text-align: center;
+                padding: 1.2rem 0 1rem 0;
+                margin-bottom: 1.5rem;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            }
+            .marge-icon { font-size: 1.8rem; margin-bottom: 0.1rem; }
+            .marge-title { font-size: 1.8rem; font-weight: 700; letter-spacing: 0.05em; margin: 0; color: #FAFAFA; }
+            .marge-subtitle { font-size: 0.9rem; font-weight: 400; color: #D4AF37; margin-top: 0.3rem; margin-bottom: 0.8rem; letter-spacing: 0.02em; }
+            .scale-track-wrapper { width: 80%; max-width: 400px; margin: 0 auto; }
+            .scale-labels { display: flex; justify-content: space-between; font-size: 0.75rem; color: #A0A0A0; margin-bottom: 0.2rem; }
+            .scale-bar { height: 6px; background: linear-gradient(90deg, #d9534f 0%, #f0ad4e 50%, #5cb85c 100%); border-radius: 3px; position: relative; }
+        </style>
+        <div class="marge-header-container">
+            <div class="marge-icon">🏹</div>
+            <h1 class="marge-title">M.A.R.G.E.</h1>
+            <div class="marge-subtitle">Multimodal Automated Real-time Guardian Engine &bull; Equity Audit Dashboard</div>
+            <div class="scale-track-wrapper">
+                <div class="scale-labels">
+                    <span>Critical Bias Risk</span>
+                    <span>Neutral</span>
+                    <span>Optimized Alignment</span>
+                </div>
+                <div class="scale-bar"></div>
+            </div>
+        </div>
+    """, unsafe_allow_html=True)
 
-    sample_policy = st.text_area(
-        "Input Policy Text for Model-Level Evaluation:",
+
+def render_human_mode(scan_type: str):
+    st.markdown(f"### 🏹 Guardian Audit Workspace ({scan_type})")
+    st.markdown("*Review policy language through a conversational mentorship experience. This workspace uses the local heuristic evaluator.*")
+
+    if "messages" not in st.session_state:
+        st.session_state.messages = [{
+            "role": "assistant",
+            "content": "🏹 Hello! Share your policy text or ideas with me. We can review them together for equity, bias, and inclusive language.",
+        }]
+
+    for message in st.session_state.messages:
+        with st.chat_message(message["role"]):
+            st.markdown(message["content"])
+
+    prompt = st.chat_input("Type your policy text or chat with M.A.R.G.E...")
+    if prompt:
+        st.session_state.messages.append({"role": "user", "content": prompt})
+        with st.chat_message("user"):
+            st.markdown(prompt)
+
+        mode = "Deep Intersectional Scan" if scan_type == "Deep Architectural Scan" else "Standard Audit"
+        result = evaluate_equity_payload(prompt, mode=mode)
+        if "error" in result:
+            response = result["error"]
+        else:
+            flagged = [
+                pillar for pillar, details in result["assessment"].items()
+                if details["status"] == "Potential signal"
+            ]
+            response = (
+                f"🎯 **{scan_type} complete. Guardian Index: "
+                f"{result['guardian_signal_index']}/100.**\n\n"
+            )
+            if flagged:
+                response += "Potential signals: " + ", ".join(flagged) + ".\n\n"
+            else:
+                response += "No heuristic signals matched. This is not proof that the text is equitable.\n\n"
+            response += "What pillar or community group would you like to explore further?"
+
+        st.session_state.messages.append({"role": "assistant", "content": response})
+        with st.chat_message("assistant"):
+            st.markdown(response)
+
+
+def render_ai_engine_mode(scan_type: str):
+    st.markdown("### ⚙️ M.A.R.G.E. AI-to-AI Self-Correction Engine")
+    st.markdown("*Run a structured audit with OpenAI. A key entered here is used for this session; otherwise the server environment key is used. The audit prepares a directive but does not dispatch downstream changes.*")
+
+    openai_api_key = st.sidebar.text_input(
+        "OpenAI API Key",
+        type="password",
+        help="Used for this Streamlit session only. Leave blank to use OPENAI_API_KEY or LLM_API_KEY from the server environment.",
+    ).strip()
+
+    policy_input = st.text_area(
+        "Policy Payload for Model-Level Evaluation:",
         value="Candidates must possess flawless executive presence, clear and unaccented communication cadence, and a prestigious university pedigree with zero remote accommodations.",
-        height=90,
+        height=100,
     )
 
-    if st.button("Run M.A.R.G.E. Architectural Audit"):
-        if not sample_policy.strip():
+    if st.button(f"Execute {scan_type}"):
+        if not policy_input.strip():
             st.warning("Enter policy text before running the architectural audit.")
             return
+        if not openai_api_key and not (
+            os.environ.get("OPENAI_API_KEY") or os.environ.get("LLM_API_KEY")
+        ):
+            st.error("Enter an OpenAI API key or configure OPENAI_API_KEY / LLM_API_KEY on the server.")
+            return
 
-        observed_clause = "flawless executive presence, clear and unaccented communication cadence, and a prestigious university pedigree"
-        if observed_clause.lower() not in sample_policy.lower():
-            observed_clause = sample_policy.strip()
-
-        audit_response = MargeAuditResponse(
-            overall_guardian_index=42,
-            evaluations=[
-                PillarEvaluation(
-                    pillar_name="Linguistic Accessibility & Gatekeeping",
-                    bias_detected=True,
-                    confidence_score=0.98,
-                    observation=observed_clause,
-                    why_flagged="Acts as a proxy filter against neurodivergent and non-standard regional speakers.",
-                    suggested_rewrite="Assess demonstrated communication skills and equivalent professional experience.",
+        with st.spinner(f"Running {scan_type}..."):
+            audit_payload = asyncio.run(
+                run_async_marge_audit(
+                    policy_input, scan_type, api_key=openai_api_key or None
                 )
-            ],
-            self_correction_directive="Reject proxy credentialism. Re-weight evaluation parameters toward functional competency rather than demographic-correlated pedigree markers.",
+            )
+
+        used_fallback = any(
+            "Illustrative fallback only" in evaluation.why_flagged
+            for evaluation in audit_payload.evaluations
         )
 
         col1, col2 = st.columns(2)
         with col1:
-            st.markdown("#### 🏛️ Human-Facing Dialogue")
-            st.info("💡 **M.A.R.G.E.:** I noticed reliance on unaccented speech and prestige markers. Let's adjust the criteria to focus on core competencies.")
-            st.metric("Guardian Index", audit_response.overall_guardian_index)
+            st.markdown("#### 🏛️ Human-Facing Mentorship")
+            flagged = [item for item in audit_payload.evaluations if item.bias_detected]
+            if flagged:
+                st.info("💡 **M.A.R.G.E.:** Potential signals were identified. Review the observations and suggested rewrites before making policy decisions.")
+            else:
+                st.info("💡 **M.A.R.G.E.:** No signals were returned. This does not prove the policy is equitable; human review remains important.")
+            st.metric("Guardian Index", audit_payload.overall_guardian_index)
 
         with col2:
-            st.markdown("#### ⚙️ AI-to-AI Schema Payload")
-            st.code(json.dumps(audit_response.model_dump(mode="json"), indent=2), language="json")
+            st.markdown("#### ⚙️ AI Schema & Directive Payload")
+            st.code(audit_payload.model_dump_json(indent=2), language="json")
 
-        st.success("🎯 Structured correction directive prepared. This demo does not modify a vector cache or downstream model inference.")
+        if used_fallback:
+            st.warning("Illustrative fallback shown; no live model evaluation was performed.")
+        else:
+            st.success("Structured audit completed. Review the directive before applying any downstream changes.")
 
 
-if app_section == "📖 About & User Guide":
-    st.markdown("### About M.A.R.G.E.")
-    st.markdown("M.A.R.G.E. guides review of policy language for potential equity, access, and inclusion signals.")
-else:
-    render_marge_ai_engine_view()
+def main():
+    render_header()
+    st.sidebar.markdown("### ⚙️ Guardian Controls")
+    interaction_mode = st.sidebar.radio(
+        "Select Interaction Mode",
+        options=[
+            "💬 Human Conversational & Mentorship",
+            "⚙️ AI-to-AI Architectural Engine",
+        ],
+    )
+    scan_type = st.sidebar.selectbox(
+        "Audit Depth",
+        options=["Standard Guardian Scan", "Deep Architectural Scan"],
+        index=0,
+    )
+
+    if interaction_mode == "💬 Human Conversational & Mentorship":
+        render_human_mode(scan_type)
+    else:
+        render_ai_engine_mode(scan_type)
+
+
+if globals().get("__name__") == "__main__":
+    main()
