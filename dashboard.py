@@ -3,10 +3,9 @@ import streamlit as st
 
 
 st.set_page_config(
-    page_title="M.A.R.G.E. | The Equity Guardian",
-    page_icon="🏹",
+    page_title="M.A.R.G.E. v2.10",
+    page_icon="🛡️",
     layout="wide",
-    initial_sidebar_state="expanded",
 )
 
 # Initialize session state for navigation & workflow steps
@@ -348,25 +347,15 @@ def evaluate_equity_payload(text: str, mode: str = "Standard Audit") -> dict:
     }
 
 
-# --- Page Configuration ---
-st.set_page_config(
-    page_title="M.A.R.G.E. v2.10",
-    page_icon="🛡️",
-    layout="wide"
-)
-
 # --- Original Header Style (with Acronym & Tooltip) ---
 st.markdown(
     """
-    <div style="padding: 10px 0;">
-        <h1 style="margin-bottom: 0px;" title="Multimodal Automated Real-time Guardian Engine">
-            M.A.R.G.E. v2.10
-        </h1>
-        <p style="font-size: 1.1em; color: #555; margin-top: 4px;">
-            <strong>Multimodal Automated Real-time Guardian Engine</strong>
-        </p>
-    </div>
-    <hr style="margin-top: 0px; margin-bottom: 20px;">
+    <h1 title="Multimodal Automated Real-time Guardian Engine">
+        M.A.R.G.E. <span style="font-size: 0.5em; color: gray;">v2.10</span>
+    </h1>
+    <p style="margin-top: -15px; color: #666;">
+        <em>Multimodal Automated Real-time Guardian Engine</em> — Chat-Driven Equity &amp; Safety Audit
+    </p>
     """,
     unsafe_allow_html=True
 )
@@ -426,12 +415,14 @@ if "workflow_step" not in st.session_state:
 if "target_text" not in st.session_state:
     st.session_state.target_text = ""
 
-# --- Render Chat History ---
-for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
-        st.markdown(message["content"])
-        if "score_val" in message:
-            render_artemis_bow_target(message["score_val"], message.get("score_label", "Guardian Index"))
+# --- Render Chat History inside an Original Styled Container ---
+chat_container = st.container()
+with chat_container:
+    for message in st.session_state.messages:
+        with st.chat_message(message["role"]):
+            st.markdown(message["content"])
+            if "score_val" in message:
+                render_artemis_bow_target(message["score_val"], message.get("score_label", "Guardian Index"))
 
 # --- Chat Input Box (Pinned to Bottom with Speech-to-Text Ergonomics) ---
 prompt = st.chat_input("Type your policy text or respond to M.A.R.G.E...")
