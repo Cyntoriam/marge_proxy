@@ -309,42 +309,56 @@ def evaluate_equity_payload(text: str, mode: str = "Standard Audit") -> dict:
 def render_header():
     st.markdown("""
         <style>
-            .marge-header-container {
+            .marge-header {
                 display: flex;
                 flex-direction: column;
                 align-items: center;
                 justify-content: center;
                 text-align: center;
-                padding: 1.2rem 0 1rem 0;
+                padding: 1.2rem 0 0.8rem 0;
                 margin-bottom: 1.5rem;
                 border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             }
-            .marge-icon { font-size: 1.8rem; margin-bottom: 0.1rem; }
-            .marge-title { font-size: 1.8rem; font-weight: 700; letter-spacing: 0.05em; margin: 0; color: #FAFAFA; }
-            .marge-subtitle { font-size: 0.9rem; font-weight: 400; color: #D4AF37; margin-top: 0.3rem; margin-bottom: 0.8rem; letter-spacing: 0.02em; }
-            .scale-track-wrapper { width: 80%; max-width: 400px; margin: 0 auto; }
-            .scale-labels { display: flex; justify-content: space-between; font-size: 0.75rem; color: #A0A0A0; margin-bottom: 0.2rem; }
-            .scale-bar { height: 6px; background: linear-gradient(90deg, #d9534f 0%, #f0ad4e 50%, #5cb85c 100%); border-radius: 3px; position: relative; }
+            .marge-icon {
+                font-size: 1.5rem;
+                margin-bottom: 0.2rem;
+            }
+            .marge-title {
+                font-size: 1.8rem;
+                font-weight: 700;
+                letter-spacing: 0.05em;
+                margin: 0;
+                color: #FAFAFA;
+            }
+            .marge-subtitle {
+                font-size: 0.9rem;
+                font-weight: 400;
+                color: #A0A0A0;
+                margin-top: 0.3rem;
+                letter-spacing: 0.02em;
+            }
         </style>
-        <div class="marge-header-container">
+        <div class="marge-header">
             <div class="marge-icon">🏹</div>
             <h1 class="marge-title">M.A.R.G.E.</h1>
             <div class="marge-subtitle">Multimodal Automated Real-time Guardian Engine &bull; Equity Audit Dashboard</div>
-            <div class="scale-track-wrapper">
-                <div class="scale-labels">
-                    <span>Critical Bias Risk</span>
-                    <span>Neutral</span>
-                    <span>Optimized Alignment</span>
-                </div>
-                <div class="scale-bar"></div>
-            </div>
         </div>
     """, unsafe_allow_html=True)
 
 
 def render_human_mode(scan_type: str):
     st.markdown(f"### 🏹 Guardian Audit Workspace ({scan_type})")
-    st.markdown("*Review policy language through a conversational mentorship experience. This workspace uses the local heuristic evaluator.*")
+    st.markdown("*Let's look closely at how policy language lands across communities through an interactive, heuristic-guided audit.*")
+    st.markdown("#### 🏛️ Pillar Diagnostic Insights")
+    st.caption("Illustrative example; actual signals are evaluated from the text you submit below.")
+    with st.container():
+        st.markdown("""
+        <div style="background: rgba(25, 25, 25, 0.6); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
+            <span style="color: #D4AF37; font-weight: 600; font-size: 0.85rem;">Pillar I: Linguistic Accessibility &amp; Gatekeeping</span>
+            <p style="margin-top: 0.5rem; font-size: 0.9rem;"><strong>Observation:</strong> Rigid prestige or unaccented-cadence requirements can act as proxy filters.</p>
+            <p style="font-size: 0.85rem; color: #A0A0A0; margin-bottom: 0;"><em>Potential impact:</em> May screen out neurodivergent candidates and non-standard speakers.</p>
+        </div>
+        """, unsafe_allow_html=True)
 
     if "messages" not in st.session_state:
         st.session_state.messages = [{
