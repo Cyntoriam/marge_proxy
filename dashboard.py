@@ -1,4 +1,5 @@
 import asyncio
+import html
 import os
 import re
 import streamlit as st
@@ -6,19 +7,58 @@ from app.tiers.tier2_judge import run_async_marge_audit
 
 
 st.set_page_config(
-    page_title="M.A.R.G.E. v2.10",
-    page_icon="🛡️",
+    page_title="M.A.R.G.E. | The Equity Guardian",
+    page_icon="🏹",
     layout="wide",
+    initial_sidebar_state="expanded",
 )
 
-# Sidebar theme preferences
+if "app_section" not in st.session_state:
+    st.session_state.app_section = "🏹 The Guardian Audit"
+if "last_results" not in st.session_state:
+    st.session_state.last_results = None
+if "current_payload" not in st.session_state:
+    st.session_state.current_payload = ""
+
 with st.sidebar:
-    st.header("Guardian Preferences")
-    theme_choice = st.selectbox(
-        "Theme Mode", 
-        ["Dark (Oshun Sunrise)", "Light (Radiant Day)"]
+    st.header("Visitor Portal")
+    visitor_name = st.text_input(
+        "Your Name / Handle", value="Pocketdoc", placeholder="Enter your name..."
     )
 
+    st.markdown("---")
+    st.header("API & Engine Config")
+    openai_api_key = st.text_input(
+        "OpenAI API Key",
+        type="password",
+        value=os.environ.get("OPENAI_API_KEY", ""),
+        help="Used only for this Streamlit session; it is not written to project files.",
+    ).strip()
+    ai_engine_mode = st.toggle(
+        "Enable AI-to-AI Engine (Async OpenAI)",
+        value=False,
+        help="Uses asynchronous OpenAI evaluation when an API key is available.",
+    )
+
+    st.markdown("---")
+    st.header("Navigation Panel")
+    if st.button("🏹 The Guardian Audit", use_container_width=True):
+        st.session_state.app_section = "🏹 The Guardian Audit"
+    if st.button("📖 About & User Guide", use_container_width=True):
+        st.session_state.app_section = "📖 About & User Guide"
+    app_section = st.session_state.app_section
+
+    st.markdown("---")
+    st.header("Guardian Controls & Preferences")
+    theme_choice = st.selectbox(
+        "Theme Mode",
+        ["Dark (Oshun Sunrise)", "Light (Radiant Day)"],
+    )
+    sound_enabled = st.toggle(
+        "Enable Audio Cues",
+        value=True,
+        help="Plays a gentle chime after an audit completes.",
+    )
     st.caption("M.A.R.G.E. v2.10 • Multi-sensory equity middleware.")
 
 is_dark_theme = "Dark" in theme_choice
@@ -346,148 +386,179 @@ def render_header():
     """, unsafe_allow_html=True)
 
 
-def render_human_mode(scan_type: str):
-    st.markdown(f"### 🏹 Guardian Audit Workspace ({scan_type})")
-    st.markdown("*Let's look closely at how policy language lands across communities through an interactive, heuristic-guided audit.*")
-    st.markdown("#### 🏛️ Pillar Diagnostic Insights")
-    st.caption("Illustrative example; actual signals are evaluated from the text you submit below.")
-    with st.container():
-        st.markdown("""
-        <div style="background: rgba(25, 25, 25, 0.6); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
-            <span style="color: #D4AF37; font-weight: 600; font-size: 0.85rem;">Pillar I: Linguistic Accessibility &amp; Gatekeeping</span>
-            <p style="margin-top: 0.5rem; font-size: 0.9rem;"><strong>Observation:</strong> Rigid prestige or unaccented-cadence requirements can act as proxy filters.</p>
-            <p style="font-size: 0.85rem; color: #A0A0A0; margin-bottom: 0;"><em>Potential impact:</em> May screen out neurodivergent candidates and non-standard speakers.</p>
-        </div>
-        """, unsafe_allow_html=True)
-
-    if "messages" not in st.session_state:
-        st.session_state.messages = [{
-            "role": "assistant",
-            "content": "🏹 Hello! Share your policy text or ideas with me. We can review them together for equity, bias, and inclusive language.",
-        }]
-
-    for message in st.session_state.messages:
-        with st.chat_message(message["role"]):
-            st.markdown(message["content"])
-
-    prompt = st.chat_input("Type your policy text or chat with M.A.R.G.E...")
-    if prompt:
-        st.session_state.messages.append({"role": "user", "content": prompt})
-        with st.chat_message("user"):
-            st.markdown(prompt)
-
-        mode = "Deep Intersectional Scan" if scan_type == "Deep Architectural Scan" else "Standard Audit"
-        result = evaluate_equity_payload(prompt, mode=mode)
-        if "error" in result:
-            response = result["error"]
-        else:
-            flagged = [
-                pillar for pillar, details in result["assessment"].items()
-                if details["status"] == "Potential signal"
-            ]
-            response = (
-                f"🎯 **{scan_type} complete. Guardian Index: "
-                f"{result['guardian_signal_index']}/100.**\n\n"
-            )
-            if flagged:
-                response += "Potential signals: " + ", ".join(flagged) + ".\n\n"
-            else:
-                response += "No heuristic signals matched. This is not proof that the text is equitable.\n\n"
-            response += "What pillar or community group would you like to explore further?"
-
-        st.session_state.messages.append({"role": "assistant", "content": response})
-        with st.chat_message("assistant"):
-            st.markdown(response)
-
-
-def render_ai_engine_mode(scan_type: str):
-    st.markdown("### ⚙️ M.A.R.G.E. Asynchronous AI-to-AI Engine")
-    st.markdown("*Run asynchronous structured evaluations against OpenAI at the selected scan depth. The self-correction directive is prepared for review, not automatically dispatched.*")
-
-    openai_api_key = st.sidebar.text_input(
-        "OpenAI API Key",
-        type="password",
-        help="Used for this Streamlit session only. Leave blank to use OPENAI_API_KEY or LLM_API_KEY from the server environment.",
-    ).strip()
-
-    policy_input = st.text_area(
-        "Policy Payload for Model-Level Evaluation:",
-        value="Candidates must possess flawless executive presence, clear and unaccented communication cadence, and a prestigious university pedigree with zero remote accommodations.",
-        height=100,
-    )
-
-    if st.button(f"Execute Async {scan_type}"):
-        if not policy_input.strip():
-            st.warning("Enter policy text before running the architectural audit.")
-            return
-        if not openai_api_key and not (
-            os.environ.get("OPENAI_API_KEY") or os.environ.get("LLM_API_KEY")
-        ):
-            st.error("Enter an OpenAI API key or configure OPENAI_API_KEY / LLM_API_KEY on the server.")
-            return
-
-        with st.spinner(f"Running asynchronous M.A.R.G.E. evaluation via OpenAI..."):
-            audit_payload = asyncio.run(
-                run_async_marge_audit(
-                    policy_input, scan_type, api_key=openai_api_key or None
-                )
+def _normalize_ai_results(audit_payload):
+    assessment = {}
+    recommendations = []
+    for evaluation in audit_payload.evaluations:
+        status = "Potential signal" if evaluation.bias_detected else "No pattern signal detected"
+        note = evaluation.why_flagged
+        if evaluation.observation:
+            note = f"Observation: {evaluation.observation}\n{note}"
+        assessment[evaluation.pillar_name] = {
+            "status": status,
+            "note": note,
+            "rewrite": evaluation.suggested_rewrite,
+        }
+        if evaluation.bias_detected and evaluation.suggested_rewrite:
+            recommendations.append(
+                f"**{evaluation.pillar_name} Rewrite Suggestion:** {evaluation.suggested_rewrite}"
             )
 
-        used_fallback = any(
-            "Illustrative fallback only" in evaluation.why_flagged
-            for evaluation in audit_payload.evaluations
-        )
-
-        col1, col2 = st.columns(2)
-        with col1:
-            st.markdown("#### 🏛️ Human-Facing Mentorship")
-            flagged = [item for item in audit_payload.evaluations if item.bias_detected]
-            if flagged:
-                st.info("💡 **M.A.R.G.E.:** Potential signals were identified. Review the observations and suggested rewrites before making policy decisions.")
-            else:
-                st.info("💡 **M.A.R.G.E.:** No signals were returned. This does not prove the policy is equitable; human review remains important.")
-            st.metric("Guardian Index", audit_payload.overall_guardian_index)
-
-        with col2:
-            st.markdown("#### ⚙️ Async OpenAI Schema Payload")
-            st.code(audit_payload.model_dump_json(indent=2), language="json")
-
-        if used_fallback:
-            st.warning("Illustrative fallback shown; no live model evaluation was performed.")
-        else:
-            st.success("Structured audit completed. Review the directive before applying any downstream changes.")
+    return {
+        "guardian_signal_index": audit_payload.overall_guardian_index,
+        "matched_pillar_count": sum(item.bias_detected for item in audit_payload.evaluations),
+        "assessment": assessment,
+        "intersectional_explanation": [audit_payload.self_correction_directive],
+        "recommendations": recommendations,
+        "recommendation_title": "AI-Generated Competency-Focused Rewrites",
+        "used_fallback": any(
+            "Illustrative fallback only" in item.why_flagged
+            for item in audit_payload.evaluations
+        ),
+    }
 
 
 def main():
     render_header()
-    if "interaction_mode" not in st.session_state:
-        st.session_state.interaction_mode = "Human Mode"
-    if "scan_type" not in st.session_state:
-        st.session_state.scan_type = "Standard Guardian Scan"
+    greeting_name = html.escape(visitor_name.strip() or "Traveler")
 
-    with st.sidebar:
-        st.markdown("### ⚙️ Navigation")
-
-        if st.button("💬 Human Mode", use_container_width=True):
-            st.session_state.interaction_mode = "Human Mode"
-        if st.button("⚙️ AI Engine Mode", use_container_width=True):
-            st.session_state.interaction_mode = "AI Engine Mode"
-
-        st.markdown("---")
-        st.markdown("### 🔍 Audit Depth")
-        if st.button("📌 Standard Scan", use_container_width=True):
-            st.session_state.scan_type = "Standard Guardian Scan"
-        if st.button("🔬 Deep Scan", use_container_width=True):
-            st.session_state.scan_type = "Deep Architectural Scan"
-
-        st.markdown(f"**Mode:** `{st.session_state.interaction_mode}`")
-        st.markdown(f"**Depth:** `{st.session_state.scan_type}`")
-
-    if st.session_state.interaction_mode == "Human Mode":
-        render_human_mode(st.session_state.scan_type)
+    if app_section == "📖 About & User Guide":
+        st.markdown(f"### Welcome to the M.A.R.G.E. Knowledge Base, {greeting_name}!")
+        st.markdown(
+            "M.A.R.G.E. reviews policy language for potential equity and access signals. "
+            "The local heuristic scan is illustrative; the optional OpenAI engine returns structured evaluations for human review."
+        )
     else:
-        render_ai_engine_mode(st.session_state.scan_type)
+        st.markdown(f"### Hello, {greeting_name}! Welcome to M.A.R.G.E.")
+        st.markdown(
+            "Paste your document below to run a Guardian audit and review pillar findings and suggested rewrites."
+        )
+
+        st.markdown(
+            f"""
+            <div class="chat-input-container">
+                <div style="color: #D9531E; font-weight: 700; font-size: 1.1rem; margin-bottom: 0.4rem;">
+                    🏹 What text, policy, or vision are we guarding today, {greeting_name}?
+                </div>
+                <div style="font-size: 0.9rem; margin-bottom: 0.8rem; opacity: 0.8;">
+                    Run a standard or deep audit, inspect its signals, then approve any suggested text changes.
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+        user_payload = st.text_area(
+            "Payload Content Box",
+            placeholder="Type or paste text here...",
+            height=160,
+            label_visibility="collapsed",
+            value=st.session_state.current_payload,
+        )
+        st.session_state.current_payload = user_payload
+
+        if st.button("Run Instant Audit", type="primary"):
+            if not user_payload.strip():
+                st.error("Please enter at least 10 characters before running the audit.")
+            elif ai_engine_mode and not (
+                openai_api_key or os.environ.get("OPENAI_API_KEY") or os.environ.get("LLM_API_KEY")
+            ):
+                st.error("Enter an OpenAI API key or configure OPENAI_API_KEY / LLM_API_KEY on the server.")
+            else:
+                scan_mode = (
+                    "Deep Intersectional Scan"
+                    if "Deep" in st.session_state.get("scan_type", "Deep Architectural Scan")
+                    else "Standard Audit"
+                )
+                if sound_enabled:
+                    st.markdown(
+                        """
+                        <audio autoplay style="display:none;">
+                            <source src="https://actions.google.com/sounds/v1/ambiences/morning_birds.ogg" type="audio/ogg">
+                        </audio>
+                        """,
+                        unsafe_allow_html=True,
+                    )
+
+                with st.spinner("M.A.R.G.E. is auditing the payload..."):
+                    if ai_engine_mode:
+                        audit_payload = asyncio.run(
+                            run_async_marge_audit(
+                                user_payload,
+                                st.session_state.get("scan_type", "Deep Architectural Scan"),
+                                api_key=openai_api_key or None,
+                            )
+                        )
+                        results = _normalize_ai_results(audit_payload)
+                    else:
+                        results = evaluate_equity_payload(user_payload, mode=scan_mode)
+
+                if "error" in results:
+                    st.error(results["error"])
+                else:
+                    results["source_payload"] = user_payload
+                    results["ai_engine_mode"] = ai_engine_mode
+                    st.session_state.last_results = results
+
+        if st.session_state.last_results:
+            results = st.session_state.last_results
+            signal_index = results["guardian_signal_index"]
+            arrow_position = min(max(signal_index, 2), 98)
+            st.markdown("<br>", unsafe_allow_html=True)
+            st.success(f"Guardian audit complete for {greeting_name}.")
+            if results.get("used_fallback"):
+                st.warning("Illustrative fallback shown; no live model evaluation was performed.")
+
+            st.markdown(
+                f"""
+                <div class="guardian-scale-container" style="padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem; text-align: center;">
+                    <div style="color: #D9531E; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">Guardian Index</div>
+                    <div style="font-size: 1.6rem; font-weight: 700; margin-top: 0.5rem;">{signal_index} / 100</div>
+                    <div style="opacity: 0.8;">{results['matched_pillar_count']} of 5 pillar groups flagged</div>
+                    <div class="scale-track"><div class="guardian-arrow-marker" style="left: {arrow_position}%">🏹</div></div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
+            if results.get("intersectional_explanation"):
+                st.info("\n\n".join(results["intersectional_explanation"]))
+
+            st.markdown("### Five-Pillar Audit Results")
+            rewritable_findings = []
+            for pillar, details in results["assessment"].items():
+                is_flagged = details["status"] == "Potential signal"
+                st.markdown(f"**{pillar}** · {details['status']}")
+                st.write(details["note"])
+                if details.get("rewrite") and is_flagged:
+                    st.markdown(f"Suggested rewrite: {details['rewrite']}")
+                    rewritable_findings.append((pillar, details["rewrite"]))
+                st.markdown("---")
+
+            if results.get("recommendations"):
+                st.markdown("### " + (results.get("recommendation_title") or "Pillar Rewrite Suggestions"))
+                for recommendation in results["recommendations"]:
+                    st.markdown(recommendation)
+
+            if rewritable_findings:
+                st.markdown("### Active Document Update")
+                apply_rewrites = st.checkbox(
+                    "Approve and apply generated equity rewrites directly into the document payload"
+                )
+                if st.button("Apply Approved Changes Now"):
+                    if apply_rewrites:
+                        revised_text = results.get("source_payload", user_payload)
+                        for pillar, rewrite in rewritable_findings:
+                            marker = f"[M.A.R.G.E. Revision ({pillar}):"
+                            if marker not in revised_text:
+                                revised_text += f"\n\n{marker} {rewrite}]"
+                        st.session_state.current_payload = revised_text
+                        st.session_state.last_results = None
+                        st.success("Approved rewrites applied to the document payload.")
+                        st.rerun()
+                    else:
+                        st.warning("Please check the approval box to confirm and apply changes.")
 
 
-if globals().get("__name__") == "__main__":
+if __name__ == "__main__":
     main()
