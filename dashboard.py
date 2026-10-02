@@ -447,30 +447,29 @@ def render_ai_engine_mode(scan_type: str):
 def main():
     render_header()
     if "interaction_mode" not in st.session_state:
-        st.session_state.interaction_mode = "💬 Human Conversational & Mentorship"
+        st.session_state.interaction_mode = "Human Mode"
     if "scan_type" not in st.session_state:
         st.session_state.scan_type = "Standard Guardian Scan"
 
     with st.sidebar:
-        st.markdown("### ⚙️ Guardian Navigation")
-        st.markdown("Select an interaction mode:")
+        st.markdown("### ⚙️ Navigation")
 
-        if st.button("💬 Human Conversational & Mentorship", use_container_width=True):
-            st.session_state.interaction_mode = "💬 Human Conversational & Mentorship"
-        if st.button("⚙️ AI-to-AI Architectural Engine", use_container_width=True):
-            st.session_state.interaction_mode = "⚙️ AI-to-AI Architectural Engine"
+        if st.button("💬 Human Mode", use_container_width=True):
+            st.session_state.interaction_mode = "Human Mode"
+        if st.button("⚙️ AI Engine Mode", use_container_width=True):
+            st.session_state.interaction_mode = "AI Engine Mode"
 
         st.markdown("---")
         st.markdown("### 🔍 Audit Depth")
-        if st.button("📌 Standard Guardian Scan", use_container_width=True):
+        if st.button("📌 Standard Scan", use_container_width=True):
             st.session_state.scan_type = "Standard Guardian Scan"
-        if st.button("🔬 Deep Architectural Scan", use_container_width=True):
+        if st.button("🔬 Deep Scan", use_container_width=True):
             st.session_state.scan_type = "Deep Architectural Scan"
 
-        st.markdown(f"**Active Mode:** `{st.session_state.interaction_mode}`")
-        st.markdown(f"**Active Depth:** `{st.session_state.scan_type}`")
+        st.markdown(f"**Mode:** `{st.session_state.interaction_mode}`")
+        st.markdown(f"**Depth:** `{st.session_state.scan_type}`")
 
-    if st.session_state.interaction_mode == "💬 Human Conversational & Mentorship":
+    if st.session_state.interaction_mode == "Human Mode":
         render_human_mode(st.session_state.scan_type)
     else:
         render_ai_engine_mode(st.session_state.scan_type)
