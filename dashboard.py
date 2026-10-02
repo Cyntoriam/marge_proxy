@@ -161,6 +161,20 @@ st.markdown(
             margin-bottom: 0.75rem;
             letter-spacing: 1px;
         }}
+        .marge-title {{
+            color: #D9531E !important;
+            font-family: Georgia, serif;
+            font-size: 3rem;
+            font-weight: 800;
+            margin: 0;
+            text-shadow: 0 2px 15px rgba(217, 83, 30, 0.2);
+        }}
+        .marge-subtitle {{
+            color: #B8860B !important;
+            font-size: 1.1rem;
+            margin: 0 0 0.3rem;
+            font-style: italic;
+        }}
         .stButton > button {{
             background: linear-gradient(135deg, #D9531E 0%, #C84512 100%) !important;
             color: #FFFFFF !important;
@@ -333,74 +347,16 @@ def evaluate_equity_payload(text: str, mode: str = "Standard Audit") -> dict:
     }
 
 
-def render_header():
-    st.markdown("""
-        <style>
-            .marge-header-container {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                text-align: center;
-                padding: 1.2rem 0 1rem 0;
-                margin-bottom: 1.5rem;
-                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            }
-            .marge-icon {
-                font-size: 1.8rem;
-                margin-bottom: 0.1rem;
-            }
-            .marge-title {
-                font-size: 1.8rem;
-                font-weight: 700;
-                letter-spacing: 0.05em;
-                margin: 0;
-                color: #FAFAFA;
-            }
-            .marge-subtitle {
-                font-size: 0.9rem;
-                font-weight: 400;
-                color: #D4AF37;
-                margin-top: 0.3rem;
-                margin-bottom: 0.8rem;
-                letter-spacing: 0.02em;
-            }
-            .scale-track-wrapper {
-                width: 80%;
-                max-width: 400px;
-                margin: 0 auto;
-            }
-            .scale-labels {
-                display: flex;
-                justify-content: space-between;
-                font-size: 0.75rem;
-                color: #A0A0A0;
-                margin-bottom: 0.2rem;
-            }
-            .scale-bar {
-                height: 6px;
-                background: linear-gradient(90deg, #d9534f 0%, #f0ad4e 50%, #5cb85c 100%);
-                border-radius: 3px;
-                position: relative;
-            }
-        </style>
-        <div class="marge-header-container">
-            <div class="marge-icon">🏹</div>
-            <h1 class="marge-title">M.A.R.G.E.</h1>
-            <div class="marge-subtitle">Multimodal Automated Real-time Guardian Engine &bull; Equity Audit Dashboard</div>
-            <div class="scale-track-wrapper">
-                <div class="scale-labels">
-                    <span>Critical Bias Risk</span>
-                    <span>Neutral</span>
-                    <span>Optimized Alignment</span>
-                </div>
-                <div class="scale-bar"></div>
-            </div>
-        </div>
-    """, unsafe_allow_html=True)
-
-
-render_header()
+# Original Header Layout (Reverted back from Option 3)
+st.markdown(
+    """
+    <div class="marge-header-card">
+        <h1 class="marge-title">M.A.R.G.E. 🏹</h1>
+        <div class="marge-subtitle">The Equity Guardian</div>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
 
 # --- Helper Component: Artemis Bow Sliding Scale on Target ---
 def render_artemis_bow_target(score: int, label: str = "Guardian Index"):
