@@ -1,5 +1,7 @@
 import re
+import json
 import streamlit as st
+from app.schemas import MargeAuditResponse, PillarEvaluation
 
 
 st.set_page_config(
@@ -333,147 +335,57 @@ def evaluate_equity_payload(text: str, mode: str = "Standard Audit") -> dict:
     }
 
 
-def render_marge_audit_view():
+def render_marge_ai_engine_view():
     st.markdown("""
-        <style>
-            .marge-header-container {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                text-align: center;
-                padding: 1rem 0 0.8rem 0;
-                margin-bottom: 1.2rem;
-                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            }
-            .marge-icon { font-size: 1.8rem; margin-bottom: 0.1rem; }
-            .marge-title { font-size: 1.8rem; font-weight: 700; letter-spacing: 0.05em; margin: 0; color: #FAFAFA; }
-            .marge-subtitle { font-size: 0.9rem; font-weight: 400; color: #D4AF37; margin-top: 0.3rem; margin-bottom: 0.8rem; }
-            .audit-card {
-                background: rgba(25, 25, 25, 0.6);
-                border: 1px solid rgba(212, 175, 55, 0.2);
-                border-radius: 8px;
-                padding: 1.2rem;
-                margin-bottom: 1rem;
-            }
-            .pillar-tag {
-                display: inline-block;
-                background: rgba(212, 175, 55, 0.15);
-                color: #D4AF37;
-                padding: 0.2rem 0.6rem;
-                border-radius: 4px;
-                font-size: 0.8rem;
-                font-weight: 600;
-                margin-bottom: 0.5rem;
-            }
-        </style>
-        <div class="marge-header-container">
-            <div class="marge-icon">🏹</div>
-            <h1 class="marge-title">M.A.R.G.E.</h1>
-            <div class="marge-subtitle">Multimodal Automated Real-time Guardian Engine &bull; Equity &amp; Bias Audit</div>
-        </div>
-    """, unsafe_allow_html=True)
-
-    st.markdown("""
-        <div style="background: rgba(212, 175, 55, 0.05); border: 1px dashed rgba(212, 175, 55, 0.4); padding: 0.8rem; border-radius: 6px; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center;">
-            <span id="speechStatus" style="font-size: 0.85rem; color: #D4AF37;">🎙️ Voice Dictation &amp; Accessibility Ready</span>
-            <div>
-                <button type="button" onclick="startDictation()" style="background: #D4AF37; color: #121212; border: none; padding: 0.4rem 0.8rem; border-radius: 4px; font-weight: 600; cursor: pointer; font-size: 0.8rem; margin-right: 0.5rem;">Dictate Policy</button>
-                <button type="button" onclick="readAuditAloud()" style="background: #333; color: #FAFAFA; border: 1px solid #D4AF37; padding: 0.4rem 0.8rem; border-radius: 4px; font-weight: 600; cursor: pointer; font-size: 0.8rem;">🔊 Read Insights Aloud</button>
-            </div>
-        </div>
-        <script>
-            function startDictation() {
-                if (window.hasOwnProperty('webkitSpeechRecognition')) {
-                    var recognition = new webkitSpeechRecognition();
-                    recognition.continuous = false;
-                    recognition.interimResults = false;
-                    recognition.lang = "en-US";
-                    recognition.start();
-                    document.getElementById("speechStatus").innerText = "Listening... Speak now.";
-
-                    recognition.onresult = function(e) {
-                        var transcript = e.results[0][0].transcript;
-                        const textarea = document.querySelector('textarea');
-                        if (textarea) {
-                            let currentValue = textarea.value;
-                            textarea.value = currentValue ? currentValue + " " + transcript : transcript;
-                            textarea.dispatchEvent(new Event('input', { bubbles: true }));
-                        }
-                        document.getElementById("speechStatus").innerText = "Dictation captured successfully!";
-                        recognition.stop();
-                    };
-
-                    recognition.onerror = function() {
-                        document.getElementById("speechStatus").innerText = "Speech recognition error. Please try again.";
-                        recognition.stop();
-                    };
-                } else {
-                    document.getElementById("speechStatus").innerText = "Speech recognition not supported in this browser.";
-                }
-            }
-
-            function readAuditAloud() {
-                if ('speechSynthesis' in window) {
-                    window.speechSynthesis.cancel();
-                    const textToRead = "Guardian Assessment and Insights. Let's look closely at how this policy language lands across different communities. Pillar one, Linguistic Accessibility and Gatekeeping. Phrases requiring flawless executive presence function as coded filters, disproportionately screening out neurodivergent candidates and non-standard speakers. Pillar two, Geographic and Logistical Equity. Mandating on-site huddles creates barriers for primary caregivers and those reliant on public transit.";
-                    const utterance = new SpeechSynthesisUtterance(textToRead);
-                    utterance.rate = 0.95;
-                    window.speechSynthesis.speak(utterance);
-                    document.getElementById("speechStatus").innerText = "Reading audit insights aloud...";
-                } else {
-                    alert("Text-to-speech is not supported in this browser.");
-                }
-            }
-        </script>
-    """, unsafe_allow_html=True)
-
-    st.markdown("""
-        ### 🏹 Guardian Assessment & Insights
-        *Let's look closely at how this policy language lands across different communities. Rather than a simple pass/fail, let's explore the underlying dynamics together.*
+        ### 🏹 M.A.R.G.E. Architectural Core: AI-to-AI Bias Self-Correction
+        *M.A.R.G.E. provides structured correction directives for downstream LLM pipelines. This view demonstrates the response contract; it does not connect to live model inference.*
     """)
 
-    st.markdown("---")
-    st.markdown("#### 🏛️ Guardian Index: Pillar Diagnostic Breakdown")
-
-    with st.container():
-        st.markdown("""
-        <div class="audit-card">
-            <div class="pillar-tag">Pillar I: Linguistic Accessibility &amp; Gatekeeping</div>
-            <p><strong>Observation:</strong> Terms requiring <em>"flawless executive presence, clear and unaccented communication cadence, and a prestigious university pedigree"</em> function as coded filters.</p>
-            <p><em>Why it's flagged:</em> These phrases disproportionately screen out neurodivergent candidates, speakers with regional or non-standard accents, and graduates of non-traditional or HBCU pathways under the guise of neutral professionalism.</p>
-        </div>
-        """, unsafe_allow_html=True)
-
-    with st.container():
-        st.markdown("""
-        <div class="audit-card">
-            <div class="pillar-tag">Pillar II: Geographic &amp; Logistical Equity</div>
-            <p><strong>Observation:</strong> Mandating <em>"on-site huddles with no remote accommodations"</em>.</p>
-            <p><em>Why it's flagged:</em> This creates systemic barriers for primary caregivers, individuals with mobility or chronic health needs, and those reliant on public transit infrastructure.</p>
-        </div>
-        """, unsafe_allow_html=True)
-
-    st.markdown("---")
-    st.markdown("#### 💬 Dialogue &amp; Refinement")
-    st.info("💡 **M.A.R.G.E.'s Perspective:** Notice how shifting from rigid credentialism to competency-focused criteria broadens our talent pool while protecting the integrity of the innovation lab. Speak or type your thoughts below.")
-
-    if "audit_input" not in st.session_state:
-        st.session_state.audit_input = ""
-
-    user_response = st.text_area(
-        "Refine this audit or ask M.A.R.G.E. a question...",
-        placeholder="Type, paste, or dictate text here...",
-        height=100,
-        key="audit_input",
+    sample_policy = st.text_area(
+        "Input Policy Text for Model-Level Evaluation:",
+        value="Candidates must possess flawless executive presence, clear and unaccented communication cadence, and a prestigious university pedigree with zero remote accommodations.",
+        height=90,
     )
 
-    if user_response:
-        st.success("🎯 **Target Adjusted:** M.A.R.G.E. is synthesizing your feedback into the revised policy draft...")
+    if st.button("Run M.A.R.G.E. Architectural Audit"):
+        if not sample_policy.strip():
+            st.warning("Enter policy text before running the architectural audit.")
+            return
+
+        observed_clause = "flawless executive presence, clear and unaccented communication cadence, and a prestigious university pedigree"
+        if observed_clause.lower() not in sample_policy.lower():
+            observed_clause = sample_policy.strip()
+
+        audit_response = MargeAuditResponse(
+            overall_guardian_index=42,
+            evaluations=[
+                PillarEvaluation(
+                    pillar_name="Linguistic Accessibility & Gatekeeping",
+                    bias_detected=True,
+                    confidence_score=0.98,
+                    observation=observed_clause,
+                    why_flagged="Acts as a proxy filter against neurodivergent and non-standard regional speakers.",
+                    suggested_rewrite="Assess demonstrated communication skills and equivalent professional experience.",
+                )
+            ],
+            self_correction_directive="Reject proxy credentialism. Re-weight evaluation parameters toward functional competency rather than demographic-correlated pedigree markers.",
+        )
+
+        col1, col2 = st.columns(2)
+        with col1:
+            st.markdown("#### 🏛️ Human-Facing Dialogue")
+            st.info("💡 **M.A.R.G.E.:** I noticed reliance on unaccented speech and prestige markers. Let's adjust the criteria to focus on core competencies.")
+            st.metric("Guardian Index", audit_response.overall_guardian_index)
+
+        with col2:
+            st.markdown("#### ⚙️ AI-to-AI Schema Payload")
+            st.code(json.dumps(audit_response.model_dump(mode="json"), indent=2), language="json")
+
+        st.success("🎯 Structured correction directive prepared. This demo does not modify a vector cache or downstream model inference.")
 
 
 if app_section == "📖 About & User Guide":
     st.markdown("### About M.A.R.G.E.")
     st.markdown("M.A.R.G.E. guides review of policy language for potential equity, access, and inclusion signals.")
 else:
-    render_marge_audit_view()
+    render_marge_ai_engine_view()
