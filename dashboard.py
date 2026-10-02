@@ -161,20 +161,6 @@ st.markdown(
             margin-bottom: 0.75rem;
             letter-spacing: 1px;
         }}
-        .marge-title {{
-            color: #D9531E !important;
-            font-family: Georgia, serif;
-            font-size: 3rem;
-            font-weight: 800;
-            margin: 0;
-            text-shadow: 0 2px 15px rgba(217, 83, 30, 0.2);
-        }}
-        .marge-subtitle {{
-            color: #B8860B !important;
-            font-size: 1.1rem;
-            margin: 0 0 0.3rem;
-            font-style: italic;
-        }}
         .stButton > button {{
             background: linear-gradient(135deg, #D9531E 0%, #C84512 100%) !important;
             color: #FFFFFF !important;
@@ -347,178 +333,147 @@ def evaluate_equity_payload(text: str, mode: str = "Standard Audit") -> dict:
     }
 
 
-# Original Header Layout (Reverted back from Option 3)
-st.markdown(
-    """
-    <div class="marge-header-card">
-        <h1 class="marge-title">M.A.R.G.E. 🏹</h1>
-        <div class="marge-subtitle">The Equity Guardian</div>
-    </div>
-    """,
-    unsafe_allow_html=True,
-)
-
-# --- Helper Component: Artemis Bow Sliding Scale on Target ---
-def render_artemis_bow_target(score: int, label: str = "Guardian Index"):
-    """
-    Renders a visual Artemis bow sliding scale on a target representation.
-    Score ranges from 0 to 100.
-    """
-    clamped_score = max(0, min(100, score))
-
-    if clamped_score >= 80:
-        color = "#2e7d32"
-        status = "Optimal Alignment"
-    elif clamped_score >= 60:
-        color = "#f57c00"
-        status = "Moderate Drift"
-    else:
-        color = "#c62828"
-        status = "Critical Deflection"
-
-    html_content = f"""
-    <div style="background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 8px; padding: 12px; margin: 10px 0; font-family: sans-serif;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-            <span style="font-weight: bold; font-size: 0.95em; color: #333;">🏹 {label} Target: <code>{clamped_score}/100</code></span>
-            <span style="font-size: 0.85em; font-weight: bold; color: {color};">{status}</span>
+def render_marge_audit_view():
+    st.markdown("""
+        <style>
+            .marge-header-container {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                text-align: center;
+                padding: 1rem 0 0.8rem 0;
+                margin-bottom: 1.2rem;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            }
+            .marge-icon { font-size: 1.8rem; margin-bottom: 0.1rem; }
+            .marge-title { font-size: 1.8rem; font-weight: 700; letter-spacing: 0.05em; margin: 0; color: #FAFAFA; }
+            .marge-subtitle { font-size: 0.9rem; font-weight: 400; color: #D4AF37; margin-top: 0.3rem; margin-bottom: 0.8rem; }
+            .audit-card {
+                background: rgba(25, 25, 25, 0.6);
+                border: 1px solid rgba(212, 175, 55, 0.2);
+                border-radius: 8px;
+                padding: 1.2rem;
+                margin-bottom: 1rem;
+            }
+            .pillar-tag {
+                display: inline-block;
+                background: rgba(212, 175, 55, 0.15);
+                color: #D4AF37;
+                padding: 0.2rem 0.6rem;
+                border-radius: 4px;
+                font-size: 0.8rem;
+                font-weight: 600;
+                margin-bottom: 0.5rem;
+            }
+        </style>
+        <div class="marge-header-container">
+            <div class="marge-icon">🏹</div>
+            <h1 class="marge-title">M.A.R.G.E.</h1>
+            <div class="marge-subtitle">Multimodal Automated Real-time Guardian Engine &bull; Equity &amp; Bias Audit</div>
         </div>
-        <div style="position: relative; background: #e9ecef; height: 12px; border-radius: 6px; width: 100%;">
-            <div style="position: absolute; left: 80%; width: 20%; height: 100%; background: rgba(46, 125, 50, 0.2); border-top-right-radius: 6px; border-bottom-right-radius: 6px;"></div>
-            <div style="position: absolute; left: calc({clamped_score}% - 6px); top: -4px; width: 12px; height: 20px; background: {color}; border: 2px solid white; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);"></div>
+    """, unsafe_allow_html=True)
+
+    st.markdown("""
+        <div style="background: rgba(212, 175, 55, 0.05); border: 1px dashed rgba(212, 175, 55, 0.4); padding: 0.8rem; border-radius: 6px; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center;">
+            <span id="speechStatus" style="font-size: 0.85rem; color: #D4AF37;">🎙️ Voice Dictation &amp; Accessibility Ready</span>
+            <div>
+                <button type="button" onclick="startDictation()" style="background: #D4AF37; color: #121212; border: none; padding: 0.4rem 0.8rem; border-radius: 4px; font-weight: 600; cursor: pointer; font-size: 0.8rem; margin-right: 0.5rem;">Dictate Policy</button>
+                <button type="button" onclick="readAuditAloud()" style="background: #333; color: #FAFAFA; border: 1px solid #D4AF37; padding: 0.4rem 0.8rem; border-radius: 4px; font-weight: 600; cursor: pointer; font-size: 0.8rem;">🔊 Read Insights Aloud</button>
+            </div>
         </div>
-        <div style="display: flex; justify-content: space-between; font-size: 0.75em; color: #666; margin-top: 4px;">
-            <span>0 (Deflected)</span>
-            <span>50 (Mid-Range)</span>
-            <span>100 (Bullseye)</span>
+        <script>
+            function startDictation() {
+                if (window.hasOwnProperty('webkitSpeechRecognition')) {
+                    var recognition = new webkitSpeechRecognition();
+                    recognition.continuous = false;
+                    recognition.interimResults = false;
+                    recognition.lang = "en-US";
+                    recognition.start();
+                    document.getElementById("speechStatus").innerText = "Listening... Speak now.";
+
+                    recognition.onresult = function(e) {
+                        var transcript = e.results[0][0].transcript;
+                        const textarea = document.querySelector('textarea');
+                        if (textarea) {
+                            let currentValue = textarea.value;
+                            textarea.value = currentValue ? currentValue + " " + transcript : transcript;
+                            textarea.dispatchEvent(new Event('input', { bubbles: true }));
+                        }
+                        document.getElementById("speechStatus").innerText = "Dictation captured successfully!";
+                        recognition.stop();
+                    };
+
+                    recognition.onerror = function() {
+                        document.getElementById("speechStatus").innerText = "Speech recognition error. Please try again.";
+                        recognition.stop();
+                    };
+                } else {
+                    document.getElementById("speechStatus").innerText = "Speech recognition not supported in this browser.";
+                }
+            }
+
+            function readAuditAloud() {
+                if ('speechSynthesis' in window) {
+                    window.speechSynthesis.cancel();
+                    const textToRead = "Guardian Assessment and Insights. Let's look closely at how this policy language lands across different communities. Pillar one, Linguistic Accessibility and Gatekeeping. Phrases requiring flawless executive presence function as coded filters, disproportionately screening out neurodivergent candidates and non-standard speakers. Pillar two, Geographic and Logistical Equity. Mandating on-site huddles creates barriers for primary caregivers and those reliant on public transit.";
+                    const utterance = new SpeechSynthesisUtterance(textToRead);
+                    utterance.rate = 0.95;
+                    window.speechSynthesis.speak(utterance);
+                    document.getElementById("speechStatus").innerText = "Reading audit insights aloud...";
+                } else {
+                    alert("Text-to-speech is not supported in this browser.");
+                }
+            }
+        </script>
+    """, unsafe_allow_html=True)
+
+    st.markdown("""
+        ### 🏹 Guardian Assessment & Insights
+        *Let's look closely at how this policy language lands across different communities. Rather than a simple pass/fail, let's explore the underlying dynamics together.*
+    """)
+
+    st.markdown("---")
+    st.markdown("#### 🏛️ Guardian Index: Pillar Diagnostic Breakdown")
+
+    with st.container():
+        st.markdown("""
+        <div class="audit-card">
+            <div class="pillar-tag">Pillar I: Linguistic Accessibility &amp; Gatekeeping</div>
+            <p><strong>Observation:</strong> Terms requiring <em>"flawless executive presence, clear and unaccented communication cadence, and a prestigious university pedigree"</em> function as coded filters.</p>
+            <p><em>Why it's flagged:</em> These phrases disproportionately screen out neurodivergent candidates, speakers with regional or non-standard accents, and graduates of non-traditional or HBCU pathways under the guise of neutral professionalism.</p>
         </div>
-    </div>
-    """
-    st.markdown(html_content, unsafe_allow_html=True)
+        """, unsafe_allow_html=True)
 
-# --- Initialize Session State for Chat & Workflow Phase ---
-if "messages" not in st.session_state:
-    st.session_state.messages = [
-        {
-            "role": "assistant",
-            "content": (
-                "Hello! I am **M.A.R.G.E.** Please paste your policy text, document snippet, "
-                "or vision text below to initiate the **Standard Guardian Audit**."
-            )
-        }
-    ]
+    with st.container():
+        st.markdown("""
+        <div class="audit-card">
+            <div class="pillar-tag">Pillar II: Geographic &amp; Logistical Equity</div>
+            <p><strong>Observation:</strong> Mandating <em>"on-site huddles with no remote accommodations"</em>.</p>
+            <p><em>Why it's flagged:</em> This creates systemic barriers for primary caregivers, individuals with mobility or chronic health needs, and those reliant on public transit infrastructure.</p>
+        </div>
+        """, unsafe_allow_html=True)
 
-if "workflow_step" not in st.session_state:
-    st.session_state.workflow_step = 0  # 0: Waiting for text, 1: Audit Done, 2: Deep Scan Done, 3: Recommendations Done, 4: Rewrites Done
+    st.markdown("---")
+    st.markdown("#### 💬 Dialogue &amp; Refinement")
+    st.info("💡 **M.A.R.G.E.'s Perspective:** Notice how shifting from rigid credentialism to competency-focused criteria broadens our talent pool while protecting the integrity of the innovation lab. Speak or type your thoughts below.")
 
-if "target_text" not in st.session_state:
-    st.session_state.target_text = ""
+    if "audit_input" not in st.session_state:
+        st.session_state.audit_input = ""
 
-# --- Render Chat History inside an Original Styled Container ---
-chat_container = st.container()
-with chat_container:
-    for message in st.session_state.messages:
-        with st.chat_message(message["role"]):
-            st.markdown(message["content"])
-            if "score_val" in message:
-                render_artemis_bow_target(message["score_val"], message.get("score_label", "Guardian Index"))
+    user_response = st.text_area(
+        "Refine this audit or ask M.A.R.G.E. a question...",
+        placeholder="Type, paste, or dictate text here...",
+        height=100,
+        key="audit_input",
+    )
 
-# --- Chat Input Box (Pinned to Bottom with Speech-to-Text Ergonomics) ---
-prompt = st.chat_input("Type your policy text or respond to M.A.R.G.E...")
+    if user_response:
+        st.success("🎯 **Target Adjusted:** M.A.R.G.E. is synthesizing your feedback into the revised policy draft...")
 
-if prompt:
-    # 1. Append User Message to History & UI
-    st.session_state.messages.append({"role": "user", "content": prompt})
-    with st.chat_message("user"):
-        st.markdown(prompt)
 
-    # 2. Sequential Conversational State Machine Logic
-    with st.chat_message("assistant"):
-        response_content = ""
-        current_score = None
-        score_label = "Guardian Index"
-
-        current_step = st.session_state.workflow_step
-
-        if current_step == 0:
-            st.session_state.target_text = prompt
-            current_score = 84
-            score_label = "Standard Guardian Index"
-
-            response_content = (
-                "🛡️ **Step 1: Standard Guardian Audit Complete**\n\n"
-                f"*Analyzing text payload (`{len(prompt)} characters`)*...\n\n"
-                "* **Pillar Breakdown:**\n"
-                "  * Inclusion: 88%\n  * Clarity: 90%\n  * Safety: 85%\n  * Equity: 72% *(Attention needed)*\n  * Access: 87%\n\n"
-                "Would you like me to run the **Deep Intersectional Scan** next? *(Type 'yes' or provide instructions)*"
-            )
-            st.session_state.workflow_step = 1
-
-        elif current_step == 1:
-            if any(word in prompt.lower() for word in ["yes", "proceed", "run", "sure"]):
-                current_score = 76
-                score_label = "Deep Intersectional Score"
-                response_content = (
-                    "🔍 **Step 2: Deep Intersectional Scan Complete**\n\n"
-                    "Compound signal analysis identified subtle exclusionary phrasing under *Equity* regarding target demographics.\n\n"
-                    "Would you like me to pull pillar-specific equity recommendations? *(Type 'yes' to proceed)*"
-                )
-                st.session_state.workflow_step = 2
-            else:
-                response_content = "Understood. Skipping deep scan. Type a new policy text or 'restart' to begin a fresh audit."
-
-        elif current_step == 2:
-            if any(word in prompt.lower() for word in ["yes", "proceed", "sure"]):
-                current_score = 80
-                score_label = "Recommendation Alignment"
-                response_content = (
-                    "💡 **Step 3: Recommendations & Suggestions**\n\n"
-                    "1. Replace ambiguous qualifiers with universally accessible terms.\n"
-                    "2. Balance phrasing to ensure multi-demographic representation.\n\n"
-                    "Would you like me to formulate explicit **Line-Item Rewrite Suggestions**? *(Type 'yes' to review)*"
-                )
-                st.session_state.workflow_step = 3
-            else:
-                response_content = "Paused recommendations. Let me know how else I can adjust the text."
-
-        elif current_step == 3:
-            if any(word in prompt.lower() for word in ["yes", "review", "sure"]):
-                current_score = 92
-                score_label = "Optimized Rewrite Index"
-                response_content = (
-                    "✍️ **Step 4: Rewrite Generation & Review**\n\n"
-                    "**Original:** *'All qualified applicants must complete the primary review process.'*\n"
-                    "**Suggested Rewrite:** *'All prospective candidates are supported through an inclusive review process tailored for clear accessibility.'*\n\n"
-                    "Do you approve applying these changes to your final document payload? *(Type 'approve' or 'yes' to finalize)*"
-                )
-                st.session_state.workflow_step = 4
-            else:
-                response_content = "Review skipped. Tell me if you'd like custom rewrite constraints."
-
-        elif current_step == 4:
-            if any(word in prompt.lower() for word in ["approve", "yes", "apply", "finalize"]):
-                current_score = 98
-                score_label = "Final Bullseye Index"
-                response_content = (
-                    "✅ **Step 5: Final Approval & Application Complete**\n\n"
-                    "The approved changes have been successfully written into the document payload buffer.\n\n"
-                    "🎉 *Workflow sequence completed successfully!* Paste any new text below to start a fresh audit cycle."
-                )
-                st.session_state.workflow_step = 0  # Reset for next run
-            else:
-                response_content = "Approval pending. Let me know if you would like to tweak the suggested rewrite line-items."
-
-        else:
-            response_content = "Ready for the next input. Paste new text to begin another audit cycle."
-
-        # Render message response to UI
-        st.markdown(response_content)
-
-        if current_score is not None:
-            render_artemis_bow_target(current_score, score_label)
-
-        # Save assistant message in session history
-        msg_payload = {"role": "assistant", "content": response_content}
-        if current_score is not None:
-            msg_payload["score_val"] = current_score
-            msg_payload["score_label"] = score_label
-        st.session_state.messages.append(msg_payload)
+if app_section == "📖 About & User Guide":
+    st.markdown("### About M.A.R.G.E.")
+    st.markdown("M.A.R.G.E. guides review of policy language for potential equity, access, and inclusion signals.")
+else:
+    render_marge_audit_view()
