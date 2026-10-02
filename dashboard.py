@@ -161,7 +161,7 @@ PILLAR_RULES = {
             r"\b(?:bypass|exclude|exclusion|peripheral|low[- ]density|"
             r"underserved|redlin\w*|low[- ]income|order volume is low|"
             r"relocat\w*|suburban|headquarters|corridor|downtown|commute|"
-            r"on[- ]?site)\b",
+            r"on[- ]?site|campus hub)\b",
         ),
         "deep_patterns": (r"\b(?:food desert|transit desert|service desert)\b",),
         "note": "Location, service access, or economic exclusion language needs context review.",
@@ -170,7 +170,8 @@ PILLAR_RULES = {
         "patterns": (
             r"\b(?:aggressive|articulate|unprofessional|emotional|polished|"
             r"assertive|traditional university|pedigree|assimilation|backward|"
-            r"culture|prestige|executive presence|institutional culture)\b",
+            r"culture|prestige|executive presence|institutional culture|"
+            r"etiquette)\b",
         ),
         "deep_patterns": (r"\b(?:angry woman|angry black|culture fit)\b",),
         "note": "Potentially subjective descriptors can carry different implications across identities.",
@@ -180,7 +181,7 @@ PILLAR_RULES = {
             r"\b(?:without accommodations|no accommodations|inaccessible|"
             r"wheelchair|screen reader|captions|disability|disabled|hour\w*|"
             r"on[- ]site|schedule|subtitles|transcript|fast[- ]paced|rhythm|"
-            r"impromptu|rapid[- ]fire|residency)\b",
+            r"impromptu|rapid[- ]fire|residency|uninterrupted|evening)\b",
         ),
         "deep_patterns": (r"\b(?:cognitive access|assistive technology|accessible format)\b",),
         "note": "Accessibility-related language was found; review whether the described needs are supported.",
@@ -190,7 +191,7 @@ PILLAR_RULES = {
             r"\b(?:all women|all men|women are naturally|men are naturally|"
             r"older workers|young and energetic|professional appearance|"
             r"leadership roles|standard|traditional|align naturally|"
-            r"high[- ]potential)\b",
+            r"high[- ]potential|impeccable)\b",
         ),
         "deep_patterns": (
             r"\b(?:naturally suited|born to|people like them|aggressive)\b",
@@ -201,7 +202,7 @@ PILLAR_RULES = {
         "patterns": (
             r"\b(?:accent|grammar|non[- ]standard dialect|speak properly|"
             r"native speaker|broken english|dialect|vernacular|prose|"
-            r"communication rhythms|polished clarity|direct)\b",
+            r"communication rhythms|polished clarity|direct|discourse)\b",
         ),
         "deep_patterns": (r"\b(?:professional language|clear english|communication style)\b",),
         "note": "Language-variety terms can be used to unfairly judge dialect or fluency; review context.",
@@ -351,6 +352,11 @@ def evaluate_equity_payload(text: str, mode: str = "Standard Audit") -> dict:
                 "Involve affected residents in planning, provide accessible participation formats, and explain how community input informs decisions.",
                 "Example rewrite: The planning process includes neighborhood consultation, accessible materials, and a published account of how community feedback informs decisions.",
             ]
+
+        if flagged_list:
+            recommendations.append(
+                "Scale-up review: Pilot the proposed changes with affected participants, assign an accountable owner, define observable access outcomes, and review similar materials before adopting a broader policy."
+            )
 
         if not recommendations:
             recommendations.append(
