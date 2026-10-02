@@ -21,13 +21,13 @@ if "last_results" not in st.session_state:
     st.session_state.last_results = None
 
 with st.sidebar:
-    st.header("Visitor Portal")
+    st.markdown("### 🛡️ Visitor Portal")
     visitor_name = st.text_input(
         "Your Name / Handle", value="Pocketdoc", placeholder="Enter your name..."
     )
 
     st.markdown("---")
-    st.header("API & Engine Config")
+    st.markdown("### ⚡ AI-to-AI Engine Config")
     openai_api_key = st.text_input(
         "OpenAI API Key",
         type="password",
@@ -35,10 +35,11 @@ with st.sidebar:
         help="Used only for this Streamlit session; it is not written to project files.",
     ).strip()
     ai_engine_mode = st.toggle(
-        "Enable AI-to-AI Engine (Async OpenAI)",
+        "Enable AI-to-AI Interceptor",
         value=False,
-        help="Use structured OpenAI evaluation when a key is configured.",
+        help="Use structured asynchronous OpenAI evaluation for scanner input when a key is configured.",
     )
+    st.caption("When enabled, audits text submitted here; it does not intercept external model streams.")
     st.markdown("---")
     st.header("Navigation Panel")
     if st.button("🏹 The Guardian Audit", use_container_width=True):
@@ -496,19 +497,26 @@ def main():
 
     with tab_scanner:
         st.subheader("Asynchronous Microaggression & Bias Guardian Audit")
-        st.markdown("Scan policy text or uploaded documents across the Five Pillars, calculate a Guardian Index, and review proposed neutralizations before using them.")
-        input_mode = st.radio(
+        st.markdown("Scan text, policies, or documents across the Five Pillars, calculate a Guardian Index, and review proposed neutralizations before using them.")
+        input_source = st.selectbox(
             "Select Input Source:",
-            ["Direct Text Input", "Simulated Document Upload"],
-            horizontal=True,
+            ["Direct Text Input", "Sample Policy Excerpt", "Upload Text Document"],
         )
 
-        if input_mode == "Direct Text Input":
+        if input_source == "Direct Text Input":
             target_input = st.text_area(
                 "Enter idea, policy, or text excerpt to scan:",
                 value=st.session_state.current_payload or "Some folks from the inner city are just not cut out for tech leadership; they are often too aggressive when speaking up.",
                 height=150,
                 key="scanner_text_input",
+            )
+        elif input_source == "Sample Policy Excerpt":
+            target_input = "Some folks from the inner city are just not cut out for tech leadership; they are often too aggressive during reviews."
+            st.text_area(
+                "Sample policy excerpt:",
+                value=target_input,
+                height=120,
+                disabled=True,
             )
         else:
             uploaded_doc = st.file_uploader(
@@ -518,8 +526,8 @@ def main():
                 target_input = uploaded_doc.getvalue().decode("utf-8", errors="replace")
                 st.text_area("Scanned document preview", value=target_input, height=150, disabled=True)
             else:
-                target_input = st.session_state.current_payload or "Sample policy text: Certain groups are always too articulate during reviews, which can disrupt the standard workflow."
-                st.info("Upload a `.txt` or `.md` file, or run the sample text shown below.")
+                target_input = "Sample policy text: Certain groups are always too articulate during reviews, which can disrupt the standard workflow."
+                st.info("Upload a `.txt` or `.md` file to scan it.")
                 st.text_area("Sample document preview", value=target_input, height=120, disabled=True)
         st.session_state.current_payload = target_input
 
@@ -585,6 +593,7 @@ def main():
                         "status": "Guardian remediation draft prepared" if violations else "No matching heuristic signals",
                         "assessment": assessment,
                         "used_fallback": used_fallback,
+                        "ai_engine_mode": ai_engine_mode,
                     }
 
         result = st.session_state.last_results
@@ -600,6 +609,10 @@ def main():
 
             if result["used_fallback"]:
                 st.warning("Illustrative fallback shown; no live model evaluation was completed.")
+            elif result["ai_engine_mode"]:
+                st.caption("Engine Mode: Live asynchronous OpenAI structured audit")
+            else:
+                st.caption("Engine Mode: Standard Direct Scan")
 
             original_col, revised_col = st.columns(2)
             with original_col:
