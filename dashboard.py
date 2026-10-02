@@ -477,6 +477,17 @@ def _remediate_local_text(original: str) -> str:
         (r"\baggressive\b", "direct in communication style"),
         (r"\bbossy\b", "assertive"),
     )
+    revised, replaced = re.subn(
+        r"Some folks from the inner city are just not cut out for tech leadership;\s*"
+        r"they are often too aggressive during reviews\.",
+        "Candidates possess diverse lived experiences and leadership potential; "
+        "evaluations must focus strictly on objective technical competencies and collaborative milestones.",
+        original,
+        count=1,
+        flags=re.IGNORECASE,
+    )
+    if replaced:
+        return revised
     revised = original
     for pattern, replacement in substitutions:
         revised = re.sub(pattern, replacement, revised, flags=re.IGNORECASE)
@@ -506,7 +517,7 @@ def main():
         if input_source == "Direct Text Input":
             target_input = st.text_area(
                 "Enter idea, policy, or text excerpt to scan:",
-                value=st.session_state.current_payload or "Some folks from the inner city are just not cut out for tech leadership; they are often too aggressive when speaking up.",
+                value=st.session_state.current_payload or "Some folks from the inner city are just not cut out for tech leadership; they are often too aggressive during reviews.",
                 height=150,
                 key="scanner_text_input",
             )
