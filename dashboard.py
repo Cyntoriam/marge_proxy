@@ -48,7 +48,7 @@ with st.sidebar:
     else:
         st.info("Standard Audit active: baseline Heuristic Equity Evaluation.")
 
-    st.caption("M.A.R.G.E. v2.7 • Multi-sensory equity middleware.")
+    st.caption("M.A.R.G.E. v2.8 • Multi-sensory equity middleware.")
 
 is_dark_theme = "Dark" in theme_choice
 
@@ -90,6 +90,10 @@ if is_dark_theme:
         [data-testid="stSidebar"] {
             background-color: #140E0A !important;
             border-right: 1px solid #3d2417 !important;
+            color: #E0E0E0 !important;
+        }
+        [data-testid="stSidebar"] h1, [data-testid="stSidebar"] h2, [data-testid="stSidebar"] h3, [data-testid="stSidebar"] label, [data-testid="stSidebar"] p, [data-testid="stSidebar"] span {
+            color: #E0E0E0 !important;
         }
         input, textarea {
             background-color: #1A120B !important;
@@ -134,6 +138,9 @@ else:
         [data-testid="stSidebar"] {
             background-color: #FDF5ED !important;
             border-right: 1px solid #E6D5C3 !important;
+            color: #2C2C2C !important;
+        }
+        [data-testid="stSidebar"] h1, [data-testid="stSidebar"] h2, [data-testid="stSidebar"] h3, [data-testid="stSidebar"] label, [data-testid="stSidebar"] p, [data-testid="stSidebar"] span, [data-testid="stSidebar"] div {
             color: #2C2C2C !important;
         }
         input, textarea {
