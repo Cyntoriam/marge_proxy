@@ -63,7 +63,7 @@ else:
     dropdown_text = "#2b1105"
     btn_bg = "linear-gradient(90deg, #d96b27 0%, #b84f18 100%)"
 
-# --- INJECT COMPLETE HIGH-CONTRAST CSS & POPOVER PORTAL FIXES ---
+# --- INJECT COMPLETE HIGH-CONTRAST CSS & ABSOLUTE DROPDOWN FIXES ---
 css_code = (
     "<style>"
     f".stApp {{ background: {bg_style} !important; color: {text_color} !important; }}"
@@ -84,11 +84,11 @@ css_code = (
     f"div[data-baseweb='input'] > div, div[data-baseweb='select'] > div, textarea, input {{ background-color: {input_bg} !important; color: {input_text} !important; border: 2px solid {panel_border} !important; }}"
     f"textarea::placeholder, input::placeholder {{ color: {placeholder_text} !important; opacity: 1 !important; }}"
     
-    # COMPREHENSIVE STREAMLIT POPOVER & DROPDOWN PORTAL OVERRIDES
-    f"div[data-baseweb='popover'], div[data-baseweb='popover'] *, div[data-baseweb='menu'], div[data-baseweb='menu'] *, ul[role='listbox'], ul[role='listbox'] *, div[data-testid='stVirtualDropdown'] {{ background-color: {dropdown_bg} !important; color: {dropdown_text} !important; }}"
+    # ABSOLUTE GLOBAL OVERRIDES FOR STREAMLIT BASEWEB DROPDOWNS & MENUS
+    f"div[data-baseweb='popover'], div[data-baseweb='menu'], ul[role='listbox'] {{ background-color: {dropdown_bg} !important; }}"
+    f"div[data-baseweb='popover'] *, div[data-baseweb='menu'] *, ul[role='listbox'] * {{ color: {dropdown_text} !important; background-color: transparent !important; }}"
     f"li[role='option'] {{ background-color: {dropdown_bg} !important; color: {dropdown_text} !important; }}"
     f"li[role='option']:hover, li[role='option'][aria-selected='true'] {{ background-color: {dropdown_hover} !important; color: {dropdown_text} !important; }}"
-    f"li[role='option'] span, li[role='option'] div, div[data-baseweb='option'] span, div[data-baseweb='option'] div {{ color: {dropdown_text} !important; font-weight: 600 !important; }}"
     
     f"label, p, span, div {{ color: {text_color} !important; }}"
     f"div.stButton > button {{ background: {btn_bg} !important; color: #ffffff !important; border-radius: 8px !important; border: none !important; font-weight: bold !important; width: 100% !important; padding: 0.75rem !important; }}"
