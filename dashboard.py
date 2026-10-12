@@ -302,7 +302,7 @@ if page_selection == "🔍 Audit Console":
                         st.markdown(f"**Issue Identified:** {v.issue_identified}")
                         st.markdown(f"**Context Explanation:** {v.detailed_explanation}")
                         st.markdown(f"**Harmonized Remedy:** <span style='color: #ffb800; font-weight: bold;'>{v.active_remedy}</span>", unsafe_allow_html=True)
-                        st.markdown(f"🌟 **Strategic Rationale & Alignment:** *{v.collaborative_rationale}*")
+                        st.markdown(f"🌟 **Guardian Rationale & Alignment:** *{v.collaborative_rationale}*")
             else:
                 st.balloons()
                 st.success("✨ Pure harmony! No microaggressions or structural bias vectors detected.")
