@@ -79,18 +79,14 @@ else:
     sidebar_bg = "#f5e9da"
 
 # --- INJECT COMPLETE CSS WITH OVERRIDES ---
-css_code = (
-    "<style>"
-    f".stApp {{ background: {bg_style} !important; color: {text_color} !important; }}"
-    f"[data-testid='stSidebar'] {{ background-color: {sidebar_bg} !important; border-right: 2px solid {panel_border} !important; }}"
-    ".block-container { max-width: 100% !important; padding-top: 1.2rem !important; padding-left: 1rem !important; padding-right: 1rem !important; }"
-    f".control-panel {{ background-color: {panel_bg}; padding: 1.2rem; border-radius: 12px; border: 2px solid {panel_border}; margin-bottom: 1.5rem; }}"
-    f".marge-header {{ background: {header_bg}; padding: 1.5rem; border-radius: 12px; color: #ffffff; margin-bottom: 1.2rem; border: 2px solid {header_border}; text-align: center; }}"
-    f".marge-title {{ font-size: 2.2rem; font-weight: 800; margin-bottom: 0.4rem; color: {title_color}; -webkit-text-stroke: {text_stroke_val}; }}"
-    
-    # Subheader Box & Typography Styling
-    f".marge-subtitle-box {{ display: inline-block; padding: 0.6rem 1.4rem; border: 2px solid {HONEY_GOLD}; border-radius: 8px; background: rgba(0,0,0,0.3); margin-top: 0.3rem; }}"
-    f".marge-subtitle {{ font-size: 0.92rem; color: {subtitle_color}; font-weight: 800; text-transform: uppercase; letter-spacing: 0.6px; -webkit-text-stroke: {text_stroke_val}; }}"
-    f".marge-essence {{ font-size: 0.85rem; color: {HONEY_GOLD} !important; font-style: italic; margin-top: 0.25rem; font-weight: 700; -webkit-text-stroke: none !important; }}"
-    
-    f".guardian-card {{ background-color: {card_bg}; padding: 1rem; border-radius: 8px; border-left: 4px solid {header_border}; margin-bottom: 0.8rem; border:
+css_code = f"""
+<style>
+.stApp {{ background: {bg_style} !important; color: {text_color} !important; }}
+[data-testid='stSidebar'] {{ background-color: {sidebar_bg} !important; border-right: 2px solid {panel_border} !important; }}
+.block-container {{ max-width: 100% !important; padding-top: 1.2rem !important; padding-left: 1rem !important; padding-right: 1rem !important; }}
+.control-panel {{ background-color: {panel_bg}; padding: 1.2rem; border-radius: 12px; border: 2px solid {panel_border}; margin-bottom: 1.5rem; }}
+.marge-header {{ background: {header_bg}; padding: 1.5rem; border-radius: 12px; color: #ffffff; margin-bottom: 1.2rem; border: 2px solid {header_border}; text-align: center; }}
+.marge-title {{ font-size: 2.2rem; font-weight: 800; margin-bottom: 0.4rem; color: {title_color}; -webkit-text-stroke: {text_stroke_val}; }}
+
+.marge-subtitle-box {{ display: inline-block; padding: 0.6rem 1.4rem; border: 2px solid {HONEY_GOLD}; border-radius: 8px; background: rgba(0,0,0,0.3); margin-top: 0.3rem; }}
+.marge-subtitle {{ font-size: 0.92rem; color: {subtitle_color}; font-weight: 800; text-transform: uppercase; letter-spacing: 0.6px; -webkit-text-stroke: {text
