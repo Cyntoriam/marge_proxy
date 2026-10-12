@@ -108,7 +108,7 @@ st.markdown(
     <div class="marge-header">
         <div class="marge-title">🏹 M.A.R.G.E.</div>
         <div class="marge-subtitle">Multimodal Automated Real-time Guardian Engine</div>
-        <div class="marge-essence">✨ The Equity Guardian — IDEA Thought Guidance & Algorithmic Protection ✨</div>
+        <div class="marge-essence">✨ The Equity Guardian — Thought Guidance & Algorithmic Protection ✨</div>
     </div>
 """,
     unsafe_allow_html=True,
@@ -170,7 +170,7 @@ FIVE_PILLARS = {
     "Pillar 5: Dialectal & Cultural Justice": "Protects AAVE, regional dialects, and cultural vernacular against false-positive aggression flags.",
 }
 
-# --- AUDIT ENGINE WITH GRADUAL DEGRADATION & IDEA LENS ---
+# --- AUDIT ENGINE WITH GRADUAL DEGRADATION (APPLYING IDEA FRAMEWORK TO REMEDIES) ---
 async def async_marge_audit(target_text: str, scan_type: str) -> MARGEEvaluationPayload:
     await asyncio.sleep(0.4)
     violations = []
@@ -187,7 +187,7 @@ async def async_marge_audit(target_text: str, scan_type: str) -> MARGEEvaluation
                     issue_identified="Geographic/Demographic proxy conditioning evaluation capacity.",
                     detailed_explanation="Coupling geographic or demographic markers with capability words introduces subconscious bias and backhanded praise.",
                     active_remedy="Candidates demonstrate exceptional technical strategy and cross-functional leadership capabilities.",
-                    collaborative_rationale="IDEA Lens: Eliminates coded geographic proxies and backhanded compliments through inclusion and equity, centering candidates strictly on objective operational competencies without demographic bias."
+                    collaborative_rationale="Eliminates coded geographic proxies and backhanded compliments through active inclusion and equity, centering candidates strictly on objective operational competencies without demographic bias."
                 )
             )
             remediated = remediated.replace("Some folks from the inner city are just not cut out for tech leadership;", "Candidates demonstrate exceptional technical strategy and cross-functional leadership capabilities;")
@@ -201,7 +201,7 @@ async def async_marge_audit(target_text: str, scan_type: str) -> MARGEEvaluation
                     issue_identified="Subjective behavior-policing adjective targeting leadership style.",
                     detailed_explanation="Terms like 'aggressive' frequently serve as double-standard critiques against marginalized communication styles in performance evaluations.",
                     active_remedy="Maintains an assertive, direct communication style focused on milestone execution.",
-                    collaborative_rationale="IDEA Lens: Reframes subjective tone-policing into quantifiable leadership strengths ('assertive clarity'), mitigating gendered and racial double standards through inclusive evaluation frameworks."
+                    collaborative_rationale="Reframing subjective tone-policing into quantifiable leadership strengths ('assertive clarity') mitigates gendered and racial double standards through inclusive evaluation frameworks."
                 )
             )
             remediated = remediated.replace("they are often too aggressive during reviews.", "feedback delivery maintains an assertive, direct communication style focused on milestone execution.")
@@ -211,10 +211,10 @@ async def async_marge_audit(target_text: str, scan_type: str) -> MARGEEvaluation
                 PillarEvaluation(
                     pillar_name="Pillar 4: Structural, Spatial & Economic Erasure",
                     severity_score=0.40,
-                    issue_identified="Institutional assumption of uniform working resources.",
+                    issue_identified="Institutional assumption of uniform working conditions.",
                     detailed_explanation="Assumes standardized resource availability without explicitly confirming structural accessibility or flexible support.",
                     active_remedy="Ensure all candidate milestone schedules explicitly support remote flexibility and accessible technical infrastructure.",
-                    collaborative_rationale="IDEA Lens: Proactively mitigates socio-economic barriers by embedding structural accessibility, inclusion, and equitable working arrangements."
+                    collaborative_rationale="Proactively mitigates socio-economic barriers by embedding structural accessibility, inclusion, and equitable working arrangements."
                 )
             )
 
@@ -285,7 +285,7 @@ if page_selection == "🔍 Audit Console":
             st.markdown("🔴 **Original / Intercepted Payload**")
             st.info(result.original_text)
         with col_rem:
-            st.markdown("🟢 **M.A.R.G.E. IDEA Restored Output**")
+            st.markdown("🟢 **M.A.R.G.E. Restored Output**")
             st.success(result.remediated_text)
 
         if scan_mode == "Initial Scan":
@@ -294,15 +294,15 @@ if page_selection == "🔍 Audit Console":
             st.markdown(f"<span style='color: #f3d0c7; font-size: 0.82rem;'>Initial scan detected active microaggression and subconscious framing patterns. Switch to <strong>Deep Intersectional Scan</strong> in the top control panel for full guidance and strategic rewrites.</span>", unsafe_allow_html=True)
         else:
             st.markdown("---")
-            st.markdown("<h3 style='color: #ffb800; font-size: 1.05rem;'>✨ Guardian Insights & IDEA Thought Partner Guide</h3>", unsafe_allow_html=True)
+            st.markdown("<h3 style='color: #ffb800; font-size: 1.05rem;'>✨ Guardian Insights & Thought Partner Guide</h3>", unsafe_allow_html=True)
             
             if result.violations:
                 for v in result.violations:
                     with st.expander(f"🏹 Flagged: {v.pillar_name} (Severity: {v.severity_score})", expanded=True):
                         st.markdown(f"**Issue Identified:** {v.issue_identified}")
                         st.markdown(f"**Context Explanation:** {v.detailed_explanation}")
-                        st.markdown(f"**IDEA Harmonized Remedy:** <span style='color: #ffb800; font-weight: bold;'>{v.active_remedy}</span>", unsafe_allow_html=True)
-                        st.markdown(f"🌟 **IDEA Rationale & Bias Mitigation:** *{v.collaborative_rationale}*")
+                        st.markdown(f"**Harmonized Remedy:** <span style='color: #ffb800; font-weight: bold;'>{v.active_remedy}</span>", unsafe_allow_html=True)
+                        st.markdown(f"🌟 **Strategic Rationale & Alignment:** *{v.collaborative_rationale}*")
             else:
                 st.balloons()
                 st.success("✨ Pure harmony! No microaggressions or structural bias vectors detected.")
@@ -329,7 +329,7 @@ else:
     
     <h4 style="color: #ffb800;">System Degradation & Resilience Tiers:</h4>
     <ul>
-        <li><strong>Tier 1 (Full Inspection)</strong>: Complete multi-pillar async valuation and IDEA thought-partner rationale.</li>
+        <li><strong>Tier 1 (Full Inspection)</strong>: Complete multi-pillar async valuation and thought-partner rationale.</li>
         <li><strong>Tier 2 (Heuristic Screen)</strong>: Local pattern matching when model resources are constrained.</li>
         <li><strong>Tier 3 (Safe Passthrough)</strong>: Guaranteed uptime passthrough ensuring zero service interruption.</li>
     </ul>
