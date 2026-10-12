@@ -120,8 +120,8 @@ class PillarEvaluation(BaseModel):
     severity_score: float = Field(..., ge=0.0, le=1.0)
     issue_identified: str
     detailed_explanation: str
-    active_remedy: str
     collaborative_rationale: str
+    active_remedy: str
 
 class MARGEEvaluationPayload(BaseModel):
     original_text: str
@@ -170,7 +170,7 @@ FIVE_PILLARS = {
     "Pillar 5: Dialectal & Cultural Justice": "Protects AAVE, regional dialects, and cultural vernacular against false-positive aggression flags.",
 }
 
-# --- AUDIT ENGINE WITH GRADUAL DEGRADATION (APPLYING IDEA FRAMEWORK TO REMEDIES) ---
+# --- AUDIT ENGINE WITH GRADUAL DEGRADATION (SYSTEMATIC IDEA FRAMEWORK REMEDIATION) ---
 async def async_marge_audit(target_text: str, scan_type: str) -> MARGEEvaluationPayload:
     await asyncio.sleep(0.4)
     violations = []
@@ -186,8 +186,8 @@ async def async_marge_audit(target_text: str, scan_type: str) -> MARGEEvaluation
                     severity_score=0.85,
                     issue_identified="Geographic/Demographic proxy conditioning evaluation capacity.",
                     detailed_explanation="Coupling geographic or demographic markers with capability words introduces subconscious bias and backhanded praise.",
-                    active_remedy="Candidates demonstrate exceptional technical strategy and cross-functional leadership capabilities.",
-                    collaborative_rationale="Eliminates coded geographic proxies and backhanded compliments through active inclusion and equity, centering candidates strictly on objective operational competencies without demographic bias."
+                    collaborative_rationale="Applying an IDEA lens eliminates coded geographic proxies and backhanded compliments through inclusion and equity, centering candidates strictly on objective operational competencies without demographic bias.",
+                    active_remedy="Candidates demonstrate exceptional technical strategy and cross-functional leadership capabilities."
                 )
             )
             remediated = remediated.replace("Some folks from the inner city are just not cut out for tech leadership;", "Candidates demonstrate exceptional technical strategy and cross-functional leadership capabilities;")
@@ -200,8 +200,8 @@ async def async_marge_audit(target_text: str, scan_type: str) -> MARGEEvaluation
                     severity_score=0.75,
                     issue_identified="Subjective behavior-policing adjective targeting leadership style.",
                     detailed_explanation="Terms like 'aggressive' frequently serve as double-standard critiques against marginalized communication styles in performance evaluations.",
-                    active_remedy="Maintains an assertive, direct communication style focused on milestone execution.",
-                    collaborative_rationale="Reframing subjective tone-policing into quantifiable leadership strengths ('assertive clarity') mitigates gendered and racial double standards through inclusive evaluation frameworks."
+                    collaborative_rationale="Applying an IDEA lens reframes subjective tone-policing into quantifiable leadership strengths ('assertive clarity'), mitigating gendered and racial double standards through inclusive evaluation frameworks.",
+                    active_remedy="Maintains an assertive, direct communication style focused on milestone execution."
                 )
             )
             remediated = remediated.replace("they are often too aggressive during reviews.", "feedback delivery maintains an assertive, direct communication style focused on milestone execution.")
@@ -213,8 +213,8 @@ async def async_marge_audit(target_text: str, scan_type: str) -> MARGEEvaluation
                     severity_score=0.40,
                     issue_identified="Institutional assumption of uniform working conditions.",
                     detailed_explanation="Assumes standardized resource availability without explicitly confirming structural accessibility or flexible support.",
-                    active_remedy="Ensure all candidate milestone schedules explicitly support remote flexibility and accessible technical infrastructure.",
-                    collaborative_rationale="Proactively mitigates socio-economic barriers by embedding structural accessibility, inclusion, and equitable working arrangements."
+                    collaborative_rationale="Applying an IDEA lens proactively mitigates socio-economic barriers by embedding structural accessibility, inclusion, and equitable working arrangements.",
+                    active_remedy="Ensure all candidate milestone schedules explicitly support remote flexibility and accessible technical infrastructure."
                 )
             )
 
@@ -301,8 +301,8 @@ if page_selection == "🔍 Audit Console":
                     with st.expander(f"🏹 Flagged: {v.pillar_name} (Severity: {v.severity_score})", expanded=True):
                         st.markdown(f"**Issue Identified:** {v.issue_identified}")
                         st.markdown(f"**Context Explanation:** {v.detailed_explanation}")
-                        st.markdown(f"**Harmonized Remedy:** <span style='color: #ffb800; font-weight: bold;'>{v.active_remedy}</span>", unsafe_allow_html=True)
                         st.markdown(f"🌟 **Guardian Rationale & Alignment:** *{v.collaborative_rationale}*")
+                        st.markdown(f"**Harmonized Remedy:** <span style='color: #ffb800; font-weight: bold;'>{v.active_remedy}</span>", unsafe_allow_html=True)
             else:
                 st.balloons()
                 st.success("✨ Pure harmony! No microaggressions or structural bias vectors detected.")
