@@ -36,7 +36,8 @@ if st.session_state.theme_mode == "Dark Mode":
     input_bg = "#240c03"
     input_text = "#ffffff"
     placeholder_text = "#f3d0c7"
-    dropdown_bg = "#170702"
+    dropdown_bg = "#1f0902"
+    dropdown_hover = "#3d1304"
     dropdown_text = "#ffffff"
     btn_bg = "linear-gradient(90deg, #e05624 0%, #d94e1f 100%)"
 else:
@@ -58,10 +59,11 @@ else:
     input_text = "#2b1105"
     placeholder_text = "#6e3b22"
     dropdown_bg = "#ffffff"
+    dropdown_hover = "#f0e1d1"
     dropdown_text = "#2b1105"
     btn_bg = "linear-gradient(90deg, #d96b27 0%, #b84f18 100%)"
 
-# --- INJECT DYNAMIC HIGH-CONTRAST CSS ---
+# --- INJECT COMPLETE HIGH-CONTRAST CSS OVERRIDES ---
 css_code = (
     "<style>"
     f".stApp {{ background: {bg_style} !important; color: {text_color} !important; }}"
@@ -78,14 +80,15 @@ css_code = (
     f"details summary {{ background-color: {expander_bg} !important; border-radius: 6px !important; border: 1px solid {panel_border} !important; padding: 0.5rem 1rem !important; }}"
     f"details summary p, details summary span, details summary div, details summary svg {{ color: {expander_text} !important; fill: {expander_text} !important; font-weight: 800 !important; font-size: 1rem !important; }}"
     
-    # Text input and select box styling
+    # Textarea, input, and base select styling
     f"div[data-baseweb='input'] > div, div[data-baseweb='select'] > div, textarea, input {{ background-color: {input_bg} !important; color: {input_text} !important; border-color: {panel_border} !important; }}"
     f"textarea::placeholder, input::placeholder {{ color: {placeholder_text} !important; opacity: 1 !important; }}"
     
-    # Fix for Drop-down Popover list items in Light Mode
-    f"div[data-baseweb='popover'], div[data-baseweb='menu'], ul[role='listbox'], li[role='option'] {{ background-color: {dropdown_bg} !important; color: {dropdown_text} !important; }}"
-    f"li[role='option'] p, li[role='option'] span, ul[role='listbox'] span, div[data-baseweb='popover'] span {{ color: {dropdown_text} !important; }}"
-    f"li[role='option']:hover, li[role='option'][aria-selected='true'] {{ background-color: {panel_bg} !important; }}"
+    # AGGRESSIVE POPOVER & DROPDOWN OVERRIDES FOR STREAMLIT BASEWEB
+    f"div[data-baseweb='popover'], div[data-baseweb='popover'] *, div[data-baseweb='menu'], div[data-baseweb='menu'] *, ul[role='listbox'], ul[role='listbox'] * {{ background-color: {dropdown_bg} !important; color: {dropdown_text} !important; }}"
+    f"li[role='option'] {{ background-color: {dropdown_bg} !important; color: {dropdown_text} !important; }}"
+    f"li[role='option']:hover, li[role='option'][aria-selected='true'] {{ background-color: {dropdown_hover} !important; color: {dropdown_text} !important; }}"
+    f"li[role='option'] span, li[role='option'] div, div[data-baseweb='option'] span {{ color: {dropdown_text} !important; font-weight: 600 !important; }}"
     
     f"label, p, span, div {{ color: {text_color} !important; }}"
     f"div.stButton > button {{ background: {btn_bg} !important; color: #ffffff !important; border-radius: 8px !important; border: none !important; font-weight: bold !important; width: 100% !important; padding: 0.75rem !important; }}"
@@ -135,7 +138,7 @@ with col_ctrl2:
 with col_ctrl3:
     enable_ai_to_ai = st.toggle("AI-to-AI Interceptor", value=True)
 
-# Clean Settings Expander (Theme Switcher and Optional OpenAI API Key)
+# Clean Settings Expander
 with st.expander("⚙️ Settings", expanded=False):
     col_set1, col_set2 = st.columns([1, 1])
     with col_set1:
