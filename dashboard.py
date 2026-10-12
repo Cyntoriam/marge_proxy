@@ -8,10 +8,9 @@ st.set_page_config(
     page_title="M.A.R.G.E. | Multimodal Automated Real-time Guardian Engine",
     page_icon="🏹",
     layout="wide",
-    initial_sidebar_state="collapsed",
 )
 
-# --- GLOBAL BURNT ORANGE & MOBILE-FIRST STYLING ---
+# --- GLOBAL BURNT ORANGE & MOBILE-FIRST FLUID STYLING ---
 st.markdown(
     """
     <style>
@@ -19,35 +18,24 @@ st.markdown(
         background: linear-gradient(180deg, #240c03 0%, #120501 60%, #0a0301 100%) !important;
         color: #fcebe6 !important;
     }
-    [data-testid="stSidebar"] {
-        background-color: #170702 !important;
-        border-right: 1px solid rgba(224, 86, 36, 0.4) !important;
+    
+    .block-container {
+        max-width: 100% !important;
+        padding-top: 1.2rem !important;
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
     }
-    @media (max-width: 768px) {
-        [data-testid="stSidebar"] {
-            width: 85vw !important;
-        }
-        .marge-title {
-            font-size: 1.8rem !important;
-        }
-        .marge-subtitle {
-            font-size: 0.8rem !important;
-        }
-        .marge-header {
-            padding: 1rem !important;
-            margin-bottom: 0.8rem !important;
-        }
-        div.stButton > button {
-            width: 100% !important;
-            padding: 0.75rem !important;
-            font-size: 1rem !important;
-        }
-        .block-container {
-            padding-top: 2rem !important;
-            padding-left: 0.8rem !important;
-            padding-right: 0.8rem !important;
-        }
+
+    /* Main Page Control Panel (Visible directly on phones) */
+    .control-panel {
+        background-color: #170702;
+        padding: 1.2rem;
+        border-radius: 12px;
+        border: 1px solid rgba(224, 86, 36, 0.4);
+        margin-bottom: 1.5rem;
     }
+
+    /* Header Box */
     .marge-header {
         background: linear-gradient(135deg, #2e1004 0%, #1a0802 100%);
         padding: 1.5rem;
@@ -59,14 +47,14 @@ st.markdown(
         text-align: center;
     }
     .marge-title {
-        font-size: 2.5rem;
+        font-size: 2.2rem;
         font-weight: 800;
         margin-bottom: 0.2rem;
         color: #ffb800;
         letter-spacing: 0.5px;
     }
     .marge-subtitle {
-        font-size: 1rem;
+        font-size: 0.95rem;
         color: #f3d0c7;
         font-weight: 400;
         text-transform: uppercase;
@@ -112,6 +100,8 @@ st.markdown(
         border: none !important;
         font-weight: bold !important;
         box-shadow: 0 4px 12px rgba(224, 86, 36, 0.3) !important;
+        width: 100% !important;
+        padding: 0.75rem !important;
     }
     </style>
     
@@ -140,39 +130,36 @@ class MARGEEvaluationPayload(BaseModel):
     degradation_tier: str = Field(default="Tier 1: Full Deep Inspection")
     violations: List[PillarEvaluation] = Field(default_factory=list)
 
-# --- SIDEBAR NAVIGATION ---
-with st.sidebar:
-    st.markdown("<h3 style='color: #ffb800; margin-bottom: 0;'>🏹 Guardian Portal</h3>", unsafe_allow_html=True)
-    
+# --- IN-PAGE CONTROL PANEL (Right on the main page, fully visible on phones) ---
+st.markdown("<div class='control-panel'>", unsafe_allow_html=True)
+st.markdown("<h4 style='color: #ffb800; margin-top: 0;'>🏹 Guardian Portal & Controls</h4>", unsafe_allow_html=True)
+
+col_ctrl1, col_ctrl2, col_ctrl3 = st.columns([1, 1, 1])
+
+with col_ctrl1:
     raw_handle = st.text_input("Your Name / Handle", value="Pocketdoc")
     formatted_handle = raw_handle.strip() if raw_handle.strip() else "Guardian"
-    if not formatted_handle.startswith("Dr.") and "pocketdoc" in formatted_handle.lower():
-        display_name = f"Dr. {formatted_handle}"
-    else:
-        display_name = formatted_handle
+    display_name = f"Dr. {formatted_handle}" if not formatted_handle.startswith("Dr.") and "pocketdoc" in formatted_handle.lower() else formatted_handle
 
+with col_ctrl2:
+    page_selection = st.selectbox("Navigation View", ["🔍 Audit Console", "🏛️ Five-Pillar Taxonomy", "📖 System Guide"])
+
+with col_ctrl3:
+    enable_ai_to_ai = st.toggle("AI-to-AI Interceptor", value=True)
+
+# Conditional Audit Parameters if Audit Console is active
+scan_mode = "Initial Scan"
+input_preset = "Custom Text Entry"
+
+if page_selection == "🔍 Audit Console":
     st.markdown("---")
-    st.markdown("<h4 style='color: #ffb800; margin-bottom: 0.2rem;'>Navigation Panel</h4>", unsafe_allow_html=True)
-    
-    page_selection = st.radio(
-        "Main Navigation",
-        ["🔍 Audit Console", "🏛️ Five-Pillar Taxonomy", "📖 System Guide"],
-        label_visibility="collapsed"
-    )
-    
-    scan_mode = "Initial Scan"
-    input_preset = "Custom Text Entry"
-    
-    if page_selection == "🔍 Audit Console":
-        st.markdown("<div style='margin-left: 0.4rem; border-left: 2px solid #e05624; padding-left: 0.6rem; margin-top: 0.4rem;'>", unsafe_allow_html=True)
-        st.markdown("<small style='color: #ffb800; font-weight: bold;'>Audit Parameters</small>", unsafe_allow_html=True)
-        scan_mode = st.radio("Scan Depth", ["Initial Scan", "Deep Intersectional Scan"])
+    col_sub1, col_sub2 = st.columns(2)
+    with col_sub1:
+        scan_mode = st.radio("Scan Depth", ["Initial Scan", "Deep Intersectional Scan"], horizontal=True)
+    with col_sub2:
         input_preset = st.selectbox("Input Type / Preset Example", ["Custom Text Entry", "HR Policy Sample", "AI-to-AI Intercept Stream"])
-        st.markdown("</div>", unsafe_allow_html=True)
 
-    st.markdown("---")
-    enable_ai_to_ai = st.toggle("Real-Time AI-to-AI Interceptor", value=True)
-    st.caption("Protects machine streams in real time.")
+st.markdown("</div>", unsafe_allow_html=True)
 
 # --- TAXONOMY DEFINITIONS ---
 FIVE_PILLARS = {
@@ -304,7 +291,7 @@ if page_selection == "🔍 Audit Console":
         if scan_mode == "Initial Scan":
             st.markdown("---")
             st.markdown("<h4 style='color: #ffb800; font-size: 0.95rem;'>⚡ Initial Pattern Screen Overview</h4>", unsafe_allow_html=True)
-            st.markdown(f"<span style='color: #f3d0c7; font-size: 0.82rem;'>Initial scan detected active microaggression and subconscious framing patterns. Open the sidebar (top-left arrow) and switch to <strong>Deep Intersectional Scan</strong> for full spiritual guidance and strategic rewrites.</span>", unsafe_allow_html=True)
+            st.markdown(f"<span style='color: #f3d0c7; font-size: 0.82rem;'>Initial scan detected active microaggression and subconscious framing patterns. Switch to <strong>Deep Intersectional Scan</strong> in the top control panel for full spiritual guidance and strategic rewrites.</span>", unsafe_allow_html=True)
         else:
             st.markdown("---")
             st.markdown("<h3 style='color: #ffb800; font-size: 1.05rem;'>✨ Guardian Insights & Spiritual Thought Partner Guide</h3>", unsafe_allow_html=True)
