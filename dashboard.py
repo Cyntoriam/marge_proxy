@@ -10,31 +10,29 @@ st.set_page_config(
     layout="wide",
 )
 
-# --- GLOBAL OSHUN & WARM NAVIGATION STYLING ---
+# --- GLOBAL OSHUN WARM PALETTE & READABILITY STYLING ---
 st.markdown(
     """
     <style>
-    /* Force main app background to deep dark charcoal */
+    /* Exact Oshun dark gold-tinted charcoal background matching user reference */
     .stApp {
-        background-color: #12100e !important;
+        background: linear-gradient(180deg, #14120f 0%, #0a0908 100%) !important;
         color: #f3f3f8 !important;
     }
     
-    /* Force sidebar styling with warm orange-gold borders */
     [data-testid="stSidebar"] {
-        background-color: #1a1614 !important;
-        border-right: 1px solid rgba(224, 86, 36, 0.3) !important;
+        background-color: #161311 !important;
+        border-right: 1px solid rgba(255, 184, 0, 0.25) !important;
     }
 
-    /* Golden/Orange Header Box */
     .marge-header {
-        background-color: #1c1815;
+        background: linear-gradient(135deg, #1f1a16 0%, #14120f 100%);
         padding: 2.2rem;
-        border-radius: 12px;
+        border-radius: 14px;
         color: #f3f3f8;
         margin-bottom: 2rem;
-        box-shadow: 0 0 25px rgba(224, 86, 36, 0.2);
-        border: 2px solid #e05624;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+        border: 2px solid rgba(255, 184, 0, 0.4);
         text-align: center;
     }
     .marge-title {
@@ -53,47 +51,38 @@ st.markdown(
     }
     .marge-tagline {
         font-size: 0.95rem;
-        color: #e05624;
+        color: #00ffcc;
         font-style: italic;
         margin-top: 0.4rem;
     }
     .guardian-card {
-        background-color: #221c18;
+        background-color: #1a1714;
         padding: 1.2rem;
         border-radius: 8px;
         border-left: 4px solid #ffb800;
         margin-bottom: 1rem;
         border: 1px solid rgba(255, 184, 0, 0.2);
+        color: #f3f3f8;
     }
-    .severity-pill {
-        display: inline-block;
-        padding: 0.4rem 1rem;
-        border-radius: 20px;
-        font-weight: 700;
-        font-size: 1rem;
-        color: #ffffff;
-        text-align: center;
-    }
-    /* Style custom orange sidebar buttons */
-    div.stButton > button {
-        background-color: #d94e1f !important;
-        color: white !important;
-        border-radius: 8px !important;
-        border: none !important;
-        font-weight: bold !important;
+    .streamlit-expanderHeader {
+        background-color: #1a1714 !important;
+        color: #ffb800 !important;
+        font-weight: 700 !important;
+        border-radius: 6px !important;
+        border: 1px solid rgba(255, 184, 0, 0.15) !important;
     }
     </style>
     
     <div class="marge-header">
-        <div class="marge-title">🏹 M.A.R.G.E.</div>
-        <div class="marge-subtitle">MULTIMODAL AUTOMATED REAL-TIME GUARDIAN ENGINE</div>
-        <div class="marge-tagline">The Equity Guardian — Sociotechnical Middleware</div>
+        <div class="marge-title">🏹 M.A.R.G.E. 🛡️</div>
+        <div class="marge-subtitle">Multimodal Automated Real-time Guardian Engine</div>
+        <div class="marge-tagline">Engine — The Equity Guardian</div>
     </div>
 """,
     unsafe_allow_html=True,
 )
 
-# --- PYDANTIC VALIDATION MODELS (Deterministic Governance & Schema Enforcement) ---
+# --- PYDANTIC VALIDATION MODELS ---
 class PillarEvaluation(BaseModel):
     pillar_name: str = Field(..., description="Name of the Five-Pillar taxonomy category.")
     severity_score: float = Field(..., ge=0.0, le=1.0, description="Normalized severity score between 0.0 and 1.0.")
@@ -131,7 +120,7 @@ with st.sidebar:
     openai_key = st.text_input("OpenAI API Key (Optional)", type="password")
     enable_ai_to_ai = st.toggle("Enable Real-Time AI-to-AI Interceptor", value=True)
     st.markdown(
-        "<small style='color: #cccccc;'>When enabled, M.A.R.G.E. intercepts model-to-model streams in real time to prevent automated bias propagation.</small>", 
+        "<small style='color: #d1d1e0;'>When enabled, M.A.R.G.E. intercepts model-to-model streams in real time to prevent automated bias propagation.</small>", 
         unsafe_allow_html=True
     )
     
@@ -143,15 +132,24 @@ with st.sidebar:
         label_visibility="collapsed"
     )
 
-# --- ASYNCHRONOUS AUDITING & REAL-TIME INTERCEPTION ENGINE ---
+# --- FIVE-PILLAR TAXONOMY DEFINITIONS ---
+FIVE_PILLARS = {
+    "Pillar 1: Stereotypical & Demographic Framing": "Catches automated assumptions of roles or capabilities based on demographic generalizations.",
+    "Pillar 2: Intersectional Microaggressions": "Flags subtle slights, exclusionary phrasing, and dog-whistles targeting compounded identity vectors.",
+    "Pillar 3: Disability & Accessibility Justice": "Audits systems for ableist assumptions, inaccessible defaults, and systemic erasure of accommodations.",
+    "Pillar 4: Structural, Spatial & Economic Erasure": "Detects when optimization models ignore localized infrastructure or socio-economic realities.",
+    "Pillar 5: Dialectal & Cultural Justice": "Protects AAVE, regional dialects, and cultural vernacular against false-positive aggression flags.",
+}
+
+# --- ASYNCHRONOUS AUDITING ENGINE ---
 async def async_marge_deep_audit(target_text: str, is_ai_to_ai: bool) -> MARGEEvaluationPayload:
-    await asyncio.sleep(0.8) # Simulate fast middleware inspection
+    await asyncio.sleep(0.8)
     
     violations_data = []
     remediated_text = target_text
     text_lower = target_text.lower()
 
-    if any(p in text_lower for p in ["those people", "inner city", "they always"]):
+    if any(p in text_lower for p in ["those people", "inner city", "they always", "unusually articulate"]):
         violations_data.append(
             PillarEvaluation(
                 pillar_name="Pillar 1: Stereotypical & Demographic Framing",
@@ -163,6 +161,7 @@ async def async_marge_deep_audit(target_text: str, is_ai_to_ai: bool) -> MARGEEv
         )
         remediated_text = remediated_text.replace("Some folks from the inner city are just not cut out for tech leadership;", "Candidates possess diverse lived experiences and leadership potential;")
         remediated_text = remediated_text.replace("they are often too aggressive during reviews.", "Evaluations must focus strictly on objective technical competencies and collaborative milestones.")
+        remediated_text = remediated_text.replace("The candidate from the inner city is unusually articulate for this role.", "The candidate demonstrates exceptional technical communication and leadership competency.")
 
     if any(p in text_lower for p in ["so articulate", "aggressive", "bossy", "where are you really from"]):
         violations_data.append(
@@ -189,20 +188,18 @@ async def async_marge_deep_audit(target_text: str, is_ai_to_ai: bool) -> MARGEEv
 
     guardian_index = max(100 - (len(violations_data) * 25), 35)
 
-    validated_payload = MARGEEvaluationPayload(
+    return MARGEEvaluationPayload(
         original_text=target_text,
         remediated_text=remediated_text,
         guardian_index=guardian_index,
         violations=violations_data
     )
 
-    return validated_payload
-
 # --- RENDER SELECTED VIEW ---
 if page_selection == "🏹 The Guardian Audit":
-    st.subheader("Interactive Audit & Real-Time AI Interception")
+    st.markdown("<h2 style='color: #ffb800;'>Asynchronous Microaggression & Bias Guardian Audit</h2>", unsafe_allow_html=True)
+    st.markdown("<span style='color: #d1d1e0;'>Scan text, policies, or documents across the Five Pillars, calculate a Guardian Index, and review proposed neutralizations before using them.</span>", unsafe_allow_html=True)
     
-    # Toggle between Human Review and Real-Time AI Stream modes
     mode = st.radio(
         "Select Operation Mode:",
         ["👤 Human Deep Scan & Live Recommendations", "🤖 Real-Time AI-to-AI Interceptor Mode"],
@@ -210,15 +207,14 @@ if page_selection == "🏹 The Guardian Audit":
     )
 
     if "Human" in mode:
-        st.markdown("Scan text, policy drafts, or human prompts. M.A.R.G.E. detects microaggressions, provides detailed analysis, and generates active structural recommendations.")
         target_text = st.text_area(
-            "Enter text payload for human equity audit:",
+            "Enter idea, policy, or text excerpt to scan:",
             value="Some folks from the inner city are just not cut out for tech leadership; they are often too aggressive during reviews.",
             height=120
         )
         button_label = "🏹 Perform Deep Human Audit"
     else:
-        st.markdown("⚡ **Real-time AI Middleware Active**: Intercepts automated AI model streams in flight. If microaggressions or bias parameters are detected, M.A.R.G.E. immediately sanitizes the payload before the downstream AI receives it.")
+        st.markdown("<span style='color: #ffb800;'>⚡ <strong>Real-time AI Middleware Active</strong>: Intercepts automated AI model streams in flight to sanitize model-to-model context windows.</span>", unsafe_allow_html=True)
         target_text = st.text_area(
             "Incoming AI-to-AI Stream Payload:",
             value="The candidate from the inner city is unusually articulate for this role.",
@@ -233,32 +229,26 @@ if page_selection == "🏹 The Guardian Audit":
 
         st.markdown("---")
         
-        # Risk levels
-        if result.guardian_index >= 80:
-            severity_color = "#28a745"
-            severity_label = "Low Risk / Clean Stream"
-        elif result.guardian_index >= 55:
-            severity_color = "#ffb800"
-            severity_label = "Moderate Risk Detected"
-        else:
-            severity_color = "#dc3545"
-            severity_label = "Critical Bias / Interception Required"
-
-        col_m1, col_m2 = st.columns([1, 2])
-        with col_m1:
-            st.metric("Guardian Index", f"{result.guardian_index}/100")
-        with col_m2:
-            st.markdown("**Status & Risk Assessment:**")
-            st.markdown(
-                f"""
-                <div style="margin-top: 0.4rem;">
-                    <span class="severity-pill" style="background-color: {severity_color};">
-                        🏹 {severity_label} ({result.guardian_index}/100)
-                    </span>
+        # Guardian Index Sliding Scale with Artemis Bow Marker
+        st.markdown("<h3 style='color: #ffb800;'>🏹 Guardian Index Sliding Scale Severity Meter</h3>", unsafe_allow_html=True)
+        
+        position_pct = max(0, min(100, result.guardian_index))
+        
+        scale_html = f"""
+        <div style="background-color: #1a1714; padding: 1.5rem; border-radius: 10px; border: 1px solid rgba(255, 184, 0, 0.3); margin-bottom: 1.5rem;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; font-weight: bold; color: #ffb800;">
+                <span>Critical Risk (0)</span>
+                <span>Guardian Index: {result.guardian_index} / 100</span>
+                <span>Pure Alignment (100)</span>
+            </div>
+            <div style="position: relative; width: 100%; height: 14px; background: linear-gradient(90deg, #dc3545 0%, #ffc107 50%, #28a745 100%); border-radius: 7px;">
+                <div style="position: absolute; left: {position_pct}%; top: -14px; transform: translateX(-50%); font-size: 1.6rem; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));">
+                    🏹
                 </div>
-                """,
-                unsafe_allow_html=True
-            )
+            </div>
+        </div>
+        """
+        st.markdown(scale_html, unsafe_allow_html=True)
 
         st.markdown("---")
 
@@ -271,24 +261,30 @@ if page_selection == "🏹 The Guardian Audit":
             st.success(result.remediated_text)
 
         st.markdown("---")
-        st.markdown("### 📋 Detailed Microaggression Breakdown & Live Recommendations")
+        st.markdown("<h3 style='color: #ffb800;'>📋 Detailed Microaggression Breakdown & Live Recommendations</h3>", unsafe_allow_html=True)
         
         if result.violations:
             for v in result.violations:
-                with st.expander(f"⚠️ Flagged: {v.pillar_name} (Severity: {v.severity_score})", expanded=True):
-                    st.markdown(f"**Issue Identified:** {v.issue_identified}")
-                    st.markdown(f"**Detailed Explanation:** {v.detailed_explanation}")
-                    st.markdown(f"**Live Guardian Recommendation / Remedy:** {v.active_remedy}")
+                with st.expander(f"🏹 Flagged: {v.pillar_name} (Severity: {v.severity_score})", expanded=True):
+                    st.markdown(f"<span style='color: #f3f3f8;'><strong>Issue Identified:</strong> {v.issue_identified}</span>", unsafe_allow_html=True)
+                    st.markdown(f"<span style='color: #d1d1e0;'><strong>Detailed Explanation:</strong> {v.detailed_explanation}</span>", unsafe_allow_html=True)
+                    st.markdown(f"<span style='color: #ffb800;'><strong>Live Guardian Recommendation / Remedy:</strong> {v.active_remedy}</span>", unsafe_allow_html=True)
         else:
             st.balloons()
             st.success("✨ Pure alignment! No microaggressions or bias vectors detected.")
 
 else:
-    st.subheader("📖 About M.A.R.G.E. & User Guide")
-    st.markdown("""
-    **M.A.R.G.E. (Multimodal Automated Real-time Guardian Engine)** operates as a sociotechnical middleware gatekeeper.
+    st.markdown("<h2 style='color: #ffb800;'>🏛️ The Five-Pillar Taxonomy & Guide</h2>", unsafe_allow_html=True)
+    st.markdown("<span style='color: #d1d1e0;'>The structural rules powering M.A.R.G.E.'s real-time equity guardian engine.</span>", unsafe_allow_html=True)
+    st.markdown("---")
     
-    ### Core Operations:
-    1. **For Humans**: Performs deep scans on policy documents and human text inputs, flagging subtle microaggressions and serving live structural recommendations.
-    2. **For AI-to-AI Systems**: Acts as a real-time interceptor that sanitizes machine-to-machine context windows, mitigating algorithmic bias propagation before downstream models process the data[cite: 2].
-    """)
+    for pillar, desc in FIVE_PILLARS.items():
+        st.markdown(
+            f"""
+            <div class="guardian-card">
+                <strong style="color: #ffb800;">🏹 {pillar}</strong><br>
+                <span style="color: #d1d1e0; font-size: 0.95rem;">{desc}</span>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
