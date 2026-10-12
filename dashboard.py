@@ -61,7 +61,7 @@ else:
     dropdown_text = "#2b1105"
     btn_bg = "linear-gradient(90deg, #d96b27 0%, #b84f18 100%)"
 
-# --- INJECT CSS WITH HIGH-CONTRAST EXPANDER HEADER STYLING ---
+# --- INJECT DYNAMIC HIGH-CONTRAST CSS ---
 css_code = (
     "<style>"
     f".stApp {{ background: {bg_style} !important; color: {text_color} !important; }}"
@@ -73,12 +73,20 @@ css_code = (
     ".marge-essence { font-size: 0.85rem; color: #ffb800; font-style: italic; margin-top: 0.3rem; }"
     f".guardian-card {{ background-color: {card_bg}; padding: 1rem; border-radius: 8px; border-left: 4px solid {header_border}; margin-bottom: 0.8rem; border: 1px solid {card_border}; color: {text_color}; }}"
     f".degradation-badge {{ display: inline-block; padding: 0.2rem 0.6rem; border-radius: 12px; font-size: 0.75rem; font-weight: bold; background-color: {badge_bg}; border: 1px solid {header_border}; color: {badge_text}; margin-top: 0.4rem; }}"
+    
+    # Expander styling
     f"details summary {{ background-color: {expander_bg} !important; border-radius: 6px !important; border: 1px solid {panel_border} !important; padding: 0.5rem 1rem !important; }}"
-    f"details summary p, details summary span, details summary div {{ color: {expander_text} !important; font-weight: 800 !important; font-size: 1rem !important; }}"
+    f"details summary p, details summary span, details summary div, details summary svg {{ color: {expander_text} !important; fill: {expander_text} !important; font-weight: 800 !important; font-size: 1rem !important; }}"
+    
+    # Text input and select box styling
     f"div[data-baseweb='input'] > div, div[data-baseweb='select'] > div, textarea, input {{ background-color: {input_bg} !important; color: {input_text} !important; border-color: {panel_border} !important; }}"
     f"textarea::placeholder, input::placeholder {{ color: {placeholder_text} !important; opacity: 1 !important; }}"
-    f"ul[role='listbox'], li[role='option'], div[data-baseweb='menu'] {{ background-color: {dropdown_bg} !important; color: {dropdown_text} !important; }}"
-    f"li[role='option'] span, ul[role='listbox'] span {{ color: {dropdown_text} !important; }}"
+    
+    # Fix for Drop-down Popover list items in Light Mode
+    f"div[data-baseweb='popover'], div[data-baseweb='menu'], ul[role='listbox'], li[role='option'] {{ background-color: {dropdown_bg} !important; color: {dropdown_text} !important; }}"
+    f"li[role='option'] p, li[role='option'] span, ul[role='listbox'] span, div[data-baseweb='popover'] span {{ color: {dropdown_text} !important; }}"
+    f"li[role='option']:hover, li[role='option'][aria-selected='true'] {{ background-color: {panel_bg} !important; }}"
+    
     f"label, p, span, div {{ color: {text_color} !important; }}"
     f"div.stButton > button {{ background: {btn_bg} !important; color: #ffffff !important; border-radius: 8px !important; border: none !important; font-weight: bold !important; width: 100% !important; padding: 0.75rem !important; }}"
     "</style>"
