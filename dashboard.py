@@ -287,7 +287,6 @@ if page_selection == "🔍 Audit Console":
 
     chosen_placeholder = random.choice(GREETING_PLACEHOLDERS)
     
-    # DEDICATED INPUT AREA WITH STABLE KEY BINDING
     target_text = st.text_area(
         "Input Text Stream for Analysis:", 
         value=default_val if default_val else "", 
@@ -373,7 +372,6 @@ if page_selection == "🔍 Audit Console":
     """
     components.html(voice_component_html, height=40)
 
-    # AUDIT EXECUTION WITH KEY-BASED VALUE FALLBACK
     if st.button("🏹 Execute M.A.R.G.E. Guardian Audit"):
         active_input = st.session_state.get("user_text_input", target_text).strip()
         
@@ -399,13 +397,9 @@ if page_selection == "🔍 Audit Console":
             )
             st.markdown(scale_html, unsafe_allow_html=True)
 
-            col_orig, col_rem = st.columns([1, 1])
-            with col_orig:
-                st.markdown("🔴 **Original / Intercepted Text**")
-                st.info(result.original_text)
-            with col_rem:
-                st.markdown("🟢 **M.A.R.G.E. Restored Output**")
-                st.success(result.remediated_text)
+            # UPDATED COLLABORATIVE HEADER
+            st.markdown("🟢 **Harmonized Perspective:**")
+            st.success(result.remediated_text)
 
             if scan_mode == "Initial Scan":
                 st.markdown("---")
