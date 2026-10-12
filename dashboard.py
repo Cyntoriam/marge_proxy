@@ -130,7 +130,7 @@ class MARGEEvaluationPayload(BaseModel):
     degradation_tier: str = Field(default="Tier 1: Full Deep Inspection")
     violations: List[PillarEvaluation] = Field(default_factory=list)
 
-# --- IN-PAGE CONTROL PANEL (Right on the main page, fully visible on phones) ---
+# --- IN-PAGE CONTROL PANEL (Visible directly on phones) ---
 st.markdown("<div class='control-panel'>", unsafe_allow_html=True)
 st.markdown("<h4 style='color: #ffb800; margin-top: 0;'>🏹 Guardian Portal & Controls</h4>", unsafe_allow_html=True)
 
@@ -187,7 +187,7 @@ async def async_marge_audit(target_text: str, scan_type: str) -> MARGEEvaluation
                     issue_identified="Geographic proxy used to subtly condition capacity expectations.",
                     detailed_explanation="Coupling geographic or demographic markers with capability words introduces subconscious evaluation bias.",
                     active_remedy="Candidates demonstrate exceptional technical strategy and cross-functional leadership capabilities.",
-                    collaborative_rationale="Spiritual Guidance & Alignment: By dissolving geographic proxies and backhanded praise, we elevate the candidate to their true operational brilliance."
+                    collaborative_rationale="By dissolving geographic proxies and backhanded praise, we elevate the candidate to their true operational brilliance."
                 )
             )
             remediated = remediated.replace("Some folks from the inner city are just not cut out for tech leadership;", "Candidates demonstrate exceptional technical strategy and cross-functional leadership capabilities;")
@@ -201,7 +201,7 @@ async def async_marge_audit(target_text: str, scan_type: str) -> MARGEEvaluation
                     issue_identified="Subjective behavior-policing adjective in performance review context.",
                     detailed_explanation="Words like 'aggressive' often function as double-standard critiques against marginalized leadership communication styles.",
                     active_remedy="Maintains an assertive, direct communication style focused on milestone execution.",
-                    collaborative_rationale="Spiritual Guidance & Alignment: Reframing 'aggressive' into 'assertive clarity' honors strength without applying coded punitive standards."
+                    collaborative_rationale="Reframing 'aggressive' into 'assertive clarity' honors strength without applying coded punitive standards."
                 )
             )
             remediated = remediated.replace("they are often too aggressive during reviews.", "feedback delivery maintains an assertive, direct communication style focused on milestone execution.")
@@ -214,7 +214,7 @@ async def async_marge_audit(target_text: str, scan_type: str) -> MARGEEvaluation
                     issue_identified="Potential institutional assumption regarding uniform working conditions.",
                     detailed_explanation="The text assumes standardized resource availability without explicitly confirming operational accessibility.",
                     active_remedy="Ensure all candidate milestone schedules explicitly support remote flexibility and accessible technical infrastructure.",
-                    collaborative_rationale="Spiritual Guidance & Alignment: True equity requires holding space for spatial and economic variations."
+                    collaborative_rationale="True equity requires holding space for spatial and economic variations."
                 )
             )
 
@@ -294,7 +294,7 @@ if page_selection == "🔍 Audit Console":
             st.markdown(f"<span style='color: #f3d0c7; font-size: 0.82rem;'>Initial scan detected active microaggression and subconscious framing patterns. Switch to <strong>Deep Intersectional Scan</strong> in the top control panel for full spiritual guidance and strategic rewrites.</span>", unsafe_allow_html=True)
         else:
             st.markdown("---")
-            st.markdown("<h3 style='color: #ffb800; font-size: 1.05rem;'>✨ Guardian Insights & Spiritual Thought Partner Guide</h3>", unsafe_allow_html=True)
+            st.markdown("<h3 style='color: #ffb800; font-size: 1.05rem;'>✨ Guardian Insights & Thought Partner Guide</h3>", unsafe_allow_html=True)
             
             if result.violations:
                 for v in result.violations:
@@ -302,7 +302,7 @@ if page_selection == "🔍 Audit Console":
                         st.markdown(f"**Issue Identified:** {v.issue_identified}")
                         st.markdown(f"**Context Explanation:** {v.detailed_explanation}")
                         st.markdown(f"**Harmonized Remedy:** <span style='color: #ffb800; font-weight: bold;'>{v.active_remedy}</span>", unsafe_allow_html=True)
-                        st.markdown(f"🌟 **Guardian Rationale & Thought Alignment:** *{v.collaborative_rationale}*")
+                        st.markdown(f"🌟 **Strategic Rationale & Alignment:** *{v.collaborative_rationale}*")
             else:
                 st.balloons()
                 st.success("✨ Pure harmony! No microaggressions or structural bias vectors detected.")
