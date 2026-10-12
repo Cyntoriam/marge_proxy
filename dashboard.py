@@ -1,4 +1,4 @@
-limport asyncio
+import asyncio
 import random
 from typing import List, Optional
 from pydantic import BaseModel, Field
@@ -84,8 +84,8 @@ css_code = (
     f"div[data-baseweb='input'] > div, div[data-baseweb='select'] > div, textarea, input {{ background-color: {input_bg} !important; color: {input_text} !important; border: 2px solid {panel_border} !important; }}"
     f"textarea::placeholder, input::placeholder {{ color: {placeholder_text} !important; opacity: 1 !important; }}"
     
-    # ULTIMATE SELECTBOX POPOVER OVERRIDES (TARGETING BASEWEB PORTALS)
-    f"div[data-baseweb='popover'], div[data-baseweb='menu'], ul[role='listbox'], div[class*='stSelectbox'] div {{ background-color: {dropdown_bg} !important; }}"
+    # POPOVER & DROPDOWN PORTAL OVERRIDES
+    f"div[data-baseweb='popover'], div[data-baseweb='menu'], ul[role='listbox'] {{ background-color: {dropdown_bg} !important; }}"
     f"div[data-baseweb='popover'] *, div[data-baseweb='menu'] *, ul[role='listbox'] * {{ color: {dropdown_text} !important; background-color: transparent !important; }}"
     f"li[role='option'] {{ background-color: {dropdown_bg} !important; color: {dropdown_text} !important; }}"
     f"li[role='option'] * {{ color: {dropdown_text} !important; }}"
