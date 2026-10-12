@@ -3,6 +3,7 @@ import random
 from typing import List, Optional
 from pydantic import BaseModel, Field
 import streamlit as st
+import streamlit.components.v1 as components
 
 # --- PAGE CONFIGURATION ---
 st.set_page_config(
@@ -16,6 +17,8 @@ if "theme_mode" not in st.session_state:
     st.session_state.theme_mode = "Dark Mode"
 if "api_key" not in st.session_state:
     st.session_state.api_key = ""
+if "voice_input_text" not in st.session_state:
+    st.session_state.voice_input_text = ""
 
 # --- DYNAMIC THEME COLOR PALETTES ---
 if st.session_state.theme_mode == "Dark Mode":
@@ -36,7 +39,7 @@ if st.session_state.theme_mode == "Dark Mode":
     input_bg = "#240c03"
     input_text = "#ffffff"
     placeholder_text = "#f3d0c7"
-    dropdown_text = "#ffffff"
+    dropdown_text = "#ff9f43"
     btn_bg = "linear-gradient(90deg, #e05624 0%, #d94e1f 100%)"
 else:
     bg_style = "linear-gradient(180deg, #fdfbf7 0%, #f7f0e6 60%, #efe3d3 100%)"
@@ -56,11 +59,10 @@ else:
     input_bg = "#ffffff"
     input_text = "#2b1105"
     placeholder_text = "#6e3b22"
-    # Bright glowing orange for Light Mode dropdown options to stand out on dark box
-    dropdown_text = "#ff9f43" 
+    dropdown_text = "#ff9f43"
     btn_bg = "linear-gradient(90deg, #d96b27 0%, #b84f18 100%)"
 
-# --- INJECT CSS WITH BRIGHT ORANGE DROPDOWN TEXT ---
+# --- INJECT COMPLETE HIGH-CONTRAST CSS ---
 css_code = (
     "<style>"
     f".stApp {{ background: {bg_style} !important; color: {text_color} !important; }}"
@@ -81,7 +83,7 @@ css_code = (
     f"div[data-baseweb='input'] > div, div[data-baseweb='select'] > div, textarea, input {{ background-color: {input_bg} !important; color: {input_text} !important; border: 2px solid {panel_border} !important; }}"
     f"textarea::placeholder, input::placeholder {{ color: {placeholder_text} !important; opacity: 1 !important; }}"
     
-    # FORCE BRIGHT ORANGE TEXT ON DROPDOWN MENU OPTIONS
+    # DROPDOWN TEXT OVERRIDE
     f"div[data-baseweb='popover'] *, div[data-baseweb='menu'] *, ul[role='listbox'] *, li[role='option'] * {{ color: {dropdown_text} !important; font-weight: 700 !important; }}"
     f"li[role='option']:hover, li[role='option'][aria-selected='true'] {{ background-color: rgba(255, 159, 67, 0.2) !important; }}"
     
@@ -262,7 +264,7 @@ if page_selection == "🔍 Audit Console":
     elif input_preset == "AI-to-AI Intercept Stream":
         default_val = "The candidate from the inner city is unusually articulate for this role."
     else:
-        default_val = ""
+        default_val = st.session_state.voice_input_text
 
     chosen_placeholder = random.choice(GREETING_PLACEHOLDERS)
     
@@ -272,6 +274,85 @@ if page_selection == "🔍 Audit Console":
         placeholder=chosen_placeholder,
         height=100
     )
+
+    # --- BROWSER-NATIVE SPEECH-TO-TEXT VOICE CONTROL ---
+    voice_component_html = f"""
+    <div style="margin-top: -10px; margin-bottom: 15px; font-family: sans-serif;">
+        <button id="record-btn" style="
+            background: {btn_bg}; 
+            color: #ffffff; 
+            border: none; 
+            padding: 8px 16px; 
+            border-radius: 20px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            display: flex; 
+            align-items: center; 
+            gap: 8px;
+            font-size: 0.85rem;
+        ">
+            <span id="mic-icon">🎙️</span> <span id="btn-text">Tap to Speak Input</span>
+        </button>
+        <span id="status-text" style="margin-left: 10px; font-size: 0.8rem; color: {title_color}; font-style: italic;"></span>
+    </div>
+
+    <script>
+        const btn = document.getElementById('record-btn');
+        const btnText = document.getElementById('btn-text');
+        const micIcon = document.getElementById('mic-icon');
+        const statusText = document.getElementById('status-text');
+
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+        if (!SpeechRecognition) {{
+            btn.style.display = 'none';
+            statusText.innerText = 'Speech-to-text not supported in this browser.';
+        }} else {{
+            const recognition = new SpeechRecognition();
+            recognition.continuous = false;
+            recognition.interimResults = false;
+            recognition.lang = 'en-US';
+
+            let isRecording = false;
+
+            btn.onclick = () => {{
+                if (!isRecording) {{
+                    recognition.start();
+                    isRecording = true;
+                    btnText.innerText = 'Listening... Speak now';
+                    micIcon.innerText = '🔴';
+                    statusText.innerText = 'Recording speech...';
+                }} else {{
+                    recognition.stop();
+                    isRecording = false;
+                    btnText.innerText = 'Tap to Speak Input';
+                    micIcon.innerText = '🎙️';
+                    statusText.innerText = '';
+                }}
+            }};
+
+            recognition.onresult = (event) => {{
+                const transcript = event.results[0][0].transcript;
+                statusText.innerText = 'Captured: "' + transcript + '"';
+                btnText.innerText = 'Tap to Speak Input';
+                micIcon.innerText = '🎙️';
+                isRecording = false;
+
+                // Copy to clipboard for easy pasting into textarea
+                navigator.clipboard.writeText(transcript);
+                alert('Speech recorded! Paste (Ctrl+V / Cmd+V) into the text box: "' + transcript + '"');
+            }};
+
+            recognition.onerror = (event) => {{
+                statusText.innerText = 'Error capturing speech: ' + event.error;
+                btnText.innerText = 'Tap to Speak Input';
+                micIcon.innerText = '🎙️';
+                isRecording = false;
+            }};
+        }}
+    </script>
+    """
+    components.html(voice_component_html, height=55)
 
     if st.button("🏹 Execute M.A.R.G.E. Guardian Audit"):
         if not target_text.strip():
