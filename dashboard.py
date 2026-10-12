@@ -22,13 +22,13 @@ if st.session_state.theme_mode == "Dark Mode":
     bg_style = "linear-gradient(180deg, #240c03 0%, #120501 60%, #0a0301 100%)"
     text_color = "#fcebe6"
     panel_bg = "#170702"
-    panel_border = "rgba(224, 86, 36, 0.4)"
+    panel_border = "rgba(224, 86, 36, 0.6)"
     header_bg = "linear-gradient(135deg, #2e1004 0%, #1a0802 100%)"
     header_border = "#e05624"
     title_color = "#ffb800"
     subtitle_color = "#f3d0c7"
     card_bg = "#1c0802"
-    card_border = "rgba(255, 184, 0, 0.25)"
+    card_border = "rgba(255, 184, 0, 0.4)"
     badge_bg = "rgba(224, 86, 36, 0.25)"
     badge_text = "#ffb800"
     expander_bg = "#2e1004"
@@ -44,13 +44,13 @@ else:
     bg_style = "linear-gradient(180deg, #fdfbf7 0%, #f7f0e6 60%, #efe3d3 100%)"
     text_color = "#2b1105"
     panel_bg = "#f5e9da"
-    panel_border = "#d96b27"
+    panel_border = "#8c2d0d"  # High-contrast crisp terracotta border
     header_bg = "linear-gradient(135deg, #8c2d0d 0%, #5e1c06 100%)"
-    header_border = "#d96b27"
+    header_border = "#8c2d0d"
     title_color = "#8c2d0d"
     subtitle_color = "#4a1908"
     card_bg = "#f7ebe0"
-    card_border = "rgba(217, 107, 39, 0.3)"
+    card_border = "#8c2d0d"
     badge_bg = "#f2d2c2"
     badge_text = "#8c2d0d"
     expander_bg = "#ebd7c5"
@@ -63,32 +63,32 @@ else:
     dropdown_text = "#2b1105"
     btn_bg = "linear-gradient(90deg, #d96b27 0%, #b84f18 100%)"
 
-# --- INJECT COMPLETE HIGH-CONTRAST CSS OVERRIDES ---
+# --- INJECT COMPLETE HIGH-CONTRAST CSS & POPOVER FIXES ---
 css_code = (
     "<style>"
     f".stApp {{ background: {bg_style} !important; color: {text_color} !important; }}"
     ".block-container { max-width: 100% !important; padding-top: 1.2rem !important; padding-left: 1rem !important; padding-right: 1rem !important; }"
-    f".control-panel {{ background-color: {panel_bg}; padding: 1.2rem; border-radius: 12px; border: 1px solid {panel_border}; margin-bottom: 1.5rem; }}"
+    f".control-panel {{ background-color: {panel_bg}; padding: 1.2rem; border-radius: 12px; border: 2px solid {panel_border}; margin-bottom: 1.5rem; }}"
     f".marge-header {{ background: {header_bg}; padding: 1.5rem; border-radius: 12px; color: #ffffff; margin-bottom: 1.2rem; border: 2px solid {header_border}; text-align: center; }}"
     ".marge-title { font-size: 2.2rem; font-weight: 800; margin-bottom: 0.2rem; color: #ffb800; }"
     ".marge-subtitle { font-size: 0.95rem; color: #f3d0c7; font-weight: 400; text-transform: uppercase; }"
     ".marge-essence { font-size: 0.85rem; color: #ffb800; font-style: italic; margin-top: 0.3rem; }"
-    f".guardian-card {{ background-color: {card_bg}; padding: 1rem; border-radius: 8px; border-left: 4px solid {header_border}; margin-bottom: 0.8rem; border: 1px solid {card_border}; color: {text_color}; }}"
+    f".guardian-card {{ background-color: {card_bg}; padding: 1rem; border-radius: 8px; border-left: 4px solid {header_border}; margin-bottom: 0.8rem; border: 2px solid {card_border}; color: {text_color}; }}"
     f".degradation-badge {{ display: inline-block; padding: 0.2rem 0.6rem; border-radius: 12px; font-size: 0.75rem; font-weight: bold; background-color: {badge_bg}; border: 1px solid {header_border}; color: {badge_text}; margin-top: 0.4rem; }}"
     
     # Expander styling
-    f"details summary {{ background-color: {expander_bg} !important; border-radius: 6px !important; border: 1px solid {panel_border} !important; padding: 0.5rem 1rem !important; }}"
+    f"details summary {{ background-color: {expander_bg} !important; border-radius: 6px !important; border: 2px solid {panel_border} !important; padding: 0.5rem 1rem !important; }}"
     f"details summary p, details summary span, details summary div, details summary svg {{ color: {expander_text} !important; fill: {expander_text} !important; font-weight: 800 !important; font-size: 1rem !important; }}"
     
     # Textarea, input, and base select styling
-    f"div[data-baseweb='input'] > div, div[data-baseweb='select'] > div, textarea, input {{ background-color: {input_bg} !important; color: {input_text} !important; border-color: {panel_border} !important; }}"
+    f"div[data-baseweb='input'] > div, div[data-baseweb='select'] > div, textarea, input {{ background-color: {input_bg} !important; color: {input_text} !important; border: 2px solid {panel_border} !important; }}"
     f"textarea::placeholder, input::placeholder {{ color: {placeholder_text} !important; opacity: 1 !important; }}"
     
-    # AGGRESSIVE POPOVER & DROPDOWN OVERRIDES FOR STREAMLIT BASEWEB
+    # GLOBAL STREAMLIT POPOVER & DROPDOWN OVERRIDES (FORCING LIGHT/DARK MODE CONSISTENCY)
     f"div[data-baseweb='popover'], div[data-baseweb='popover'] *, div[data-baseweb='menu'], div[data-baseweb='menu'] *, ul[role='listbox'], ul[role='listbox'] * {{ background-color: {dropdown_bg} !important; color: {dropdown_text} !important; }}"
     f"li[role='option'] {{ background-color: {dropdown_bg} !important; color: {dropdown_text} !important; }}"
     f"li[role='option']:hover, li[role='option'][aria-selected='true'] {{ background-color: {dropdown_hover} !important; color: {dropdown_text} !important; }}"
-    f"li[role='option'] span, li[role='option'] div, div[data-baseweb='option'] span {{ color: {dropdown_text} !important; font-weight: 600 !important; }}"
+    f"li[role='option'] span, li[role='option'] div, div[data-baseweb='option'] span, div[data-baseweb='option'] div {{ color: {dropdown_text} !important; font-weight: 600 !important; }}"
     
     f"label, p, span, div {{ color: {text_color} !important; }}"
     f"div.stButton > button {{ background: {btn_bg} !important; color: #ffffff !important; border-radius: 8px !important; border: none !important; font-weight: bold !important; width: 100% !important; padding: 0.75rem !important; }}"
@@ -247,7 +247,7 @@ async def async_marge_audit(target_text: str, scan_type: str) -> MARGEEvaluation
 # --- MAIN INTERFACE VIEWS ---
 if page_selection == "🔍 Audit Console":
     welcome_html = (
-        f'<div style="background-color: {card_bg}; padding: 0.9rem; border-radius: 10px; border: 1px solid {panel_border}; margin-bottom: 0.9rem;">'
+        f'<div style="background-color: {card_bg}; padding: 0.9rem; border-radius: 10px; border: 2px solid {panel_border}; margin-bottom: 0.9rem;">'
         f'<h3 style="color: {title_color}; margin: 0; font-size: 1.15rem;">✨ Welcome, {display_name}.</h3>'
         f'<p style="color: {subtitle_color}; margin-top: 0.2rem; margin-bottom: 0; font-size: 0.82rem;">'
         'M.A.R.G.E. stands by as your algorithmic angel and equity guardian.'
@@ -290,7 +290,7 @@ if page_selection == "🔍 Audit Console":
             pct = max(0, min(100, result.guardian_index))
             
             scale_html = (
-                f'<div style="background-color: {card_bg}; padding: 0.9rem; border-radius: 10px; border: 1px solid {panel_border}; margin-bottom: 1rem;">'
+                f'<div style="background-color: {card_bg}; padding: 0.9rem; border-radius: 10px; border: 2px solid {panel_border}; margin-bottom: 1rem;">'
                 f'<div style="display: flex; justify-content: space-between; margin-bottom: 0.3rem; font-weight: bold; color: {title_color}; font-size: 0.8rem;">'
                 '<span>Critical Bias (0)</span>'
                 f'<span>Guardian Index: {result.guardian_index} / 100</span>'
