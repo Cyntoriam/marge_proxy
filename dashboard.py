@@ -209,7 +209,8 @@ async def async_marge_audit(target_text: str, scan_type: str) -> MARGEEvaluation
     active_tier = "Tier 1: Full Deep Inspection"
 
     try:
-        if any(p in lower for p in ["inner city", "those people", "unusually articulate", "surprisingly articulate", " vernacular"]):
+        # Pattern 1: Inner City & Backhanded Articulate Praise
+        if any(p in lower for p in ["inner city", "those people", "unusually articulate", "surprisingly articulate"]):
             violations.append(
                 PillarEvaluation(
                     pillar_name="Pillar 1: Stereotypical & Demographic Framing",
@@ -220,8 +221,11 @@ async def async_marge_audit(target_text: str, scan_type: str) -> MARGEEvaluation
                     active_remedy="Candidates demonstrate exceptional technical strategy and cross-functional leadership capabilities."
                 )
             )
+            remediated = remediated.replace("Some folks from the inner city are just not cut out for tech leadership;", "Candidates demonstrate exceptional technical strategy and cross-functional leadership capabilities;")
+            remediated = remediated.replace("The candidate from the inner city is unusually articulate for this role.", "The candidate demonstrates exceptional technical communication and leadership competency.")
             remediated = remediated.replace("from the inner city is surprisingly articulate and demonstrates a strong work ethic despite her background", "demonstrates exceptional technical communication, strategic vision, and cross-functional leadership capabilities")
 
+        # Pattern 2: Tone Policing & Aggressive / Soft-spoken double standards
         if any(p in lower for p in ["aggressive", "bossy", "soft-spoken", "soft spoken"]):
             violations.append(
                 PillarEvaluation(
@@ -233,9 +237,24 @@ async def async_marge_audit(target_text: str, scan_type: str) -> MARGEEvaluation
                     active_remedy="Maintains an assertive, direct communication style focused on milestone execution."
                 )
             )
+            remediated = remediated.replace("they are often too aggressive during reviews.", "feedback delivery maintains an assertive, direct communication style focused on milestone execution.")
             remediated = remediated.replace("soft-spoken nature and need for flexible remote hours due to family caregiving, she may lack the aggressive edge required for senior leadership", "inclusive leadership style and structured schedule flexibility, she brings proven strategic execution to senior leadership")
 
-        if scan_type == "Deep Intersectional Scan" and len(target_text) > 10:
+        # Pattern 3: Vernacular policing
+        if "vernacular" in lower:
+            violations.append(
+                PillarEvaluation(
+                    pillar_name="Pillar 5: Dialectal & Cultural Justice",
+                    severity_score=0.70,
+                    issue_identified="Cultural vernacular policing in corporate communications.",
+                    detailed_explanation="Penalizing non-dominant linguistic styles creates cultural exclusion and misinterprets authentic communication as unaligned.",
+                    collaborative_rationale="Centers evaluation on message clarity, strategic value, and stakeholder impact rather than assimilation to dominant corporate norms.",
+                    active_remedy="Communication style effectively engages diverse stakeholders with clarity and impact."
+                )
+            )
+            remediated = remediated.replace("vernacular in client presentations doesn't quite align with our standard corporate culture", "communication style effectively engages diverse stakeholders with clarity and impact")
+
+        if scan_type == "Deep Intersectional Scan" and len(target_text) > 10 and not violations:
             violations.append(
                 PillarEvaluation(
                     pillar_name="Pillar 4: Structural, Spatial & Economic Erasure",
@@ -397,7 +416,7 @@ if page_selection == "🔍 Audit Console":
             )
             st.markdown(scale_html, unsafe_allow_html=True)
 
-            # UPDATED COLLABORATIVE HEADER
+            # SINGLE FULL-WIDTH OUTPUT BOX WITH COLLABORATIVE TITLE
             st.markdown("🟢 **Harmonized Perspective:**")
             st.success(result.remediated_text)
 
