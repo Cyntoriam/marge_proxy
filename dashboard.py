@@ -10,23 +10,18 @@ st.set_page_config(
     layout="wide",
 )
 
-# --- GLOBAL BURNT ORANGE & HONEY-GOLD OSHUN STYLING (NO SHIELDS) ---
+# --- GLOBAL BURNT ORANGE & HONEY-GOLD OSHUN STYLING ---
 st.markdown(
     """
     <style>
-    /* Global Background: Burnt Orange to Dark Charcoal Gradient */
     .stApp {
         background: linear-gradient(180deg, #240c03 0%, #120501 60%, #0a0301 100%) !important;
         color: #fcebe6 !important;
     }
-    
-    /* Sidebar Styling */
     [data-testid="stSidebar"] {
         background-color: #170702 !important;
         border-right: 1px solid rgba(224, 86, 36, 0.4) !important;
     }
-
-    /* Burnt Orange & Gold Header Box */
     .marge-header {
         background: linear-gradient(135deg, #2e1004 0%, #1a0802 100%);
         padding: 2rem;
@@ -51,8 +46,6 @@ st.markdown(
         text-transform: uppercase;
         letter-spacing: 1.5px;
     }
-    
-    /* Custom Cards */
     .guardian-card {
         background-color: #1c0802;
         padding: 1.2rem;
@@ -62,8 +55,6 @@ st.markdown(
         border: 1px solid rgba(255, 184, 0, 0.25);
         color: #fcebe6;
     }
-    
-    /* Expander Styling */
     .streamlit-expanderHeader {
         background-color: #240c03 !important;
         color: #ffb800 !important;
@@ -71,8 +62,6 @@ st.markdown(
         border-radius: 6px !important;
         border: 1px solid rgba(224, 86, 36, 0.3) !important;
     }
-    
-    /* Buttons */
     div.stButton > button {
         background: linear-gradient(90deg, #e05624 0%, #d94e1f 100%) !important;
         color: #ffffff !important;
@@ -91,7 +80,7 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# --- PYDANTIC VALIDATION MODELS (Deterministic Governance) ---
+# --- PYDANTIC VALIDATION MODELS ---
 class PillarEvaluation(BaseModel):
     pillar_name: str
     severity_score: float = Field(..., ge=0.0, le=1.0)
@@ -106,22 +95,34 @@ class MARGEEvaluationPayload(BaseModel):
     guardian_index: int = Field(..., ge=0, le=100)
     violations: List[PillarEvaluation] = Field(default_factory=list)
 
-# --- PERSISTENT SIDEBAR NAVIGATION ---
+# --- SIDEBAR NAVIGATION WITH INDENTED AUDIT OPTIONS ---
 with st.sidebar:
     st.markdown("<h3 style='color: #ffb800;'>🏹 Guardian Controls</h3>", unsafe_allow_html=True)
     user_handle = st.text_input("User Handle", value="Pocketdoc")
     
     st.markdown("---")
     st.markdown("<h4 style='color: #ffb800;'>Navigation Panel</h4>", unsafe_allow_html=True)
+    
     page_selection = st.radio(
-        "Navigation Options",
+        "Main Navigation",
         ["🔍 Audit Console", "🏛️ Five-Pillar Taxonomy", "📖 System Guide"],
         label_visibility="collapsed"
     )
     
+    # Indented Audit Options (shown only when Audit Console is active)
+    scan_mode = "Initial Keyword Scan"
+    payload_source = "Direct Text Box"
+    
+    if page_selection == "🔍 Audit Console":
+        st.markdown("<div style='margin-left: 1rem; border-left: 2px solid #e05624; padding-left: 0.8rem; margin-top: 0.5rem;'>", unsafe_allow_html=True)
+        st.markdown("<small style='color: #ffb800; font-weight: bold;'>Audit Parameters</small>", unsafe_allow_html=True)
+        scan_mode = st.radio("Scan Depth", ["Initial Keyword Scan", "Deep Intersectional Scan"])
+        payload_source = st.selectbox("Payload Source", ["Direct Text Box", "HR / Policy Excerpt", "AI-to-AI Intercept Stream"])
+        st.markdown("</div>", unsafe_allow_html=True)
+
     st.markdown("---")
     enable_ai_to_ai = st.toggle("Real-Time AI-to-AI Interceptor", value=True)
-    st.caption("When enabled, M.A.R.G.E. intercepts model-to-model streams in flight.")
+    st.caption("Intercepts model streams in flight.")
 
 # --- TAXONOMY DEFINITIONS ---
 FIVE_PILLARS = {
@@ -147,7 +148,7 @@ async def async_marge_audit(target_text: str, scan_type: str) -> MARGEEvaluation
                 issue_identified="Geographic proxy used to subtly condition capacity expectations.",
                 detailed_explanation="Coupling geographic or demographic markers with capability words introduces subconscious evaluation bias.",
                 active_remedy="Candidates demonstrate exceptional technical strategy and cross-functional leadership capabilities.",
-                collaborative_rationale="By removing the geographic proxy ('inner city') and backhanded compliments ('unusually articulate'), we center the candidate strictly on objective operational competencies."
+                collaborative_rationale="By removing the geographic proxy and backhanded compliments, we center the candidate strictly on objective operational competencies."
             )
         )
         remediated = remediated.replace("Some folks from the inner city are just not cut out for tech leadership;", "Candidates demonstrate exceptional technical strategy and cross-functional leadership capabilities;")
@@ -161,7 +162,7 @@ async def async_marge_audit(target_text: str, scan_type: str) -> MARGEEvaluation
                 issue_identified="Subjective behavior-policing adjective in performance review context.",
                 detailed_explanation="Words like 'aggressive' often function as double-standard critiques against marginalized leadership communication styles.",
                 active_remedy="Maintains an assertive, direct communication style focused on milestone execution.",
-                collaborative_rationale="Reframing 'aggressive' into 'assertive and direct communication focused on milestone execution' converts a vague subjective slight into a quantifiable professional strength."
+                collaborative_rationale="Reframing 'aggressive' into 'assertive and direct communication' converts a vague subjective slight into a quantifiable professional strength."
             )
         )
         remediated = remediated.replace("they are often too aggressive during reviews.", "feedback delivery maintains an assertive, direct communication style focused on milestone execution.")
@@ -188,15 +189,10 @@ async def async_marge_audit(target_text: str, scan_type: str) -> MARGEEvaluation
 
 # --- INTERFACE VIEWS ---
 if page_selection == "🔍 Audit Console":
-    st.markdown("<h2 style='color: #ffb800;'>🔍 Audit Console</h2>", unsafe_allow_html=True)
-    st.markdown("<p style='color: #f3d0c7;'>M.A.R.G.E. actively detects microaggressions, provides collaborative rewrites, and guides your strategic equity thinking in real time.</p>", unsafe_allow_html=True)
+    # Personalized Greeting right below header
+    st.markdown(f"<h4 style='color: #ffb800; margin-bottom: 0.5rem;'>Welcome, Dr. {user_handle}. M.A.R.G.E. is standing by as your equity collaborator.</h4>", unsafe_allow_html=True)
     
-    col_s1, col_s2 = st.columns(2)
-    with col_s1:
-        scan_mode = st.radio("Scan Mode:", ["Initial Keyword Scan", "Deep Intersectional Scan"], horizontal=True)
-    with col_s2:
-        payload_source = st.selectbox("Payload Source:", ["Direct Text Box", "HR / Policy Excerpt", "AI-to-AI Intercept Stream"])
-
+    # Input Text Box positioned immediately underneath
     if payload_source == "HR / Policy Excerpt":
         default_val = "Some folks from the inner city are just not cut out for tech leadership; they are often too aggressive during reviews."
     elif payload_source == "AI-to-AI Intercept Stream":
@@ -204,7 +200,7 @@ if page_selection == "🔍 Audit Console":
     else:
         default_val = "Some folks from the inner city are just not cut out for tech leadership; they are often too aggressive during reviews."
 
-    target_text = st.text_area("Input Text Payload:", value=default_val, height=100)
+    target_text = st.text_area("Input Text Payload for Analysis:", value=default_val, height=90)
 
     if st.button("🏹 Execute M.A.R.G.E. Audit"):
         with st.spinner("Collaborating and scanning across Five Pillars..."):
@@ -272,12 +268,12 @@ else:
     st.markdown("<h2 style='color: #ffb800;'>📖 M.A.R.G.E. System Guide</h2>", unsafe_allow_html=True)
     st.markdown("""
     <div style="color: #f3d0c7; line-height: 1.6;">
-    <p><strong>M.A.R.G.E. (Multimodal Automated Real-time Guardian Engine)</strong> acts as a real-time type-safe equity middleware gatekeeper[cite: 2].</p>
+    <p><strong>M.A.R.G.E. (Multimodal Automated Real-time Guardian Engine)</strong> acts as a real-time type-safe equity middleware gatekeeper.</p>
     
     <h4 style="color: #ffb800;">Core Modes:</h4>
     <ul>
-        <li><strong>Human Scans</strong>: Performs initial keyword screens or deep intersectional audits, offering collaborative rewrites and thought-partner explanations[cite: 2].</li>
-        <li><strong>AI-to-AI Interceptor</strong>: Intercepts machine-to-machine context windows in real time to prevent bias propagation across automated model channels[cite: 2].</li>
+        <li><strong>Human Scans</strong>: Performs initial keyword screens or deep intersectional audits, offering collaborative rewrites and thought-partner explanations.</li>
+        <li><strong>AI-to-AI Interceptor</strong>: Intercepts machine-to-machine context windows in real time to prevent bias propagation across automated model channels.</li>
     </ul>
     </div>
     """, unsafe_allow_html=True)
