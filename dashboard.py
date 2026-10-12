@@ -11,13 +11,13 @@ st.set_page_config(
     layout="wide",
 )
 
-# --- INITIALIZE SESSION STATE FOR SETTINGS ---
+# --- INITIALIZE SESSION STATE ---
 if "theme_mode" not in st.session_state:
     st.session_state.theme_mode = "Dark Mode"
 if "api_key" not in st.session_state:
     st.session_state.api_key = ""
 
-# --- DYNAMIC THEME STYLING VARIABLES ---
+# --- DYNAMIC THEME COLOR PALETTES ---
 if st.session_state.theme_mode == "Dark Mode":
     bg_style = "linear-gradient(180deg, #240c03 0%, #120501 60%, #0a0301 100%)"
     text_color = "#fcebe6"
@@ -52,7 +52,7 @@ else:
     card_border = "rgba(217, 107, 39, 0.3)"
     badge_bg = "#f2d2c2"
     badge_text = "#8c2d0d"
-    expander_bg = "#f5e9da"
+    expander_bg = "#ebd7c5"
     expander_text = "#8c2d0d"
     input_bg = "#ffffff"
     input_text = "#2b1105"
@@ -61,7 +61,7 @@ else:
     dropdown_text = "#2b1105"
     btn_bg = "linear-gradient(90deg, #d96b27 0%, #b84f18 100%)"
 
-# --- INJECT DYNAMIC ACCESSIBLE CSS ---
+# --- INJECT CSS WITH HIGH-CONTRAST EXPANDER HEADER STYLING ---
 css_code = (
     "<style>"
     f".stApp {{ background: {bg_style} !important; color: {text_color} !important; }}"
@@ -73,8 +73,8 @@ css_code = (
     ".marge-essence { font-size: 0.85rem; color: #ffb800; font-style: italic; margin-top: 0.3rem; }"
     f".guardian-card {{ background-color: {card_bg}; padding: 1rem; border-radius: 8px; border-left: 4px solid {header_border}; margin-bottom: 0.8rem; border: 1px solid {card_border}; color: {text_color}; }}"
     f".degradation-badge {{ display: inline-block; padding: 0.2rem 0.6rem; border-radius: 12px; font-size: 0.75rem; font-weight: bold; background-color: {badge_bg}; border: 1px solid {header_border}; color: {badge_text}; margin-top: 0.4rem; }}"
-    f".streamlit-expanderHeader {{ background-color: {expander_bg} !important; color: {expander_text} !important; font-weight: 700 !important; border-radius: 6px !important; border: 1px solid {panel_border} !important; }}"
-    f".streamlit-expanderHeader p, .streamlit-expanderHeader span {{ color: {expander_text} !important; font-weight: 700 !important; }}"
+    f"details summary {{ background-color: {expander_bg} !important; border-radius: 6px !important; border: 1px solid {panel_border} !important; padding: 0.5rem 1rem !important; }}"
+    f"details summary p, details summary span, details summary div {{ color: {expander_text} !important; font-weight: 800 !important; font-size: 1rem !important; }}"
     f"div[data-baseweb='input'] > div, div[data-baseweb='select'] > div, textarea, input {{ background-color: {input_bg} !important; color: {input_text} !important; border-color: {panel_border} !important; }}"
     f"textarea::placeholder, input::placeholder {{ color: {placeholder_text} !important; opacity: 1 !important; }}"
     f"ul[role='listbox'], li[role='option'], div[data-baseweb='menu'] {{ background-color: {dropdown_bg} !important; color: {dropdown_text} !important; }}"
@@ -127,7 +127,7 @@ with col_ctrl2:
 with col_ctrl3:
     enable_ai_to_ai = st.toggle("AI-to-AI Interceptor", value=True)
 
-# Settings Expander with Theme Switcher and OpenAI API Key
+# Clean Settings Expander (Theme Switcher and Optional OpenAI API Key)
 with st.expander("⚙️ Settings", expanded=False):
     col_set1, col_set2 = st.columns([1, 1])
     with col_set1:
