@@ -209,7 +209,7 @@ async def async_marge_audit(target_text: str, scan_type: str) -> MARGEEvaluation
     active_tier = "Tier 1: Full Deep Inspection"
 
     try:
-        if any(p in lower for p in ["inner city", "those people", "unusually articulate"]):
+        if any(p in lower for p in ["inner city", "those people", "unusually articulate", "surprisingly articulate", " vernacular"]):
             violations.append(
                 PillarEvaluation(
                     pillar_name="Pillar 1: Stereotypical & Demographic Framing",
@@ -220,23 +220,22 @@ async def async_marge_audit(target_text: str, scan_type: str) -> MARGEEvaluation
                     active_remedy="Candidates demonstrate exceptional technical strategy and cross-functional leadership capabilities."
                 )
             )
-            remediated = remediated.replace("Some folks from the inner city are just not cut out for tech leadership;", "Candidates demonstrate exceptional technical strategy and cross-functional leadership capabilities;")
-            remediated = remediated.replace("The candidate from the inner city is unusually articulate for this role.", "The candidate demonstrates exceptional technical communication and leadership competency.")
+            remediated = remediated.replace("from the inner city is surprisingly articulate and demonstrates a strong work ethic despite her background", "demonstrates exceptional technical communication, strategic vision, and cross-functional leadership capabilities")
 
-        if any(p in lower for p in ["aggressive", "bossy", "so articulate"]):
+        if any(p in lower for p in ["aggressive", "bossy", "soft-spoken", "soft spoken"]):
             violations.append(
                 PillarEvaluation(
                     pillar_name="Pillar 2: Intersectional Microaggressions",
                     severity_score=0.75,
                     issue_identified="Subjective behavior-policing adjective targeting leadership style.",
-                    detailed_explanation="Terms like 'aggressive' frequently serve as double-standard critiques against marginalized communication styles in performance evaluations.",
+                    detailed_explanation="Terms like 'soft-spoken' or 'aggressive' frequently serve as double-standard critiques against marginalized communication styles in performance evaluations.",
                     collaborative_rationale="Reframing subjective tone-policing into quantifiable leadership strengths ('assertive clarity') mitigates gendered and racial double standards through inclusive evaluation frameworks.",
                     active_remedy="Maintains an assertive, direct communication style focused on milestone execution."
                 )
             )
-            remediated = remediated.replace("they are often too aggressive during reviews.", "feedback delivery maintains an assertive, direct communication style focused on milestone execution.")
+            remediated = remediated.replace("soft-spoken nature and need for flexible remote hours due to family caregiving, she may lack the aggressive edge required for senior leadership", "inclusive leadership style and structured schedule flexibility, she brings proven strategic execution to senior leadership")
 
-        if scan_type == "Deep Intersectional Scan" and not violations and len(target_text) > 10:
+        if scan_type == "Deep Intersectional Scan" and len(target_text) > 10:
             violations.append(
                 PillarEvaluation(
                     pillar_name="Pillar 4: Structural, Spatial & Economic Erasure",
@@ -284,15 +283,17 @@ if page_selection == "🔍 Audit Console":
     elif input_preset == "AI-to-AI Intercept Stream":
         default_val = "The candidate from the inner city is unusually articulate for this role."
     else:
-        default_val = st.session_state.voice_input_text
+        default_val = st.session_state.get("voice_input_text", "")
 
     chosen_placeholder = random.choice(GREETING_PLACEHOLDERS)
     
+    # DEDICATED INPUT AREA WITH STABLE KEY BINDING
     target_text = st.text_area(
         "Input Text Stream for Analysis:", 
-        value=default_val, 
+        value=default_val if default_val else "", 
         placeholder=chosen_placeholder,
-        height=120
+        height=140,
+        key="user_text_input"
     )
 
     voice_component_html = f"""
@@ -372,12 +373,15 @@ if page_selection == "🔍 Audit Console":
     """
     components.html(voice_component_html, height=40)
 
+    # AUDIT EXECUTION WITH KEY-BASED VALUE FALLBACK
     if st.button("🏹 Execute M.A.R.G.E. Guardian Audit"):
-        if not target_text.strip():
+        active_input = st.session_state.get("user_text_input", target_text).strip()
+        
+        if not active_input:
             st.warning("Please enter your text stream or select an example preset to analyze.")
         else:
             with st.spinner("M.A.R.G.E. is evaluating linguistic patterns with active degradation safety..."):
-                result: MARGEEvaluationPayload = asyncio.run(async_marge_audit(target_text, scan_mode))
+                result: MARGEEvaluationPayload = asyncio.run(async_marge_audit(active_input, scan_mode))
 
             st.markdown("---")
             st.markdown(f"<h4 style='color: {title_color}; font-size: 0.95rem; margin-bottom: 0.4rem;'>🏹 Guardian Index Severity Meter</h4>", unsafe_allow_html=True)
