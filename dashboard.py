@@ -1,4 +1,5 @@
 import asyncio
+import json
 import random
 from typing import List, Optional
 from pydantic import BaseModel, Field
@@ -200,16 +201,82 @@ FIVE_PILLARS = {
     "Pillar 5: Dialectal & Cultural Justice": "Protects AAVE, regional dialects, and cultural vernacular against false-positive aggression flags.",
 }
 
-# --- AUDIT ENGINE WITH GRADUAL DEGRADATION ---
-async def async_marge_audit(target_text: str, scan_type: str) -> MARGEEvaluationPayload:
-    await asyncio.sleep(0.4)
+# --- AUDIT ENGINE WITH LLM REASONING & HEURISTIC FALLBACK ---
+async def async_marge_audit(target_text: str, scan_type: str, api_key: str = "") -> MARGEEvaluationPayload:
+    await asyncio.sleep(0.3)
+    
+    # 1. DYNAMIC OPENAI API LLM AUDIT (IF KEY IS PROVIDED)
+    if api_key.startswith("sk-"):
+        try:
+            import urllib.request
+            
+            system_prompt = (
+                "You are M.A.R.G.E. (Multimodal Automated Real-time Guardian Engine), an equity guardian and thought partner. "
+                "Evaluate input text for systemic bias across 5 Pillars: "
+                "1. Stereotypical & Demographic Framing, 2. Intersectional Microaggressions, "
+                "3. Disability & Accessibility Justice, 4. Structural/Spatial Erasure, 5. Dialectal & Cultural Justice. "
+                "Your task: Extract genuine operational strengths (pros), real operational/logistical considerations (cons), "
+                "and synthesize a 'Harmonized Perspective' that eliminates tone policing, backhanded praise, and demographic proxies. "
+                "Respond strictly in valid JSON with this structure:\n"
+                "{\n"
+                '  "remediated_text": "Synthesized paragraph weighing actual talents and operational considerations objectively.",\n'
+                '  "guardian_index": 85,\n'
+                '  "violations": [\n'
+                "    {\n"
+                '      "pillar_name": "Pillar 1: Stereotypical & Demographic Framing",\n'
+                '      "severity_score": 0.80,\n'
+                '      "issue_identified": "Short summary",\n'
+                '      "detailed_explanation": "Detailed explanation of subconscious bias.",\n'
+                '      "collaborative_rationale": "Why reframing centers equity while respecting rigor.",\n'
+                '      "active_remedy": "Specific strategic alternative."\n'
+                "    }\n"
+                "  ]\n"
+                "}"
+            )
+            
+            payload = {
+                "model": "gpt-4o-mini",
+                "messages": [
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": f"Scan Mode: {scan_type}\nInput Text: {target_text}"}
+                ],
+                "response_format": {"type": "json_object"},
+                "temperature": 0.2
+            }
+            
+            req = urllib.request.Request(
+                "https://api.openai.com/v1/chat/completions",
+                data=json.dumps(payload).encode("utf-8"),
+                headers={
+                    "Content-Type": "application/json",
+                    "Authorization": f"Bearer {api_key}"
+                }
+            )
+            
+            loop = asyncio.get_event_loop()
+            response = await loop.run_in_executor(None, lambda: urllib.request.urlopen(req))
+            resp_data = json.loads(response.read().decode("utf-8"))
+            parsed = json.loads(resp_data["choices"][0]["message"]["content"])
+            
+            violations = [PillarEvaluation(**v) for v in parsed.get("violations", [])]
+            return MARGEEvaluationPayload(
+                original_text=target_text,
+                remediated_text=parsed.get("remediated_text", target_text),
+                guardian_index=parsed.get("guardian_index", 90),
+                degradation_tier="Tier 1: Full AI Deep Inspection",
+                violations=violations
+            )
+        except Exception:
+            pass  # Fall back smoothly to Heuristic Engine if API fails or fails to parse
+
+    # 2. HEURISTIC RULE ENGINE (FALLBACK WHEN NO KEY IS PRESENT)
     violations = []
     remediated = target_text
     lower = target_text.lower()
-    active_tier = "Tier 1: Full Deep Inspection"
+    active_tier = "Tier 2: Heuristic Pattern Engine"
 
     try:
-        # Pattern 1: Inner City & Backhanded Articulate Praise
+        # Pattern 1: Demographic proxies & Backhanded praise
         if any(p in lower for p in ["inner city", "those people", "unusually articulate", "surprisingly articulate"]):
             violations.append(
                 PillarEvaluation(
@@ -217,7 +284,7 @@ async def async_marge_audit(target_text: str, scan_type: str) -> MARGEEvaluation
                     severity_score=0.85,
                     issue_identified="Geographic/Demographic proxy conditioning evaluation capacity.",
                     detailed_explanation="Coupling geographic or demographic markers with capability words introduces subconscious bias and backhanded praise.",
-                    collaborative_rationale="Eliminates coded geographic proxies and backhanded compliments through active inclusion and equity, centering candidates strictly on objective operational competencies without demographic bias.",
+                    collaborative_rationale="Eliminates coded geographic proxies while explicitly highlighting candidate technical competencies and executive strengths.",
                     active_remedy="Candidates demonstrate exceptional technical strategy and cross-functional leadership capabilities."
                 )
             )
@@ -225,46 +292,34 @@ async def async_marge_audit(target_text: str, scan_type: str) -> MARGEEvaluation
             remediated = remediated.replace("The candidate from the inner city is unusually articulate for this role.", "The candidate demonstrates exceptional technical communication and leadership competency.")
             remediated = remediated.replace("from the inner city is surprisingly articulate and demonstrates a strong work ethic despite her background", "demonstrates exceptional technical communication, strategic vision, and cross-functional leadership capabilities")
 
-        # Pattern 2: Tone Policing & Aggressive / Soft-spoken double standards
+        # Pattern 2: Tone policing vs. Leadership style
         if any(p in lower for p in ["aggressive", "bossy", "soft-spoken", "soft spoken"]):
             violations.append(
                 PillarEvaluation(
                     pillar_name="Pillar 2: Intersectional Microaggressions",
                     severity_score=0.75,
                     issue_identified="Subjective behavior-policing adjective targeting leadership style.",
-                    detailed_explanation="Terms like 'soft-spoken' or 'aggressive' frequently serve as double-standard critiques against marginalized communication styles in performance evaluations.",
-                    collaborative_rationale="Reframing subjective tone-policing into quantifiable leadership strengths ('assertive clarity') mitigates gendered and racial double standards through inclusive evaluation frameworks.",
+                    detailed_explanation="Terms like 'soft-spoken' or 'aggressive' frequently serve as double-standard critiques against marginalized communication styles.",
+                    collaborative_rationale="Reframes tone policing into an objective assessment of leadership style, schedule considerations, and strategic output.",
                     active_remedy="Maintains an assertive, direct communication style focused on milestone execution."
                 )
             )
             remediated = remediated.replace("they are often too aggressive during reviews.", "feedback delivery maintains an assertive, direct communication style focused on milestone execution.")
             remediated = remediated.replace("soft-spoken nature and need for flexible remote hours due to family caregiving, she may lack the aggressive edge required for senior leadership", "inclusive leadership style and structured schedule flexibility, she brings proven strategic execution to senior leadership")
 
-        # Pattern 3: Vernacular policing
+        # Pattern 3: Dialectal & Cultural Vernacular
         if "vernacular" in lower:
             violations.append(
                 PillarEvaluation(
                     pillar_name="Pillar 5: Dialectal & Cultural Justice",
                     severity_score=0.70,
                     issue_identified="Cultural vernacular policing in corporate communications.",
-                    detailed_explanation="Penalizing non-dominant linguistic styles creates cultural exclusion and misinterprets authentic communication as unaligned.",
+                    detailed_explanation="Penalizing authentic linguistic styles creates cultural exclusion and misinterprets stakeholder engagement.",
                     collaborative_rationale="Centers evaluation on message clarity, strategic value, and stakeholder impact rather than assimilation to dominant corporate norms.",
                     active_remedy="Communication style effectively engages diverse stakeholders with clarity and impact."
                 )
             )
             remediated = remediated.replace("vernacular in client presentations doesn't quite align with our standard corporate culture", "communication style effectively engages diverse stakeholders with clarity and impact")
-
-        if scan_type == "Deep Intersectional Scan" and len(target_text) > 10 and not violations:
-            violations.append(
-                PillarEvaluation(
-                    pillar_name="Pillar 4: Structural, Spatial & Economic Erasure",
-                    severity_score=0.40,
-                    issue_identified="Institutional assumption of uniform working conditions.",
-                    detailed_explanation="Assumes standardized resource availability without explicitly confirming structural accessibility or flexible support.",
-                    collaborative_rationale="Proactively mitigates socio-economic barriers by embedding structural accessibility, inclusion, and equitable working arrangements.",
-                    active_remedy="Ensure all candidate milestone schedules explicitly support remote flexibility and accessible technical infrastructure."
-                )
-            )
 
     except Exception:
         active_tier = "Tier 3: Safe Passthrough Fallback"
@@ -398,7 +453,9 @@ if page_selection == "🔍 Audit Console":
             st.warning("Please enter your text stream or select an example preset to analyze.")
         else:
             with st.spinner("M.A.R.G.E. is evaluating linguistic patterns with active degradation safety..."):
-                result: MARGEEvaluationPayload = asyncio.run(async_marge_audit(active_input, scan_mode))
+                result: MARGEEvaluationPayload = asyncio.run(
+                    async_marge_audit(active_input, scan_mode, st.session_state.api_key)
+                )
 
             st.markdown("---")
             st.markdown(f"<h4 style='color: {title_color}; font-size: 0.95rem; margin-bottom: 0.4rem;'>🏹 Guardian Index Severity Meter</h4>", unsafe_allow_html=True)
