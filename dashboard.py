@@ -31,7 +31,7 @@ if st.session_state.theme_mode == "Dark Mode":
     panel_bg = "#170702"
     panel_border = "rgba(255, 184, 0, 0.6)"
     hr_border = "rgba(255, 184, 0, 0.5)"
-    header_bg = "linear-gradient(135deg, #2e1004 0%, #1a0802 100%)"  # Burnt Orange
+    header_bg = "linear-gradient(135deg, #2e1004 0%, #1a0802 100%)"
     header_border = HONEY_GOLD
     title_color = HONEY_GOLD
     title_stroke = "none"
@@ -49,17 +49,17 @@ if st.session_state.theme_mode == "Dark Mode":
     btn_bg = "linear-gradient(90deg, #e05624 0%, #d94e1f 100%)"
     sidebar_bg = "#170702"
 else:
-    # LIGHT MODE: Honey Gold Dividers, Outlines & Subheader
+    # LIGHT MODE: Honey Gold Outlines, Subheader Border & White Input Boxes
     bg_style = "linear-gradient(180deg, #fdfbf7 0%, #f7f0e6 60%, #efe3d3 100%)"
     text_color = "#2b1105"
     panel_bg = "#f5e9da"
     panel_border = HONEY_GOLD
-    hr_border = HONEY_GOLD  # Explicit Honey Gold for all horizontal divider lines
-    header_bg = "linear-gradient(135deg, #8c2d0d 0%, #5e1c06 100%)"  # Retained Burnt Orange
-    header_border = HONEY_GOLD  # Honey Gold Outline for Header Box
+    hr_border = HONEY_GOLD
+    header_bg = "linear-gradient(135deg, #8c2d0d 0%, #5e1c06 100%)"
+    header_border = HONEY_GOLD
     title_color = HONEY_GOLD
-    title_stroke = f"1px {HONEY_GOLD}"  # Honey Gold Outline on Header Letters
-    subtitle_color = HONEY_GOLD  # Subheader in Honey Gold
+    title_stroke = f"1px {HONEY_GOLD}"
+    subtitle_color = HONEY_GOLD
     card_bg = "#f7ebe0"
     card_border = HONEY_GOLD
     badge_bg = "#f2d2c2"
@@ -73,7 +73,7 @@ else:
     btn_bg = "linear-gradient(90deg, #d96b27 0%, #b84f18 100%)"
     sidebar_bg = "#f5e9da"
 
-# --- INJECT COMPLETE HIGH-CONTRAST CSS WITH DIVIDER FIXES ---
+# --- INJECT COMPLETE HIGH-CONTRAST CSS ---
 css_code = (
     "<style>"
     f".stApp {{ background: {bg_style} !important; color: {text_color} !important; }}"
@@ -81,24 +81,29 @@ css_code = (
     ".block-container { max-width: 100% !important; padding-top: 1.2rem !important; padding-left: 1rem !important; padding-right: 1rem !important; }"
     f".control-panel {{ background-color: {panel_bg}; padding: 1.2rem; border-radius: 12px; border: 2px solid {panel_border}; margin-bottom: 1.5rem; }}"
     f".marge-header {{ background: {header_bg}; padding: 1.5rem; border-radius: 12px; color: #ffffff; margin-bottom: 1.2rem; border: 2px solid {header_border}; text-align: center; }}"
-    f".marge-title {{ font-size: 2.2rem; font-weight: 800; margin-bottom: 0.2rem; color: {title_color}; -webkit-text-stroke: {title_stroke}; }}"
-    f".marge-subtitle {{ font-size: 0.95rem; color: {subtitle_color}; font-weight: 600; text-transform: uppercase; }}"
-    f".marge-essence {{ font-size: 0.85rem; color: {HONEY_GOLD}; font-style: italic; margin-top: 0.3rem; }}"
+    f".marge-title {{ font-size: 2.2rem; font-weight: 800; margin-bottom: 0.4rem; color: {title_color}; -webkit-text-stroke: {title_stroke}; }}"
+    
+    # Subheader Gold Bordered Container
+    f".marge-subtitle-box {{ display: inline-block; padding: 0.5rem 1.2rem; border: 2px solid {HONEY_GOLD}; border-radius: 8px; background: rgba(0,0,0,0.25); margin-top: 0.3rem; }}"
+    f".marge-subtitle {{ font-size: 0.92rem; color: {subtitle_color}; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }}"
+    f".marge-essence {{ font-size: 0.85rem; color: {HONEY_GOLD}; font-style: italic; margin-top: 0.2rem; }}"
+    
     f".guardian-card {{ background-color: {card_bg}; padding: 1rem; border-radius: 8px; border-left: 4px solid {header_border}; margin-bottom: 0.8rem; border: 2px solid {card_border}; color: {text_color}; }}"
     f".degradation-badge {{ display: inline-block; padding: 0.2rem 0.6rem; border-radius: 12px; font-size: 0.75rem; font-weight: bold; background-color: {badge_bg}; border: 1px solid {header_border}; color: {badge_text}; margin-top: 0.4rem; }}"
     
-    # GLOBAL HORIZONTAL DIVIDER FIX (hr tags across Sidebar and Main View)
+    # Global Horizontal Dividers
     f"hr {{ border: none !important; border-top: 2px solid {hr_border} !important; margin: 1rem 0 !important; opacity: 1 !important; }}"
     
     # Expander styling
     f"details summary {{ background-color: {expander_bg} !important; border-radius: 6px !important; border: 2px solid {panel_border} !important; padding: 0.5rem 1rem !important; }}"
     f"details summary p, details summary span, details summary div, details summary svg {{ color: {expander_text} !important; fill: {expander_text} !important; font-weight: 800 !important; font-size: 1rem !important; }}"
     
-    # Textarea, input, and base select styling with Honey Gold outlines in Light Mode
-    f"div[data-baseweb='input'] > div, div[data-baseweb='select'] > div, textarea, input {{ background-color: {input_bg} !important; color: {input_text} !important; border: 2px solid {panel_border} !important; }}"
+    # FORCED WHITE INPUT & DROPDOWN CONTAINERS WHEN PUSHED/ACTIVE
+    f"div[data-baseweb='select'], div[data-baseweb='select'] > div, div[data-baseweb='input'], div[data-baseweb='input'] > div, textarea, input {{ background-color: {input_bg} !important; color: {input_text} !important; border: 2px solid {panel_border} !important; }}"
+    f"div[data-baseweb='select']:focus, div[data-baseweb='select']:active, div[data-baseweb='select'] > div:focus, div[data-baseweb='select'] > div:active {{ background-color: {input_bg} !important; color: {input_text} !important; }}"
     f"textarea::placeholder, input::placeholder {{ color: {placeholder_text} !important; opacity: 1 !important; }}"
     
-    # DROPDOWN TEXT OVERRIDE
+    # DROPDOWN TEXT & POPOVER OVERRIDE
     f"div[data-baseweb='popover'] *, div[data-baseweb='menu'] *, ul[role='listbox'] *, li[role='option'] * {{ color: {dropdown_text} !important; font-weight: 700 !important; }}"
     f"li[role='option']:hover, li[role='option'][aria-selected='true'] {{ background-color: rgba(255, 184, 0, 0.25) !important; }}"
     
@@ -110,8 +115,10 @@ css_code = (
 header_html = (
     '<div class="marge-header">'
     '<div class="marge-title">🏹 M.A.R.G.E.</div>'
+    '<div class="marge-subtitle-box">'
     '<div class="marge-subtitle">Multimodal Automated Real-time Guardian Engine</div>'
     '<div class="marge-essence">✨ The Equity Guardian — Thought Guidance & Algorithmic Protection ✨</div>'
+    '</div>'
     '</div>'
 )
 
