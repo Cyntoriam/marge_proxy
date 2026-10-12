@@ -3,7 +3,7 @@ from typing import List, Optional
 from pydantic import BaseModel, Field, field_validator
 import streamlit as st
 
-# --- PAGE CONFIGURATION (Auto-collapsed sidebar for mobile optimization) ---
+# --- PAGE CONFIGURATION ---
 st.set_page_config(
     page_title="M.A.R.G.E. | Multimodal Automated Real-time Guardian Engine",
     page_icon="🏹",
@@ -15,21 +15,15 @@ st.set_page_config(
 st.markdown(
     """
     <style>
-    /* Global Gradient Background */
     .stApp {
         background: linear-gradient(180deg, #240c03 0%, #120501 60%, #0a0301 100%) !important;
         color: #fcebe6 !important;
     }
-    
-    /* Sidebar Styling & Mobile Bounds */
     [data-testid="stSidebar"] {
         background-color: #170702 !important;
         border-right: 1px solid rgba(224, 86, 36, 0.4) !important;
     }
-
-    /* Mobile-Specific Responsive Styling */
     @media (max-width: 768px) {
-        /* Make sidebar sleeker and less overwhelming on phone screens */
         [data-testid="stSidebar"] {
             width: 85vw !important;
         }
@@ -43,21 +37,17 @@ st.markdown(
             padding: 1rem !important;
             margin-bottom: 0.8rem !important;
         }
-        /* Mobile touch button width */
         div.stButton > button {
             width: 100% !important;
             padding: 0.75rem !important;
             font-size: 1rem !important;
         }
-        /* Reduce block container margins for mobile screens */
         .block-container {
             padding-top: 2rem !important;
             padding-left: 0.8rem !important;
             padding-right: 0.8rem !important;
         }
     }
-
-    /* Header Box */
     .marge-header {
         background: linear-gradient(135deg, #2e1004 0%, #1a0802 100%);
         padding: 1.5rem;
@@ -88,8 +78,6 @@ st.markdown(
         font-style: italic;
         margin-top: 0.3rem;
     }
-
-    /* Cards & Container Elements */
     .guardian-card {
         background-color: #1c0802;
         padding: 1rem;
@@ -99,8 +87,6 @@ st.markdown(
         border: 1px solid rgba(255, 184, 0, 0.25);
         color: #fcebe6;
     }
-
-    /* Degradation Badge */
     .degradation-badge {
         display: inline-block;
         padding: 0.2rem 0.6rem;
@@ -112,8 +98,6 @@ st.markdown(
         color: #ffb800;
         margin-top: 0.4rem;
     }
-
-    /* Expander Header Styling */
     .streamlit-expanderHeader {
         background-color: #240c03 !important;
         color: #ffb800 !important;
@@ -121,8 +105,6 @@ st.markdown(
         border-radius: 6px !important;
         border: 1px solid rgba(224, 86, 36, 0.3) !important;
     }
-
-    /* Primary Action Buttons */
     div.stButton > button {
         background: linear-gradient(90deg, #e05624 0%, #d94e1f 100%) !important;
         color: #ffffff !important;
@@ -158,7 +140,7 @@ class MARGEEvaluationPayload(BaseModel):
     degradation_tier: str = Field(default="Tier 1: Full Deep Inspection")
     violations: List[PillarEvaluation] = Field(default_factory=list)
 
-# --- SIDEBAR NAVIGATION WITH DYNAMIC HANDLE ---
+# --- SIDEBAR NAVIGATION ---
 with st.sidebar:
     st.markdown("<h3 style='color: #ffb800; margin-bottom: 0;'>🏹 Guardian Portal</h3>", unsafe_allow_html=True)
     
@@ -291,7 +273,6 @@ if page_selection == "🔍 Audit Console":
 
         st.markdown("---")
         
-        # Guardian Index Sliding Scale
         st.markdown("<h4 style='color: #ffb800; font-size: 0.95rem; margin-bottom: 0.4rem;'>🏹 Guardian Index Severity Meter</h4>", unsafe_allow_html=True)
         pct = max(0, min(100, result.guardian_index))
         
@@ -333,37 +314,4 @@ if page_selection == "🔍 Audit Console":
                     with st.expander(f"🏹 Flagged: {v.pillar_name} (Severity: {v.severity_score})", expanded=True):
                         st.markdown(f"**Issue Identified:** {v.issue_identified}")
                         st.markdown(f"**Context Explanation:** {v.detailed_explanation}")
-                        st.markdown(f"**Harmonized Remedy:** <span style='color: #ffb800; font-weight: bold;'>{v.active_remedy}</span>", unsafe_allow_html=True)
-                        st.markdown(f"🌟 **Guardian Rationale & Thought Alignment:** *{v.collaborative_rationale}*")
-            else:
-                st.balloons()
-                st.success("✨ Pure harmony! No microaggressions or structural bias vectors detected.")
-
-elif page_selection == "🏛️ Five-Pillar Taxonomy":
-    st.markdown("<h2 style='color: #ffb800; font-size: 1.3rem;'>🏛️ The Five-Pillar Equity Framework</h2>", unsafe_allow_html=True)
-    st.markdown("---")
-    for pillar, desc in FIVE_PILLARS.items():
-        st.markdown(
-            f"""
-            <div class="guardian-card">
-                <strong style="color: #ffb800;">🏹 {pillar}</strong><br>
-                <span style="color: #f3d0c7; font-size: 0.82rem;">{desc}</span>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-
-else:
-    st.markdown("<h2 style='color: #ffb800; font-size: 1.3rem;'>📖 M.A.R.G.E. System Guide</h2>", unsafe_allow_html=True)
-    st.markdown("""
-    <div style="color: #f3d0c7; line-height: 1.5; font-size: 0.85rem;">
-    <p><strong>M.A.R.G.E. (Multimodal Automated Real-time Guardian Engine)</strong> acts as an algorithmic angel and spiritual equity guardian, serving as a type-safe middleware gatekeeper with gradual degradation safety.</p>
-    
-    <h4 style="color: #ffb800;">System Degradation & Resilience Tiers:</h4>
-    <ul>
-        <li><strong>Tier 1 (Full Inspection)</strong>: Complete multi-pillar async valuation and spiritual thought-partner rationale.</li>
-        <li><strong>Tier 2 (Heuristic Screen)</strong>: Local pattern matching when model resources are constrained.</li>
-        <li><strong>Tier 3 (Safe Passthrough)</strong>: Guaranteed uptime passthrough ensuring zero service interruption.</li>
-    </ul>
-    </div>
-    """, unsafe_allow_html=True)
+                        st.markdown(f"**Harmonized Remedy:** <span style='color: #ffb800; font-weight: bold;'>{v.active
