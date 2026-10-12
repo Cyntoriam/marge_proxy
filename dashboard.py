@@ -314,4 +314,37 @@ if page_selection == "🔍 Audit Console":
                     with st.expander(f"🏹 Flagged: {v.pillar_name} (Severity: {v.severity_score})", expanded=True):
                         st.markdown(f"**Issue Identified:** {v.issue_identified}")
                         st.markdown(f"**Context Explanation:** {v.detailed_explanation}")
-                        st.markdown(f"**Harmonized Remedy:** <span style='color: #ffb800; font-weight: bold;'>{v.active
+                        st.markdown(f"**Harmonized Remedy:** <span style='color: #ffb800; font-weight: bold;'>{v.active_remedy}</span>", unsafe_allow_html=True)
+                        st.markdown(f"🌟 **Guardian Rationale & Thought Alignment:** *{v.collaborative_rationale}*")
+            else:
+                st.balloons()
+                st.success("✨ Pure harmony! No microaggressions or structural bias vectors detected.")
+
+elif page_selection == "🏛️ Five-Pillar Taxonomy":
+    st.markdown("<h2 style='color: #ffb800; font-size: 1.3rem;'>🏛️ The Five-Pillar Equity Framework</h2>", unsafe_allow_html=True)
+    st.markdown("---")
+    for pillar, desc in FIVE_PILLARS.items():
+        st.markdown(
+            f"""
+            <div class="guardian-card">
+                <strong style="color: #ffb800;">🏹 {pillar}</strong><br>
+                <span style="color: #f3d0c7; font-size: 0.82rem;">{desc}</span>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+else:
+    st.markdown("<h2 style='color: #ffb800; font-size: 1.3rem;'>📖 M.A.R.G.E. System Guide</h2>", unsafe_allow_html=True)
+    st.markdown("""
+    <div style="color: #f3d0c7; line-height: 1.5; font-size: 0.85rem;">
+    <p><strong>M.A.R.G.E. (Multimodal Automated Real-time Guardian Engine)</strong> acts as an algorithmic angel and spiritual equity guardian, serving as a type-safe middleware gatekeeper with gradual degradation safety.</p>
+    
+    <h4 style="color: #ffb800;">System Degradation & Resilience Tiers:</h4>
+    <ul>
+        <li><strong>Tier 1 (Full Inspection)</strong>: Complete multi-pillar async valuation and spiritual thought-partner rationale.</li>
+        <li><strong>Tier 2 (Heuristic Screen)</strong>: Local pattern matching when model resources are constrained.</li>
+        <li><strong>Tier 3 (Safe Passthrough)</strong>: Guaranteed uptime passthrough ensuring zero service interruption.</li>
+    </ul>
+    </div>
+    """, unsafe_allow_html=True)
