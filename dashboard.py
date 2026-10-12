@@ -14,6 +14,8 @@ st.set_page_config(
 # --- INITIALIZE SESSION STATE FOR SETTINGS ---
 if "theme_mode" not in st.session_state:
     st.session_state.theme_mode = "Dark Mode"
+if "api_key" not in st.session_state:
+    st.session_state.api_key = ""
 
 # --- DYNAMIC THEME STYLING VARIABLES ---
 if st.session_state.theme_mode == "Dark Mode":
@@ -29,9 +31,13 @@ if st.session_state.theme_mode == "Dark Mode":
     card_border = "rgba(255, 184, 0, 0.25)"
     badge_bg = "rgba(224, 86, 36, 0.25)"
     badge_text = "#ffb800"
-    expander_bg = "#240c03"
-    input_bg = "#2e1004"
+    expander_bg = "#2e1004"
+    expander_text = "#ffb800"
+    input_bg = "#240c03"
     input_text = "#ffffff"
+    placeholder_text = "#f3d0c7"
+    dropdown_bg = "#170702"
+    dropdown_text = "#ffffff"
     btn_bg = "linear-gradient(90deg, #e05624 0%, #d94e1f 100%)"
 else:
     bg_style = "linear-gradient(180deg, #fdfbf7 0%, #f7f0e6 60%, #efe3d3 100%)"
@@ -40,15 +46,19 @@ else:
     panel_border = "#d96b27"
     header_bg = "linear-gradient(135deg, #8c2d0d 0%, #5e1c06 100%)"
     header_border = "#d96b27"
-    title_color = "#8c2d0d"  # Deep readable terracotta for Light Mode
+    title_color = "#8c2d0d"
     subtitle_color = "#4a1908"
     card_bg = "#f7ebe0"
     card_border = "rgba(217, 107, 39, 0.3)"
     badge_bg = "#f2d2c2"
     badge_text = "#8c2d0d"
-    expander_bg = "#ebd7c5"
+    expander_bg = "#f5e9da"
+    expander_text = "#8c2d0d"
     input_bg = "#ffffff"
     input_text = "#2b1105"
+    placeholder_text = "#6e3b22"
+    dropdown_bg = "#ffffff"
+    dropdown_text = "#2b1105"
     btn_bg = "linear-gradient(90deg, #d96b27 0%, #b84f18 100%)"
 
 # --- INJECT DYNAMIC ACCESSIBLE CSS ---
@@ -58,13 +68,17 @@ css_code = (
     ".block-container { max-width: 100% !important; padding-top: 1.2rem !important; padding-left: 1rem !important; padding-right: 1rem !important; }"
     f".control-panel {{ background-color: {panel_bg}; padding: 1.2rem; border-radius: 12px; border: 1px solid {panel_border}; margin-bottom: 1.5rem; }}"
     f".marge-header {{ background: {header_bg}; padding: 1.5rem; border-radius: 12px; color: #ffffff; margin-bottom: 1.2rem; border: 2px solid {header_border}; text-align: center; }}"
-    f".marge-title {{ font-size: 2.2rem; font-weight: 800; margin-bottom: 0.2rem; color: #ffb800; }}"
-    f".marge-subtitle {{ font-size: 0.95rem; color: #f3d0c7; font-weight: 400; text-transform: uppercase; }}"
-    f".marge-essence {{ font-size: 0.85rem; color: #ffb800; font-style: italic; margin-top: 0.3rem; }}"
+    ".marge-title { font-size: 2.2rem; font-weight: 800; margin-bottom: 0.2rem; color: #ffb800; }"
+    ".marge-subtitle { font-size: 0.95rem; color: #f3d0c7; font-weight: 400; text-transform: uppercase; }"
+    ".marge-essence { font-size: 0.85rem; color: #ffb800; font-style: italic; margin-top: 0.3rem; }"
     f".guardian-card {{ background-color: {card_bg}; padding: 1rem; border-radius: 8px; border-left: 4px solid {header_border}; margin-bottom: 0.8rem; border: 1px solid {card_border}; color: {text_color}; }}"
     f".degradation-badge {{ display: inline-block; padding: 0.2rem 0.6rem; border-radius: 12px; font-size: 0.75rem; font-weight: bold; background-color: {badge_bg}; border: 1px solid {header_border}; color: {badge_text}; margin-top: 0.4rem; }}"
-    f".streamlit-expanderHeader {{ background-color: {expander_bg} !important; color: {title_color} !important; font-weight: 700 !important; border-radius: 6px !important; border: 1px solid {panel_border} !important; }}"
-    f"div[data-baseweb='input'] > div, div[data-baseweb='select'] > div {{ background-color: {input_bg} !important; color: {input_text} !important; border-color: {panel_border} !important; }}"
+    f".streamlit-expanderHeader {{ background-color: {expander_bg} !important; color: {expander_text} !important; font-weight: 700 !important; border-radius: 6px !important; border: 1px solid {panel_border} !important; }}"
+    f".streamlit-expanderHeader p, .streamlit-expanderHeader span {{ color: {expander_text} !important; font-weight: 700 !important; }}"
+    f"div[data-baseweb='input'] > div, div[data-baseweb='select'] > div, textarea, input {{ background-color: {input_bg} !important; color: {input_text} !important; border-color: {panel_border} !important; }}"
+    f"textarea::placeholder, input::placeholder {{ color: {placeholder_text} !important; opacity: 1 !important; }}"
+    f"ul[role='listbox'], li[role='option'], div[data-baseweb='menu'] {{ background-color: {dropdown_bg} !important; color: {dropdown_text} !important; }}"
+    f"li[role='option'] span, ul[role='listbox'] span {{ color: {dropdown_text} !important; }}"
     f"label, p, span, div {{ color: {text_color} !important; }}"
     f"div.stButton > button {{ background: {btn_bg} !important; color: #ffffff !important; border-radius: 8px !important; border: none !important; font-weight: bold !important; width: 100% !important; padding: 0.75rem !important; }}"
     "</style>"
@@ -96,7 +110,7 @@ class MARGEEvaluationPayload(BaseModel):
     degradation_tier: str = Field(default="Tier 1: Full Deep Inspection")
     violations: List[PillarEvaluation] = Field(default_factory=list)
 
-# --- IN-PAGE CONTROL PANEL WITH CLEAN SETTINGS EXPANDER ---
+# --- IN-PAGE CONTROL PANEL WITH SETTINGS & API KEY ---
 st.markdown("<div class='control-panel'>", unsafe_allow_html=True)
 st.markdown(f"<h4 style='color: {title_color}; margin-top: 0;'>🏹 Guardian Portal & Controls</h4>", unsafe_allow_html=True)
 
@@ -113,19 +127,29 @@ with col_ctrl2:
 with col_ctrl3:
     enable_ai_to_ai = st.toggle("AI-to-AI Interceptor", value=True)
 
-# Clean Settings Expander (Theme Selection Only)
+# Settings Expander with Theme Switcher and OpenAI API Key
 with st.expander("⚙️ Settings", expanded=False):
-    selected_theme = st.radio(
-        "Theme Style",
-        ["Dark Mode", "Light Mode"],
-        index=0 if st.session_state.theme_mode == "Dark Mode" else 1,
-        horizontal=True
-    )
-    if selected_theme != st.session_state.theme_mode:
-        st.session_state.theme_mode = selected_theme
-        st.rerun()
+    col_set1, col_set2 = st.columns([1, 1])
+    with col_set1:
+        selected_theme = st.radio(
+            "Theme Style",
+            ["Dark Mode", "Light Mode"],
+            index=0 if st.session_state.theme_mode == "Dark Mode" else 1,
+            horizontal=True
+        )
+        if selected_theme != st.session_state.theme_mode:
+            st.session_state.theme_mode = selected_theme
+            st.rerun()
+    with col_set2:
+        api_key_input = st.text_input(
+            "OpenAI API Key (Optional)", 
+            value=st.session_state.api_key, 
+            type="password",
+            placeholder="sk-..."
+        )
+        if api_key_input != st.session_state.api_key:
+            st.session_state.api_key = api_key_input
 
-# Audit parameters explicitly defined
 scan_mode = "Initial Scan"
 input_preset = "Custom Text Entry"
 
