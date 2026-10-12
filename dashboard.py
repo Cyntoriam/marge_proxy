@@ -36,8 +36,6 @@ if st.session_state.theme_mode == "Dark Mode":
     input_bg = "#240c03"
     input_text = "#ffffff"
     placeholder_text = "#f3d0c7"
-    dropdown_bg = "#1f0902"
-    dropdown_hover = "#3d1304"
     dropdown_text = "#ffffff"
     btn_bg = "linear-gradient(90deg, #e05624 0%, #d94e1f 100%)"
 else:
@@ -58,12 +56,11 @@ else:
     input_bg = "#ffffff"
     input_text = "#2b1105"
     placeholder_text = "#6e3b22"
-    dropdown_bg = "#ffffff"
-    dropdown_hover = "#f0e1d1"
-    dropdown_text = "#2b1105"
+    # Bright glowing orange for Light Mode dropdown options to stand out on dark box
+    dropdown_text = "#ff9f43" 
     btn_bg = "linear-gradient(90deg, #d96b27 0%, #b84f18 100%)"
 
-# --- INJECT COMPLETE HIGH-CONTRAST CSS & PORTAL OVERRIDES ---
+# --- INJECT CSS WITH BRIGHT ORANGE DROPDOWN TEXT ---
 css_code = (
     "<style>"
     f".stApp {{ background: {bg_style} !important; color: {text_color} !important; }}"
@@ -84,12 +81,9 @@ css_code = (
     f"div[data-baseweb='input'] > div, div[data-baseweb='select'] > div, textarea, input {{ background-color: {input_bg} !important; color: {input_text} !important; border: 2px solid {panel_border} !important; }}"
     f"textarea::placeholder, input::placeholder {{ color: {placeholder_text} !important; opacity: 1 !important; }}"
     
-    # POPOVER & DROPDOWN PORTAL OVERRIDES
-    f"div[data-baseweb='popover'], div[data-baseweb='menu'], ul[role='listbox'] {{ background-color: {dropdown_bg} !important; }}"
-    f"div[data-baseweb='popover'] *, div[data-baseweb='menu'] *, ul[role='listbox'] * {{ color: {dropdown_text} !important; background-color: transparent !important; }}"
-    f"li[role='option'] {{ background-color: {dropdown_bg} !important; color: {dropdown_text} !important; }}"
-    f"li[role='option'] * {{ color: {dropdown_text} !important; }}"
-    f"li[role='option']:hover, li[role='option'][aria-selected='true'] {{ background-color: {dropdown_hover} !important; color: {dropdown_text} !important; }}"
+    # FORCE BRIGHT ORANGE TEXT ON DROPDOWN MENU OPTIONS
+    f"div[data-baseweb='popover'] *, div[data-baseweb='menu'] *, ul[role='listbox'] *, li[role='option'] * {{ color: {dropdown_text} !important; font-weight: 700 !important; }}"
+    f"li[role='option']:hover, li[role='option'][aria-selected='true'] {{ background-color: rgba(255, 159, 67, 0.2) !important; }}"
     
     f"label, p, span, div {{ color: {text_color} !important; }}"
     f"div.stButton > button {{ background: {btn_bg} !important; color: #ffffff !important; border-radius: 8px !important; border: none !important; font-weight: bold !important; width: 100% !important; padding: 0.75rem !important; }}"
