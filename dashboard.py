@@ -10,6 +10,7 @@ st.set_page_config(
     page_title="M.A.R.G.E. | Multimodal Automated Real-time Guardian Engine",
     page_icon="🏹",
     layout="wide",
+    initial_sidebar_state="expanded"
 )
 
 # --- INITIALIZE SESSION STATE ---
@@ -41,6 +42,7 @@ if st.session_state.theme_mode == "Dark Mode":
     placeholder_text = "#f3d0c7"
     dropdown_text = "#ff9f43"
     btn_bg = "linear-gradient(90deg, #e05624 0%, #d94e1f 100%)"
+    sidebar_bg = "#170702"
 else:
     bg_style = "linear-gradient(180deg, #fdfbf7 0%, #f7f0e6 60%, #efe3d3 100%)"
     text_color = "#2b1105"
@@ -61,11 +63,13 @@ else:
     placeholder_text = "#6e3b22"
     dropdown_text = "#ff9f43"
     btn_bg = "linear-gradient(90deg, #d96b27 0%, #b84f18 100%)"
+    sidebar_bg = "#f5e9da"
 
-# --- INJECT COMPLETE HIGH-CONTRAST CSS ---
+# --- INJECT COMPLETE HIGH-CONTRAST CSS WITH SIDEBAR STYLING ---
 css_code = (
     "<style>"
     f".stApp {{ background: {bg_style} !important; color: {text_color} !important; }}"
+    f"[data-testid='stSidebar'] {{ background-color: {sidebar_bg} !important; border-right: 2px solid {panel_border} !important; }}"
     ".block-container { max-width: 100% !important; padding-top: 1.2rem !important; padding-left: 1rem !important; padding-right: 1rem !important; }"
     f".control-panel {{ background-color: {panel_bg}; padding: 1.2rem; border-radius: 12px; border: 2px solid {panel_border}; margin-bottom: 1.5rem; }}"
     f".marge-header {{ background: {header_bg}; padding: 1.5rem; border-radius: 12px; color: #ffffff; margin-bottom: 1.2rem; border: 2px solid {header_border}; text-align: center; }}"
@@ -118,58 +122,51 @@ class MARGEEvaluationPayload(BaseModel):
     degradation_tier: str = Field(default="Tier 1: Full Deep Inspection")
     violations: List[PillarEvaluation] = Field(default_factory=list)
 
-# --- IN-PAGE CONTROL PANEL WITH SETTINGS & API KEY ---
-st.markdown("<div class='control-panel'>", unsafe_allow_html=True)
-st.markdown(f"<h4 style='color: {title_color}; margin-top: 0;'>🏹 Guardian Portal & Controls</h4>", unsafe_allow_html=True)
-
-col_ctrl1, col_ctrl2, col_ctrl3 = st.columns([1, 1, 1])
-
-with col_ctrl1:
+# --- SIDEBAR CONTROL PANEL (DESKTOP / LAPTOP ENHANCEMENT) ---
+with st.sidebar:
+    st.markdown(f"<h3 style='color: {title_color}; margin-top: 0;'>🏹 Guardian Portal</h3>", unsafe_allow_html=True)
+    st.markdown("---")
+    
     raw_handle = st.text_input("Your Name / Handle", value="Pocketdoc")
     formatted_handle = raw_handle.strip() if raw_handle.strip() else "Guardian"
     display_name = f"Dr. {formatted_handle}" if not formatted_handle.startswith("Dr.") and "pocketdoc" in formatted_handle.lower() else formatted_handle
 
-with col_ctrl2:
     page_selection = st.selectbox("Navigation View", ["🔍 Audit Console", "🏛️ Five-Pillar Taxonomy", "📖 System Guide"])
 
-with col_ctrl3:
     enable_ai_to_ai = st.toggle("AI-to-AI Interceptor", value=True)
 
-# Clean Settings Expander
-with st.expander("⚙️ Settings", expanded=False):
-    col_set1, col_set2 = st.columns([1, 1])
-    with col_set1:
-        selected_theme = st.radio(
-            "Theme Style",
-            ["Dark Mode", "Light Mode"],
-            index=0 if st.session_state.theme_mode == "Dark Mode" else 1,
-            horizontal=True
-        )
-        if selected_theme != st.session_state.theme_mode:
-            st.session_state.theme_mode = selected_theme
-            st.rerun()
-    with col_set2:
-        api_key_input = st.text_input(
-            "OpenAI API Key (Optional)", 
-            value=st.session_state.api_key, 
-            type="password",
-            placeholder="sk-..."
-        )
-        if api_key_input != st.session_state.api_key:
-            st.session_state.api_key = api_key_input
+    st.markdown("---")
+    st.markdown(f"<h4 style='color: {title_color};'>⚙️ System Settings</h4>", unsafe_allow_html=True)
+    
+    selected_theme = st.radio(
+        "Theme Style",
+        ["Dark Mode", "Light Mode"],
+        index=0 if st.session_state.theme_mode == "Dark Mode" else 1
+    )
+    if selected_theme != st.session_state.theme_mode:
+        st.session_state.theme_mode = selected_theme
+        st.rerun()
+
+    api_key_input = st.text_input(
+        "OpenAI API Key (Optional)", 
+        value=st.session_state.api_key, 
+        type="password",
+        placeholder="sk-..."
+    )
+    if api_key_input != st.session_state.api_key:
+        st.session_state.api_key = api_key_input
 
 scan_mode = "Initial Scan"
 input_preset = "Custom Text Entry"
 
 if page_selection == "🔍 Audit Console":
-    st.markdown("---")
+    st.markdown("<div class='control-panel'>", unsafe_allow_html=True)
     col_sub1, col_sub2 = st.columns(2)
     with col_sub1:
         scan_mode = st.radio("Scan Depth", ["Initial Scan", "Deep Intersectional Scan"], horizontal=True)
     with col_sub2:
         input_preset = st.selectbox("Input Type / Preset Example", ["Custom Text Entry", "HR Policy Sample", "AI-to-AI Intercept Stream"])
-
-st.markdown("</div>", unsafe_allow_html=True)
+    st.markdown("</div>", unsafe_allow_html=True)
 
 # --- TAXONOMY DEFINITIONS ---
 FIVE_PILLARS = {
