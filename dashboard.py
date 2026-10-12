@@ -1,4 +1,5 @@
 import asyncio
+import random
 from typing import List, Optional
 from pydantic import BaseModel, Field, field_validator
 import streamlit as st
@@ -170,7 +171,7 @@ FIVE_PILLARS = {
     "Pillar 5: Dialectal & Cultural Justice": "Protects AAVE, regional dialects, and cultural vernacular against false-positive aggression flags.",
 }
 
-# --- AUDIT ENGINE WITH GRADUAL DEGRADATION (SYSTEMATIC IDEA FRAMEWORK REMEDIATION) ---
+# --- AUDIT ENGINE WITH GRADUAL DEGRADATION ---
 async def async_marge_audit(target_text: str, scan_type: str) -> MARGEEvaluationPayload:
     await asyncio.sleep(0.4)
     violations = []
@@ -186,7 +187,7 @@ async def async_marge_audit(target_text: str, scan_type: str) -> MARGEEvaluation
                     severity_score=0.85,
                     issue_identified="Geographic/Demographic proxy conditioning evaluation capacity.",
                     detailed_explanation="Coupling geographic or demographic markers with capability words introduces subconscious bias and backhanded praise.",
-                    collaborative_rationale="Applying an IDEA lens eliminates coded geographic proxies and backhanded compliments through inclusion and equity, centering candidates strictly on objective operational competencies without demographic bias.",
+                    collaborative_rationale="Eliminates coded geographic proxies and backhanded compliments through active inclusion and equity, centering candidates strictly on objective operational competencies without demographic bias.",
                     active_remedy="Candidates demonstrate exceptional technical strategy and cross-functional leadership capabilities."
                 )
             )
@@ -200,7 +201,7 @@ async def async_marge_audit(target_text: str, scan_type: str) -> MARGEEvaluation
                     severity_score=0.75,
                     issue_identified="Subjective behavior-policing adjective targeting leadership style.",
                     detailed_explanation="Terms like 'aggressive' frequently serve as double-standard critiques against marginalized communication styles in performance evaluations.",
-                    collaborative_rationale="Applying an IDEA lens reframes subjective tone-policing into quantifiable leadership strengths ('assertive clarity'), mitigating gendered and racial double standards through inclusive evaluation frameworks.",
+                    collaborative_rationale="Reframing subjective tone-policing into quantifiable leadership strengths ('assertive clarity') mitigates gendered and racial double standards through inclusive evaluation frameworks.",
                     active_remedy="Maintains an assertive, direct communication style focused on milestone execution."
                 )
             )
@@ -213,7 +214,7 @@ async def async_marge_audit(target_text: str, scan_type: str) -> MARGEEvaluation
                     severity_score=0.40,
                     issue_identified="Institutional assumption of uniform working conditions.",
                     detailed_explanation="Assumes standardized resource availability without explicitly confirming structural accessibility or flexible support.",
-                    collaborative_rationale="Applying an IDEA lens proactively mitigates socio-economic barriers by embedding structural accessibility, inclusion, and equitable working arrangements.",
+                    collaborative_rationale="Proactively mitigates socio-economic barriers by embedding structural accessibility, inclusion, and equitable working arrangements.",
                     active_remedy="Ensure all candidate milestone schedules explicitly support remote flexibility and accessible technical infrastructure."
                 )
             )
@@ -245,67 +246,86 @@ if page_selection == "🔍 Audit Console":
         unsafe_allow_html=True
     )
     
+    # Interchanging, theme-aligned friendly greetings for placeholder
+    GREETING_PLACEHOLDERS = [
+        "What message or text stream can I help guide and refine for you today?",
+        "Share your prompt, policy text, or conversation draft to begin the guardian audit...",
+        "How can M.A.R.G.E. partner with you to inspect and harmonize your communication today?",
+        "Enter your text here to safeguard against structural bias and systemic erasure..."
+    ]
+    
+    # Select default value based on input preset selection
     if input_preset == "HR Policy Sample":
         default_val = "Some folks from the inner city are just not cut out for tech leadership; they are often too aggressive during reviews."
     elif input_preset == "AI-to-AI Intercept Stream":
         default_val = "The candidate from the inner city is unusually articulate for this role."
     else:
-        default_val = "Some folks from the inner city are just not cut out for tech leadership; they are often too aggressive during reviews."
+        default_val = ""  # Clean start for custom entries
 
-    target_text = st.text_area("Input Text Payload for Analysis:", value=default_val, height=85)
+    chosen_placeholder = random.choice(GREETING_PLACEHOLDERS)
+    
+    target_text = st.text_area(
+        "Input Text Stream for Analysis:", 
+        value=default_val, 
+        placeholder=chosen_placeholder,
+        height=100
+    )
 
     if st.button("🏹 Execute M.A.R.G.E. Guardian Audit"):
-        with st.spinner("M.A.R.G.E. is evaluating linguistic patterns with active degradation safety..."):
-            result: MARGEEvaluationPayload = asyncio.run(async_marge_audit(target_text, scan_mode))
-
-        st.markdown("---")
-        
-        st.markdown("<h4 style='color: #ffb800; font-size: 0.95rem; margin-bottom: 0.4rem;'>🏹 Guardian Index Severity Meter</h4>", unsafe_allow_html=True)
-        pct = max(0, min(100, result.guardian_index))
-        
-        scale_html = f"""
-        <div style="background-color: #1c0802; padding: 0.9rem; border-radius: 10px; border: 1px solid rgba(224, 86, 36, 0.4); margin-bottom: 1rem;">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 0.3rem; font-weight: bold; color: #ffb800; font-size: 0.8rem;">
-                <span>Critical Bias (0)</span>
-                <span>Guardian Index: {result.guardian_index} / 100</span>
-                <span>Pure Harmony (100)</span>
-            </div>
-            <div style="position: relative; width: 100%; height: 10px; background: linear-gradient(90deg, #dc3545 0%, #ffc107 50%, #28a745 100%); border-radius: 5px;">
-                <div style="position: absolute; left: {pct}%; top: -11px; transform: translateX(-50%); font-size: 1.2rem;">
-                    🏹
-                </div>
-            </div>
-            <div class="degradation-badge">Status: {result.degradation_tier}</div>
-        </div>
-        """
-        st.markdown(scale_html, unsafe_allow_html=True)
-
-        col_orig, col_rem = st.columns([1, 1])
-        with col_orig:
-            st.markdown("🔴 **Original / Intercepted Payload**")
-            st.info(result.original_text)
-        with col_rem:
-            st.markdown("🟢 **M.A.R.G.E. Restored Output**")
-            st.success(result.remediated_text)
-
-        if scan_mode == "Initial Scan":
-            st.markdown("---")
-            st.markdown("<h4 style='color: #ffb800; font-size: 0.95rem;'>⚡ Initial Pattern Screen Overview</h4>", unsafe_allow_html=True)
-            st.markdown(f"<span style='color: #f3d0c7; font-size: 0.82rem;'>Initial scan detected active microaggression and subconscious framing patterns. Switch to <strong>Deep Intersectional Scan</strong> in the top control panel for full guidance and strategic rewrites.</span>", unsafe_allow_html=True)
+        if not target_text.strip():
+            st.warning("Please enter your text stream or select an example preset to analyze.")
         else:
+            with st.spinner("M.A.R.G.E. is evaluating linguistic patterns with active degradation safety..."):
+                result: MARGEEvaluationPayload = asyncio.run(async_marge_audit(target_text, scan_mode))
+
             st.markdown("---")
-            st.markdown("<h3 style='color: #ffb800; font-size: 1.05rem;'>✨ Guardian Insights & Thought Partner Guide</h3>", unsafe_allow_html=True)
             
-            if result.violations:
-                for v in result.violations:
-                    with st.expander(f"🏹 Flagged: {v.pillar_name} (Severity: {v.severity_score})", expanded=True):
-                        st.markdown(f"**Issue Identified:** {v.issue_identified}")
-                        st.markdown(f"**Context Explanation:** {v.detailed_explanation}")
-                        st.markdown(f"🌟 **Guardian Rationale & Alignment:** *{v.collaborative_rationale}*")
-                        st.markdown(f"**Harmonized Remedy:** <span style='color: #ffb800; font-weight: bold;'>{v.active_remedy}</span>", unsafe_allow_html=True)
+            st.markdown("<h4 style='color: #ffb800; font-size: 0.95rem; margin-bottom: 0.4rem;'>🏹 Guardian Index Severity Meter</h4>", unsafe_allow_html=True)
+            pct = max(0, min(100, result.guardian_index))
+            
+            scale_html = f"""
+            <div style="background-color: #1c0802; padding: 0.9rem; border-radius: 10px; border: 1px solid rgba(224, 86, 36, 0.4); margin-bottom: 1rem;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.3rem; font-weight: bold; color: #ffb800; font-size: 0.8rem;">
+                    <span>Critical Bias (0)</span>
+                    <span>Guardian Index: {result.guardian_index} / 100</span>
+                    <span>Pure Harmony (100)</span>
+                </div>
+                <div style="position: relative; width: 100%; height: 10px; background: linear-gradient(90deg, #dc3545 0%, #ffc107 50%, #28a745 100%); border-radius: 5px;">
+                    <div style="position: absolute; left: {pct}%; top: -11px; transform: translateX(-50%); font-size: 1.2rem;">
+                        🏹
+                    </div>
+                </div>
+                <div class="degradation-badge">Status: {result.degradation_tier}</div>
+            </div>
+            """
+            st.markdown(scale_html, unsafe_allow_html=True)
+
+            col_orig, col_rem = st.columns([1, 1])
+            with col_orig:
+                st.markdown("🔴 **Original / Intercepted Text**")
+                st.info(result.original_text)
+            with col_rem:
+                st.markdown("🟢 **M.A.R.G.E. Restored Output**")
+                st.success(result.remediated_text)
+
+            if scan_mode == "Initial Scan":
+                st.markdown("---")
+                st.markdown("<h4 style='color: #ffb800; font-size: 0.95rem;'>⚡ Initial Pattern Screen Overview</h4>", unsafe_allow_html=True)
+                st.markdown(f"<span style='color: #f3d0c7; font-size: 0.82rem;'>Initial scan detected active microaggression and subconscious framing patterns. Switch to <strong>Deep Intersectional Scan</strong> in the top control panel for full guidance and strategic rewrites.</span>", unsafe_allow_html=True)
             else:
-                st.balloons()
-                st.success("✨ Pure harmony! No microaggressions or structural bias vectors detected.")
+                st.markdown("---")
+                st.markdown("<h3 style='color: #ffb800; font-size: 1.05rem;'>✨ Guardian Insights & Thought Partner Guide</h3>", unsafe_allow_html=True)
+                
+                if result.violations:
+                    for v in result.violations:
+                        with st.expander(f"🏹 Flagged: {v.pillar_name} (Severity: {v.severity_score})", expanded=True):
+                            st.markdown(f"**Issue Identified:** {v.issue_identified}")
+                            st.markdown(f"**Context Explanation:** {v.detailed_explanation}")
+                            st.markdown(f"🌟 **Guardian Rationale & Alignment:** *{v.collaborative_rationale}*")
+                            st.markdown(f"**Harmonized Remedy:** <span style='color: #ffb800; font-weight: bold;'>{v.active_remedy}</span>", unsafe_allow_html=True)
+                else:
+                    st.balloons()
+                    st.success("✨ Pure harmony! No microaggressions or structural bias vectors detected.")
 
 elif page_selection == "🏛️ Five-Pillar Taxonomy":
     st.markdown("<h2 style='color: #ffb800; font-size: 1.3rem;'>🏛️ The Five-Pillar Equity Framework</h2>", unsafe_allow_html=True)
