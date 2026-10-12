@@ -1,4 +1,4 @@
-import asyncio
+limport asyncio
 import random
 from typing import List, Optional
 from pydantic import BaseModel, Field
@@ -63,7 +63,7 @@ else:
     dropdown_text = "#2b1105"
     btn_bg = "linear-gradient(90deg, #d96b27 0%, #b84f18 100%)"
 
-# --- INJECT COMPLETE HIGH-CONTRAST CSS & ABSOLUTE DROPDOWN FIXES ---
+# --- INJECT COMPLETE HIGH-CONTRAST CSS & PORTAL OVERRIDES ---
 css_code = (
     "<style>"
     f".stApp {{ background: {bg_style} !important; color: {text_color} !important; }}"
@@ -84,10 +84,11 @@ css_code = (
     f"div[data-baseweb='input'] > div, div[data-baseweb='select'] > div, textarea, input {{ background-color: {input_bg} !important; color: {input_text} !important; border: 2px solid {panel_border} !important; }}"
     f"textarea::placeholder, input::placeholder {{ color: {placeholder_text} !important; opacity: 1 !important; }}"
     
-    # ABSOLUTE GLOBAL OVERRIDES FOR STREAMLIT BASEWEB DROPDOWNS & MENUS
-    f"div[data-baseweb='popover'], div[data-baseweb='menu'], ul[role='listbox'] {{ background-color: {dropdown_bg} !important; }}"
+    # ULTIMATE SELECTBOX POPOVER OVERRIDES (TARGETING BASEWEB PORTALS)
+    f"div[data-baseweb='popover'], div[data-baseweb='menu'], ul[role='listbox'], div[class*='stSelectbox'] div {{ background-color: {dropdown_bg} !important; }}"
     f"div[data-baseweb='popover'] *, div[data-baseweb='menu'] *, ul[role='listbox'] * {{ color: {dropdown_text} !important; background-color: transparent !important; }}"
     f"li[role='option'] {{ background-color: {dropdown_bg} !important; color: {dropdown_text} !important; }}"
+    f"li[role='option'] * {{ color: {dropdown_text} !important; }}"
     f"li[role='option']:hover, li[role='option'][aria-selected='true'] {{ background-color: {dropdown_hover} !important; color: {dropdown_text} !important; }}"
     
     f"label, p, span, div {{ color: {text_color} !important; }}"
