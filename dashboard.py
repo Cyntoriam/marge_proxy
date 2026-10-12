@@ -44,7 +44,7 @@ else:
     bg_style = "linear-gradient(180deg, #fdfbf7 0%, #f7f0e6 60%, #efe3d3 100%)"
     text_color = "#2b1105"
     panel_bg = "#f5e9da"
-    panel_border = "#8c2d0d"  # High-contrast crisp terracotta border
+    panel_border = "#8c2d0d"
     header_bg = "linear-gradient(135deg, #8c2d0d 0%, #5e1c06 100%)"
     header_border = "#8c2d0d"
     title_color = "#8c2d0d"
@@ -63,7 +63,7 @@ else:
     dropdown_text = "#2b1105"
     btn_bg = "linear-gradient(90deg, #d96b27 0%, #b84f18 100%)"
 
-# --- INJECT COMPLETE HIGH-CONTRAST CSS & POPOVER FIXES ---
+# --- INJECT COMPLETE HIGH-CONTRAST CSS & POPOVER PORTAL FIXES ---
 css_code = (
     "<style>"
     f".stApp {{ background: {bg_style} !important; color: {text_color} !important; }}"
@@ -84,8 +84,8 @@ css_code = (
     f"div[data-baseweb='input'] > div, div[data-baseweb='select'] > div, textarea, input {{ background-color: {input_bg} !important; color: {input_text} !important; border: 2px solid {panel_border} !important; }}"
     f"textarea::placeholder, input::placeholder {{ color: {placeholder_text} !important; opacity: 1 !important; }}"
     
-    # GLOBAL STREAMLIT POPOVER & DROPDOWN OVERRIDES (FORCING LIGHT/DARK MODE CONSISTENCY)
-    f"div[data-baseweb='popover'], div[data-baseweb='popover'] *, div[data-baseweb='menu'], div[data-baseweb='menu'] *, ul[role='listbox'], ul[role='listbox'] * {{ background-color: {dropdown_bg} !important; color: {dropdown_text} !important; }}"
+    # COMPREHENSIVE STREAMLIT POPOVER & DROPDOWN PORTAL OVERRIDES
+    f"div[data-baseweb='popover'], div[data-baseweb='popover'] *, div[data-baseweb='menu'], div[data-baseweb='menu'] *, ul[role='listbox'], ul[role='listbox'] *, div[data-testid='stVirtualDropdown'] {{ background-color: {dropdown_bg} !important; color: {dropdown_text} !important; }}"
     f"li[role='option'] {{ background-color: {dropdown_bg} !important; color: {dropdown_text} !important; }}"
     f"li[role='option']:hover, li[role='option'][aria-selected='true'] {{ background-color: {dropdown_hover} !important; color: {dropdown_text} !important; }}"
     f"li[role='option'] span, li[role='option'] div, div[data-baseweb='option'] span, div[data-baseweb='option'] div {{ color: {dropdown_text} !important; font-weight: 600 !important; }}"
