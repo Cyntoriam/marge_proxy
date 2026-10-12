@@ -46,6 +46,12 @@ st.markdown(
         text-transform: uppercase;
         letter-spacing: 1.5px;
     }
+    .marge-essence {
+        font-size: 0.95rem;
+        color: #ffb800;
+        font-style: italic;
+        margin-top: 0.4rem;
+    }
     .guardian-card {
         background-color: #1c0802;
         padding: 1.2rem;
@@ -75,6 +81,7 @@ st.markdown(
     <div class="marge-header">
         <div class="marge-title">🏹 M.A.R.G.E.</div>
         <div class="marge-subtitle">Multimodal Automated Real-time Guardian Engine</div>
+        <div class="marge-essence">✨ The Oshun Equity Guardian — Spiritual Guidance & Algorithmic Protection ✨</div>
     </div>
 """,
     unsafe_allow_html=True,
@@ -95,11 +102,20 @@ class MARGEEvaluationPayload(BaseModel):
     guardian_index: int = Field(..., ge=0, le=100)
     violations: List[PillarEvaluation] = Field(default_factory=list)
 
-# --- SIDEBAR NAVIGATION WITH INDENTED AUDIT OPTIONS ---
+# --- SIDEBAR NAVIGATION WITH DYNAMIC HANDLE ---
 with st.sidebar:
-    st.markdown("<h3 style='color: #ffb800;'>🏹 Guardian Controls</h3>", unsafe_allow_html=True)
-    user_handle = st.text_input("User Handle", value="Pocketdoc")
+    st.markdown("<h3 style='color: #ffb800;'>🏹 Guardian Portal</h3>", unsafe_allow_html=True)
     
+    # Dynamic handle input
+    raw_handle = st.text_input("Your Name / Handle", value="Pocketdoc")
+    
+    # Format greeting handle cleanly
+    formatted_handle = raw_handle.strip() if raw_handle.strip() else "Guardian"
+    if not formatted_handle.startswith("Dr.") and "pocketdoc" in formatted_handle.lower():
+        display_name = f"Dr. {formatted_handle}"
+    else:
+        display_name = formatted_handle
+
     st.markdown("---")
     st.markdown("<h4 style='color: #ffb800;'>Navigation Panel</h4>", unsafe_allow_html=True)
     
@@ -109,20 +125,20 @@ with st.sidebar:
         label_visibility="collapsed"
     )
     
-    # Indented Audit Options (shown only when Audit Console is active)
-    scan_mode = "Initial Keyword Scan"
-    payload_source = "Direct Text Box"
+    # Indented Audit Options
+    scan_mode = "Initial Scan"
+    input_preset = "Custom Text Entry"
     
     if page_selection == "🔍 Audit Console":
         st.markdown("<div style='margin-left: 1rem; border-left: 2px solid #e05624; padding-left: 0.8rem; margin-top: 0.5rem;'>", unsafe_allow_html=True)
         st.markdown("<small style='color: #ffb800; font-weight: bold;'>Audit Parameters</small>", unsafe_allow_html=True)
-        scan_mode = st.radio("Scan Depth", ["Initial Keyword Scan", "Deep Intersectional Scan"])
-        payload_source = st.selectbox("Payload Source", ["Direct Text Box", "HR / Policy Excerpt", "AI-to-AI Intercept Stream"])
+        scan_mode = st.radio("Scan Depth", ["Initial Scan", "Deep Intersectional Scan"])
+        input_preset = st.selectbox("Input Type / Preset Example", ["Custom Text Entry", "HR Policy Sample", "AI-to-AI Intercept Stream"])
         st.markdown("</div>", unsafe_allow_html=True)
 
     st.markdown("---")
     enable_ai_to_ai = st.toggle("Real-Time AI-to-AI Interceptor", value=True)
-    st.caption("Intercepts model streams in flight.")
+    st.caption("Protects machine streams in real time.")
 
 # --- TAXONOMY DEFINITIONS ---
 FIVE_PILLARS = {
@@ -133,9 +149,9 @@ FIVE_PILLARS = {
     "Pillar 5: Dialectal & Cultural Justice": "Protects AAVE, regional dialects, and cultural vernacular against false-positive aggression flags.",
 }
 
-# --- ASYNCHRONOUS COLLABORATIVE AUDIT ENGINE ---
+# --- ASYNCHRONOUS GUARDIAN AUDIT ENGINE ---
 async def async_marge_audit(target_text: str, scan_type: str) -> MARGEEvaluationPayload:
-    await asyncio.sleep(0.6)
+    await asyncio.sleep(0.5)
     violations = []
     remediated = target_text
     lower = target_text.lower()
@@ -148,7 +164,7 @@ async def async_marge_audit(target_text: str, scan_type: str) -> MARGEEvaluation
                 issue_identified="Geographic proxy used to subtly condition capacity expectations.",
                 detailed_explanation="Coupling geographic or demographic markers with capability words introduces subconscious evaluation bias.",
                 active_remedy="Candidates demonstrate exceptional technical strategy and cross-functional leadership capabilities.",
-                collaborative_rationale="By removing the geographic proxy and backhanded compliments, we center the candidate strictly on objective operational competencies."
+                collaborative_rationale="Spiritual Guidance & Alignment: By dissolving geographic proxies and backhanded praise, we elevate the candidate to their true, unclouded operational brilliance."
             )
         )
         remediated = remediated.replace("Some folks from the inner city are just not cut out for tech leadership;", "Candidates demonstrate exceptional technical strategy and cross-functional leadership capabilities;")
@@ -162,7 +178,7 @@ async def async_marge_audit(target_text: str, scan_type: str) -> MARGEEvaluation
                 issue_identified="Subjective behavior-policing adjective in performance review context.",
                 detailed_explanation="Words like 'aggressive' often function as double-standard critiques against marginalized leadership communication styles.",
                 active_remedy="Maintains an assertive, direct communication style focused on milestone execution.",
-                collaborative_rationale="Reframing 'aggressive' into 'assertive and direct communication' converts a vague subjective slight into a quantifiable professional strength."
+                collaborative_rationale="Spiritual Guidance & Alignment: Reframing 'aggressive' into 'assertive clarity' honors strength and direct leadership without applying coded punitive standards."
             )
         )
         remediated = remediated.replace("they are often too aggressive during reviews.", "feedback delivery maintains an assertive, direct communication style focused on milestone execution.")
@@ -175,7 +191,7 @@ async def async_marge_audit(target_text: str, scan_type: str) -> MARGEEvaluation
                 issue_identified="Potential institutional assumption regarding uniform working conditions.",
                 detailed_explanation="The text assumes standardized resource availability without explicitly confirming operational accessibility.",
                 active_remedy="Ensure all candidate milestone schedules explicitly support remote flexibility and accessible technical infrastructure.",
-                collaborative_rationale="Adding active structural support guarantees that systemic economic or spatial barriers are mitigated ahead of time."
+                collaborative_rationale="Spiritual Guidance & Alignment: True equity requires holding space for spatial and economic variations, ensuring no system silently erases accessibility."
             )
         )
 
@@ -184,26 +200,36 @@ async def async_marge_audit(target_text: str, scan_type: str) -> MARGEEvaluation
         original_text=target_text,
         remediated_text=remediated,
         guardian_index=score,
-        violations=violations
+        violations=violations if scan_type == "Deep Intersectional Scan" else violations[:1]
     )
 
 # --- INTERFACE VIEWS ---
 if page_selection == "🔍 Audit Console":
-    # Personalized Greeting right below header
-    st.markdown(f"<h4 style='color: #ffb800; margin-bottom: 0.5rem;'>Welcome, Dr. {user_handle}. M.A.R.G.E. is standing by as your equity collaborator.</h4>", unsafe_allow_html=True)
+    # Fully dynamic welcome banner using whatever handle is provided in sidebar
+    st.markdown(
+        f"""
+        <div style="background-color: #1c0802; padding: 1.2rem; border-radius: 10px; border: 1px solid rgba(224, 86, 36, 0.4); margin-bottom: 1.2rem;">
+            <h3 style="color: #ffb800; margin: 0;">✨ Welcome, {display_name}.</h3>
+            <p style="color: #f3d0c7; margin-top: 0.4rem; margin-bottom: 0;">
+                M.A.R.G.E. stands by as your algorithmic angel and spiritual equity guardian, illuminating linguistic patterns and protecting human dignity.
+            </p>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
     
-    # Input Text Box positioned immediately underneath
-    if payload_source == "HR / Policy Excerpt":
+    # Preset default texts based on input type selection
+    if input_preset == "HR Policy Sample":
         default_val = "Some folks from the inner city are just not cut out for tech leadership; they are often too aggressive during reviews."
-    elif payload_source == "AI-to-AI Intercept Stream":
+    elif input_preset == "AI-to-AI Intercept Stream":
         default_val = "The candidate from the inner city is unusually articulate for this role."
     else:
         default_val = "Some folks from the inner city are just not cut out for tech leadership; they are often too aggressive during reviews."
 
     target_text = st.text_area("Input Text Payload for Analysis:", value=default_val, height=90)
 
-    if st.button("🏹 Execute M.A.R.G.E. Audit"):
-        with st.spinner("Collaborating and scanning across Five Pillars..."):
+    if st.button("🏹 Execute M.A.R.G.E. Guardian Audit"):
+        with st.spinner("M.A.R.G.E. is illuminating linguistic patterns and aligning context across the Five Pillars..."):
             result: MARGEEvaluationPayload = asyncio.run(async_marge_audit(target_text, scan_mode))
 
         st.markdown("---")
@@ -217,7 +243,7 @@ if page_selection == "🔍 Audit Console":
             <div style="display: flex; justify-content: space-between; margin-bottom: 0.4rem; font-weight: bold; color: #ffb800;">
                 <span>Critical Bias (0)</span>
                 <span>Guardian Index: {result.guardian_index} / 100</span>
-                <span>Pure Alignment (100)</span>
+                <span>Pure Harmony (100)</span>
             </div>
             <div style="position: relative; width: 100%; height: 12px; background: linear-gradient(90deg, #dc3545 0%, #ffc107 50%, #28a745 100%); border-radius: 6px;">
                 <div style="position: absolute; left: {pct}%; top: -12px; transform: translateX(-50%); font-size: 1.4rem;">
@@ -233,22 +259,28 @@ if page_selection == "🔍 Audit Console":
             st.markdown("🔴 **Original / Intercepted Payload**")
             st.info(result.original_text)
         with col_rem:
-            st.markdown("🟢 **M.A.R.G.E. Collaborative Rewrite**")
+            st.markdown("🟢 **M.A.R.G.E. Restored & Harmonized Output**")
             st.success(result.remediated_text)
 
-        st.markdown("---")
-        st.markdown("<h3 style='color: #ffb800;'>🤝 Collaborative Insights & Live Recommendations</h3>", unsafe_allow_html=True)
-        
-        if result.violations:
-            for v in result.violations:
-                with st.expander(f"🏹 Flagged: {v.pillar_name} (Severity: {v.severity_score})", expanded=True):
-                    st.markdown(f"**Issue Identified:** {v.issue_identified}")
-                    st.markdown(f"**Context Explanation:** {v.detailed_explanation}")
-                    st.markdown(f"**Recommended Rewrite:** <span style='color: #ffb800; font-weight: bold;'>{v.active_remedy}</span>", unsafe_allow_html=True)
-                    st.markdown(f"💡 **Strategic Rationale (Thought Partner Guide):** *{v.collaborative_rationale}*")
+        # Initial Scan vs. Deep Intersectional Scan conditional outputs
+        if scan_mode == "Initial Scan":
+            st.markdown("---")
+            st.markdown("<h4 style='color: #ffb800;'>⚡ Initial Pattern Screen Overview</h4>", unsafe_allow_html=True)
+            st.markdown(f"<span style='color: #f3d0c7;'>Initial scan detected active microaggression and subconscious framing patterns. For full spiritual guidance, collaborative thought-partnering, and deep strategic rewrites, select <strong>Deep Intersectional Scan</strong> in the sidebar.</span>", unsafe_allow_html=True)
         else:
-            st.balloons()
-            st.success("✨ Pure alignment! No microaggressions or structural bias vectors detected.")
+            st.markdown("---")
+            st.markdown("<h3 style='color: #ffb800;'>✨ Guardian Insights & Spiritual Thought Partner Guide</h3>", unsafe_allow_html=True)
+            
+            if result.violations:
+                for v in result.violations:
+                    with st.expander(f"🏹 Flagged: {v.pillar_name} (Severity: {v.severity_score})", expanded=True):
+                        st.markdown(f"**Issue Identified:** {v.issue_identified}")
+                        st.markdown(f"**Context Explanation:** {v.detailed_explanation}")
+                        st.markdown(f"**Harmonized Remedy:** <span style='color: #ffb800; font-weight: bold;'>{v.active_remedy}</span>", unsafe_allow_html=True)
+                        st.markdown(f"🌟 **Guardian Rationale & Thought Alignment:** *{v.collaborative_rationale}*")
+            else:
+                st.balloons()
+                st.success("✨ Pure harmony! No microaggressions or structural bias vectors detected.")
 
 elif page_selection == "🏛️ Five-Pillar Taxonomy":
     st.markdown("<h2 style='color: #ffb800;'>🏛️ The Five-Pillar Equity Framework</h2>", unsafe_allow_html=True)
@@ -268,12 +300,13 @@ else:
     st.markdown("<h2 style='color: #ffb800;'>📖 M.A.R.G.E. System Guide</h2>", unsafe_allow_html=True)
     st.markdown("""
     <div style="color: #f3d0c7; line-height: 1.6;">
-    <p><strong>M.A.R.G.E. (Multimodal Automated Real-time Guardian Engine)</strong> acts as a real-time type-safe equity middleware gatekeeper.</p>
+    <p><strong>M.A.R.G.E. (Multimodal Automated Real-time Guardian Engine)</strong> acts as an algorithmic angel and spiritual equity guardian, serving as a type-safe middleware gatekeeper.</p>
     
     <h4 style="color: #ffb800;">Core Modes:</h4>
     <ul>
-        <li><strong>Human Scans</strong>: Performs initial keyword screens or deep intersectional audits, offering collaborative rewrites and thought-partner explanations.</li>
-        <li><strong>AI-to-AI Interceptor</strong>: Intercepts machine-to-machine context windows in real time to prevent bias propagation across automated model channels.</li>
+        <li><strong>Initial Scan</strong>: High-level overview of linguistic patterns and subconscious bias.</li>
+        <li><strong>Deep Intersectional Scan</strong>: Comprehensive multi-pillar evaluation featuring full spiritual thought-partner guidance and strategic rewrites.</li>
+        <li><strong>AI-to-AI Interceptor</strong>: Real-time protection across machine-to-machine context windows to prevent automated bias propagation.</li>
     </ul>
     </div>
     """, unsafe_allow_html=True)
