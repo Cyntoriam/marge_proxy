@@ -10,31 +10,31 @@ st.set_page_config(
     layout="wide",
 )
 
-# --- GLOBAL OSHUN THEME & STYLING OVERRIDE ---
+# --- GLOBAL OSHUN & WARM NAVIGATION STYLING ---
 st.markdown(
     """
     <style>
-    /* Force main app background to deep charcoal */
+    /* Force main app background to deep dark charcoal */
     .stApp {
-        background-color: #0e0e12 !important;
+        background-color: #12100e !important;
         color: #f3f3f8 !important;
     }
     
-    /* Force sidebar styling */
+    /* Force sidebar styling with warm orange-gold borders */
     [data-testid="stSidebar"] {
-        background-color: #141419 !important;
-        border-right: 1px solid rgba(255, 184, 0, 0.2) !important;
+        background-color: #1a1614 !important;
+        border-right: 1px solid rgba(224, 86, 36, 0.3) !important;
     }
 
-    /* Golden Header Box */
+    /* Golden/Orange Header Box */
     .marge-header {
-        background-color: #141419;
+        background-color: #1c1815;
         padding: 2.2rem;
         border-radius: 12px;
         color: #f3f3f8;
         margin-bottom: 2rem;
-        box-shadow: 0 0 25px rgba(255, 184, 0, 0.25);
-        border: 2px solid #ffb800;
+        box-shadow: 0 0 25px rgba(224, 86, 36, 0.2);
+        border: 2px solid #e05624;
         text-align: center;
     }
     .marge-title {
@@ -53,12 +53,12 @@ st.markdown(
     }
     .marge-tagline {
         font-size: 0.95rem;
-        color: #ffb800;
+        color: #e05624;
         font-style: italic;
         margin-top: 0.4rem;
     }
     .guardian-card {
-        background-color: #181820;
+        background-color: #221c18;
         padding: 1.2rem;
         border-radius: 8px;
         border-left: 4px solid #ffb800;
@@ -74,10 +74,18 @@ st.markdown(
         color: #ffffff;
         text-align: center;
     }
+    /* Style custom orange sidebar buttons */
+    div.stButton > button {
+        background-color: #d94e1f !important;
+        color: white !important;
+        border-radius: 8px !important;
+        border: none !important;
+        font-weight: bold !important;
+    }
     </style>
     
     <div class="marge-header">
-        <div class="marge-title">M.A.R.G.E. 🏹</div>
+        <div class="marge-title">🏹 M.A.R.G.E.</div>
         <div class="marge-subtitle">MULTIMODAL AUTOMATED REAL-TIME GUARDIAN ENGINE</div>
         <div class="marge-tagline">The Equity Guardian — Sociotechnical Middleware</div>
     </div>
@@ -113,31 +121,31 @@ class MARGEEvaluationPayload(BaseModel):
             raise ValueError('Guardian Index must be bound between 0 and 100.')
         return v
 
-# --- SIDEBAR: VISITOR PORTAL & AI-TO-AI CONFIG ---
+# --- SIDEBAR: VISITOR PORTAL & NAVIGATION ---
 with st.sidebar:
-    st.markdown("<h3 style='color: #ffb800;'>🏹 Guardian Controls</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='color: #ffb800;'>🏹 Visitor Portal</h3>", unsafe_allow_html=True)
     user_handle = st.text_input("Your Name / Handle", value="Pocketdoc")
     
     st.markdown("---")
     st.markdown("<h3 style='color: #ffb800;'>⚡ AI-to-AI Engine Config</h3>", unsafe_allow_html=True)
-    enable_ai_to_ai = st.toggle("Enable AI-to-AI Interceptor", value=True)
+    openai_key = st.text_input("OpenAI API Key (Optional)", type="password")
+    enable_ai_to_ai = st.toggle("Enable Real-Time AI-to-AI Interceptor", value=True)
     st.markdown(
-        "<small style='color: #cccccc;'>Oshun theme active: charcoal and honey-gold.<br>Self-contained mode: no API request or external service is used.</small>", 
+        "<small style='color: #cccccc;'>When enabled, M.A.R.G.E. intercepts model-to-model streams in real time to prevent automated bias propagation.</small>", 
         unsafe_allow_html=True
     )
+    
+    st.markdown("---")
+    st.markdown("<h3 style='color: #ffb800;'>Navigation Panel</h3>", unsafe_allow_html=True)
+    page_selection = st.radio(
+        "Select View:",
+        ["🏹 The Guardian Audit", "📖 About & User Guide"],
+        label_visibility="collapsed"
+    )
 
-# --- FIVE-PILLAR TAXONOMY ---
-FIVE_PILLARS = {
-    "Pillar 1: Stereotypical & Demographic Framing": "Catches automated assumptions of roles or capabilities based on demographic generalizations.",
-    "Pillar 2: Intersectional Microaggressions": "Flags subtle slights, exclusionary phrasing, and dog-whistles targeting compounded identity vectors.",
-    "Pillar 3: Disability & Accessibility Justice": "Audits systems for ableist assumptions, inaccessible defaults, and systemic erasure of accommodations.",
-    "Pillar 4: Structural, Spatial & Economic Erasure": "Detects when optimization models ignore localized infrastructure or socio-economic realities.",
-    "Pillar 5: Dialectal & Cultural Justice": "Protects AAVE, regional dialects, and cultural vernacular against false-positive aggression flags.",
-}
-
-# --- ASYNCHRONOUS AUDITING & ACTIVE REMEDIATION ENGINE WITH PURE VALIDATION ---
-async def async_marge_deep_audit(target_text: str, ai_to_ai_active: bool) -> MARGEEvaluationPayload:
-    await asyncio.sleep(1.0) # Simulate fast async inspection
+# --- ASYNCHRONOUS AUDITING & REAL-TIME INTERCEPTION ENGINE ---
+async def async_marge_deep_audit(target_text: str, is_ai_to_ai: bool) -> MARGEEvaluationPayload:
+    await asyncio.sleep(0.8) # Simulate fast middleware inspection
     
     violations_data = []
     remediated_text = target_text
@@ -190,46 +198,57 @@ async def async_marge_deep_audit(target_text: str, ai_to_ai_active: bool) -> MAR
 
     return validated_payload
 
-# --- MAIN INTERFACE TABS ---
-tab_scanner, tab_pillars = st.tabs(["🔍 Guardian Deep Scan", "🏛️ Five-Pillar Taxonomy"])
-
-with tab_scanner:
-    st.subheader("Deep Idea & Document Microaggression Scanner")
-    st.markdown("Scan text, policy drafts, or external model outputs across the Five Pillars. M.A.R.G.E. provides deep explanations, analysis, and active structural rewrites with programmatic Pydantic validation.")
-
-    input_source = st.selectbox("Choose Input Source:", ["Direct Text Box", "Sample Policy Excerpt"])
+# --- RENDER SELECTED VIEW ---
+if page_selection == "🏹 The Guardian Audit":
+    st.subheader("Interactive Audit & Real-Time AI Interception")
     
-    if input_source == "Direct Text Box":
+    # Toggle between Human Review and Real-Time AI Stream modes
+    mode = st.radio(
+        "Select Operation Mode:",
+        ["👤 Human Deep Scan & Live Recommendations", "🤖 Real-Time AI-to-AI Interceptor Mode"],
+        horizontal=True
+    )
+
+    if "Human" in mode:
+        st.markdown("Scan text, policy drafts, or human prompts. M.A.R.G.E. detects microaggressions, provides detailed analysis, and generates active structural recommendations.")
         target_text = st.text_area(
-            "Enter text or idea for M.A.R.G.E. to scan:",
+            "Enter text payload for human equity audit:",
             value="Some folks from the inner city are just not cut out for tech leadership; they are often too aggressive during reviews.",
             height=120
         )
+        button_label = "🏹 Perform Deep Human Audit"
     else:
-        target_text = "Certain demographic groups are overly articulate in meetings, which often disrupts standard workflow procedures."
-        st.info(f"Loaded Sample: {target_text}")
+        st.markdown("⚡ **Real-time AI Middleware Active**: Intercepts automated AI model streams in flight. If microaggressions or bias parameters are detected, M.A.R.G.E. immediately sanitizes the payload before the downstream AI receives it.")
+        target_text = st.text_area(
+            "Incoming AI-to-AI Stream Payload:",
+            value="The candidate from the inner city is unusually articulate for this role.",
+            height=120
+        )
+        button_label = "⚡ Intercept & Sanitize AI Stream"
 
-    if st.button("🏹 Run Guardian Deep Scan"):
-        with st.spinner("M.A.R.G.E. is actively analyzing and enforcing type-safe schema validation..."):
-            result: MARGEEvaluationPayload = asyncio.run(async_marge_deep_audit(target_text, enable_ai_to_ai))
+    if st.button(button_label):
+        is_ai_mode = "AI-to-AI" in mode
+        with st.spinner("M.A.R.G.E. is executing async inspection and enforcing Pydantic type safety..."):
+            result: MARGEEvaluationPayload = asyncio.run(async_marge_deep_audit(target_text, is_ai_mode))
 
         st.markdown("---")
         
+        # Risk levels
         if result.guardian_index >= 80:
-            severity_color = "#28a745"  # Green
-            severity_label = "Low Risk"
+            severity_color = "#28a745"
+            severity_label = "Low Risk / Clean Stream"
         elif result.guardian_index >= 55:
-            severity_color = "#ffb800"  # Honey-Gold
-            severity_label = "Moderate Risk"
+            severity_color = "#ffb800"
+            severity_label = "Moderate Risk Detected"
         else:
-            severity_color = "#dc3545"  # Red
-            severity_label = "Critical Risk"
+            severity_color = "#dc3545"
+            severity_label = "Critical Bias / Interception Required"
 
         col_m1, col_m2 = st.columns([1, 2])
         with col_m1:
             st.metric("Guardian Index", f"{result.guardian_index}/100")
         with col_m2:
-            st.markdown("**Severity Level Scale:**")
+            st.markdown("**Status & Risk Assessment:**")
             st.markdown(
                 f"""
                 <div style="margin-top: 0.4rem;">
@@ -240,43 +259,36 @@ with tab_scanner:
                 """,
                 unsafe_allow_html=True
             )
-            interception_status = "Active Async AI-to-AI Interceptor Hooked" if enable_ai_to_ai else "Standard Direct Scan"
-            st.caption(f"Engine Mode: {interception_status}")
 
         st.markdown("---")
 
         col_orig, col_rem = st.columns(2)
         with col_orig:
-            st.markdown("🔴 **Original Text / Model Output**")
+            st.markdown("🔴 **Original Output / Intercepted Stream**")
             st.info(result.original_text)
         with col_rem:
-            st.markdown("🟢 **M.A.R.G.E. Active Corrected Rewrite**")
+            st.markdown("🟢 **M.A.R.G.E. Sanitized Output & Recommendation**")
             st.success(result.remediated_text)
 
         st.markdown("---")
-        st.markdown("### 📋 Deep Analysis & Pillar Breakdown (Validated Payload)")
+        st.markdown("### 📋 Detailed Microaggression Breakdown & Live Recommendations")
         
         if result.violations:
             for v in result.violations:
                 with st.expander(f"⚠️ Flagged: {v.pillar_name} (Severity: {v.severity_score})", expanded=True):
                     st.markdown(f"**Issue Identified:** {v.issue_identified}")
                     st.markdown(f"**Detailed Explanation:** {v.detailed_explanation}")
-                    st.markdown(f"**Active Guardian Remedy:** {v.active_remedy}")
+                    st.markdown(f"**Live Guardian Recommendation / Remedy:** {v.active_remedy}")
         else:
             st.balloons()
-            st.success("✨ Pure alignment! No microaggressions or bias vectors detected across the Five Pillars.")
+            st.success("✨ Pure alignment! No microaggressions or bias vectors detected.")
 
-with tab_pillars:
-    st.subheader("The Five-Pillar Taxonomy")
-    st.markdown("The structural rules powering M.A.R.G.E.'s real-time equity guardian engine.")
+else:
+    st.subheader("📖 About M.A.R.G.E. & User Guide")
+    st.markdown("""
+    **M.A.R.G.E. (Multimodal Automated Real-time Guardian Engine)** operates as a sociotechnical middleware gatekeeper.
     
-    for pillar, desc in FIVE_PILLARS.items():
-        st.markdown(
-            f"""
-            <div class="guardian-card">
-                <strong style="color: #ffb800;">🏹 {pillar}</strong><br>
-                <span style="color: #d1d1e0; font-size: 0.95rem;">{desc}</span>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+    ### Core Operations:
+    1. **For Humans**: Performs deep scans on policy documents and human text inputs, flagging subtle microaggressions and serving live structural recommendations.
+    2. **For AI-to-AI Systems**: Acts as a real-time interceptor that sanitizes machine-to-machine context windows, mitigating algorithmic bias propagation before downstream models process the data[cite: 2].
+    """)
