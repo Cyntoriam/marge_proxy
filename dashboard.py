@@ -3,14 +3,15 @@ from typing import List, Optional
 from pydantic import BaseModel, Field, field_validator
 import streamlit as st
 
-# --- PAGE CONFIGURATION ---
+# --- PAGE CONFIGURATION (Auto-collapsed sidebar for mobile optimization) ---
 st.set_page_config(
     page_title="M.A.R.G.E. | Multimodal Automated Real-time Guardian Engine",
     page_icon="🏹",
     layout="wide",
+    initial_sidebar_state="collapsed",
 )
 
-# --- GLOBAL BURNT ORANGE & MOBILE-FRIENDLY OSHUN STYLING ---
+# --- GLOBAL BURNT ORANGE & MOBILE-FIRST STYLING ---
 st.markdown(
     """
     <style>
@@ -20,9 +21,40 @@ st.markdown(
         color: #fcebe6 !important;
     }
     
+    /* Sidebar Styling & Mobile Bounds */
     [data-testid="stSidebar"] {
         background-color: #170702 !important;
         border-right: 1px solid rgba(224, 86, 36, 0.4) !important;
+    }
+
+    /* Mobile-Specific Responsive Styling */
+    @media (max-width: 768px) {
+        /* Make sidebar sleeker and less overwhelming on phone screens */
+        [data-testid="stSidebar"] {
+            width: 85vw !important;
+        }
+        .marge-title {
+            font-size: 1.8rem !important;
+        }
+        .marge-subtitle {
+            font-size: 0.8rem !important;
+        }
+        .marge-header {
+            padding: 1rem !important;
+            margin-bottom: 0.8rem !important;
+        }
+        /* Mobile touch button width */
+        div.stButton > button {
+            width: 100% !important;
+            padding: 0.75rem !important;
+            font-size: 1rem !important;
+        }
+        /* Reduce block container margins for mobile screens */
+        .block-container {
+            padding-top: 2rem !important;
+            padding-left: 0.8rem !important;
+            padding-right: 0.8rem !important;
+        }
     }
 
     /* Header Box */
@@ -37,14 +69,14 @@ st.markdown(
         text-align: center;
     }
     .marge-title {
-        font-size: 2.2rem;
+        font-size: 2.5rem;
         font-weight: 800;
         margin-bottom: 0.2rem;
         color: #ffb800;
         letter-spacing: 0.5px;
     }
     .marge-subtitle {
-        font-size: 0.95rem;
+        font-size: 1rem;
         color: #f3d0c7;
         font-weight: 400;
         text-transform: uppercase;
@@ -81,25 +113,7 @@ st.markdown(
         margin-top: 0.4rem;
     }
 
-    /* Touch-Friendly Responsive Adjustments for Mobile / Phones */
-    @media (max-width: 768px) {
-        .marge-title {
-            font-size: 1.7rem !important;
-        }
-        .marge-subtitle {
-            font-size: 0.8rem !important;
-        }
-        .marge-header {
-            padding: 1rem !important;
-        }
-        div.stButton > button {
-            width: 100% !important;
-            padding: 0.75rem !important;
-            font-size: 1rem !important;
-        }
-    }
-
-    /* Expander Header */
+    /* Expander Header Styling */
     .streamlit-expanderHeader {
         background-color: #240c03 !important;
         color: #ffb800 !important;
@@ -108,7 +122,7 @@ st.markdown(
         border: 1px solid rgba(224, 86, 36, 0.3) !important;
     }
 
-    /* Buttons */
+    /* Primary Action Buttons */
     div.stButton > button {
         background: linear-gradient(90deg, #e05624 0%, #d94e1f 100%) !important;
         color: #ffffff !important;
@@ -146,7 +160,7 @@ class MARGEEvaluationPayload(BaseModel):
 
 # --- SIDEBAR NAVIGATION WITH DYNAMIC HANDLE ---
 with st.sidebar:
-    st.markdown("<h3 style='color: #ffb800;'>🏹 Guardian Portal</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='color: #ffb800; margin-bottom: 0;'>🏹 Guardian Portal</h3>", unsafe_allow_html=True)
     
     raw_handle = st.text_input("Your Name / Handle", value="Pocketdoc")
     formatted_handle = raw_handle.strip() if raw_handle.strip() else "Guardian"
@@ -156,7 +170,7 @@ with st.sidebar:
         display_name = formatted_handle
 
     st.markdown("---")
-    st.markdown("<h4 style='color: #ffb800;'>Navigation Panel</h4>", unsafe_allow_html=True)
+    st.markdown("<h4 style='color: #ffb800; margin-bottom: 0.2rem;'>Navigation Panel</h4>", unsafe_allow_html=True)
     
     page_selection = st.radio(
         "Main Navigation",
@@ -168,7 +182,7 @@ with st.sidebar:
     input_preset = "Custom Text Entry"
     
     if page_selection == "🔍 Audit Console":
-        st.markdown("<div style='margin-left: 0.5rem; border-left: 2px solid #e05624; padding-left: 0.6rem; margin-top: 0.4rem;'>", unsafe_allow_html=True)
+        st.markdown("<div style='margin-left: 0.4rem; border-left: 2px solid #e05624; padding-left: 0.6rem; margin-top: 0.4rem;'>", unsafe_allow_html=True)
         st.markdown("<small style='color: #ffb800; font-weight: bold;'>Audit Parameters</small>", unsafe_allow_html=True)
         scan_mode = st.radio("Scan Depth", ["Initial Scan", "Deep Intersectional Scan"])
         input_preset = st.selectbox("Input Type / Preset Example", ["Custom Text Entry", "HR Policy Sample", "AI-to-AI Intercept Stream"])
@@ -187,7 +201,7 @@ FIVE_PILLARS = {
     "Pillar 5: Dialectal & Cultural Justice": "Protects AAVE, regional dialects, and cultural vernacular against false-positive aggression flags.",
 }
 
-# --- AUDIT ENGINE WITH GRADUAL DEGRADATION LOGIC ---
+# --- AUDIT ENGINE WITH GRADUAL DEGRADATION ---
 async def async_marge_audit(target_text: str, scan_type: str) -> MARGEEvaluationPayload:
     await asyncio.sleep(0.4)
     violations = []
@@ -196,7 +210,6 @@ async def async_marge_audit(target_text: str, scan_type: str) -> MARGEEvaluation
     active_tier = "Tier 1: Full Deep Inspection"
 
     try:
-        # TIER 1 / TIER 2 Pattern Matching Logic
         if any(p in lower for p in ["inner city", "those people", "unusually articulate"]):
             violations.append(
                 PillarEvaluation(
@@ -236,8 +249,7 @@ async def async_marge_audit(target_text: str, scan_type: str) -> MARGEEvaluation
                 )
             )
 
-    except Exception as e:
-        # GRADUAL DEGRADATION FALLBACK (Tier 3: Safe Passthrough)
+    except Exception:
         active_tier = "Tier 3: Safe Passthrough Fallback"
         remediated = target_text
 
@@ -250,14 +262,14 @@ async def async_marge_audit(target_text: str, scan_type: str) -> MARGEEvaluation
         violations=violations if scan_type == "Deep Intersectional Scan" else violations[:1]
     )
 
-# --- INTERFACE VIEWS ---
+# --- MAIN INTERFACE VIEWS ---
 if page_selection == "🔍 Audit Console":
     st.markdown(
         f"""
-        <div style="background-color: #1c0802; padding: 1rem; border-radius: 10px; border: 1px solid rgba(224, 86, 36, 0.4); margin-bottom: 1rem;">
-            <h3 style="color: #ffb800; margin: 0; font-size: 1.2rem;">✨ Welcome, {display_name}.</h3>
-            <p style="color: #f3d0c7; margin-top: 0.3rem; margin-bottom: 0; font-size: 0.85rem;">
-                M.A.R.G.E. stands by as your algorithmic angel and spiritual equity guardian, protecting human dignity across all devices.
+        <div style="background-color: #1c0802; padding: 0.9rem; border-radius: 10px; border: 1px solid rgba(224, 86, 36, 0.4); margin-bottom: 0.9rem;">
+            <h3 style="color: #ffb800; margin: 0; font-size: 1.15rem;">✨ Welcome, {display_name}.</h3>
+            <p style="color: #f3d0c7; margin-top: 0.2rem; margin-bottom: 0; font-size: 0.82rem;">
+                M.A.R.G.E. stands by as your algorithmic angel and spiritual equity guardian.
             </p>
         </div>
         """,
@@ -280,12 +292,12 @@ if page_selection == "🔍 Audit Console":
         st.markdown("---")
         
         # Guardian Index Sliding Scale
-        st.markdown("<h4 style='color: #ffb800; font-size: 1rem;'>🏹 Guardian Index Severity Meter</h4>", unsafe_allow_html=True)
+        st.markdown("<h4 style='color: #ffb800; font-size: 0.95rem; margin-bottom: 0.4rem;'>🏹 Guardian Index Severity Meter</h4>", unsafe_allow_html=True)
         pct = max(0, min(100, result.guardian_index))
         
         scale_html = f"""
-        <div style="background-color: #1c0802; padding: 1rem; border-radius: 10px; border: 1px solid rgba(224, 86, 36, 0.4); margin-bottom: 1rem;">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 0.3rem; font-weight: bold; color: #ffb800; font-size: 0.85rem;">
+        <div style="background-color: #1c0802; padding: 0.9rem; border-radius: 10px; border: 1px solid rgba(224, 86, 36, 0.4); margin-bottom: 1rem;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 0.3rem; font-weight: bold; color: #ffb800; font-size: 0.8rem;">
                 <span>Critical Bias (0)</span>
                 <span>Guardian Index: {result.guardian_index} / 100</span>
                 <span>Pure Harmony (100)</span>
@@ -300,7 +312,6 @@ if page_selection == "🔍 Audit Console":
         """
         st.markdown(scale_html, unsafe_allow_html=True)
 
-        # Phone-friendly stacked columns
         col_orig, col_rem = st.columns([1, 1])
         with col_orig:
             st.markdown("🔴 **Original / Intercepted Payload**")
@@ -311,11 +322,11 @@ if page_selection == "🔍 Audit Console":
 
         if scan_mode == "Initial Scan":
             st.markdown("---")
-            st.markdown("<h4 style='color: #ffb800; font-size: 1rem;'>⚡ Initial Pattern Screen Overview</h4>", unsafe_allow_html=True)
-            st.markdown(f"<span style='color: #f3d0c7; font-size: 0.85rem;'>Initial scan detected active microaggression and subconscious framing patterns. Switch to <strong>Deep Intersectional Scan</strong> in the sidebar for full spiritual guidance and strategic rewrites.</span>", unsafe_allow_html=True)
+            st.markdown("<h4 style='color: #ffb800; font-size: 0.95rem;'>⚡ Initial Pattern Screen Overview</h4>", unsafe_allow_html=True)
+            st.markdown(f"<span style='color: #f3d0c7; font-size: 0.82rem;'>Initial scan detected active microaggression and subconscious framing patterns. Open the sidebar (top-left arrow) and switch to <strong>Deep Intersectional Scan</strong> for full spiritual guidance and strategic rewrites.</span>", unsafe_allow_html=True)
         else:
             st.markdown("---")
-            st.markdown("<h3 style='color: #ffb800; font-size: 1.1rem;'>✨ Guardian Insights & Spiritual Thought Partner Guide</h3>", unsafe_allow_html=True)
+            st.markdown("<h3 style='color: #ffb800; font-size: 1.05rem;'>✨ Guardian Insights & Spiritual Thought Partner Guide</h3>", unsafe_allow_html=True)
             
             if result.violations:
                 for v in result.violations:
@@ -329,23 +340,23 @@ if page_selection == "🔍 Audit Console":
                 st.success("✨ Pure harmony! No microaggressions or structural bias vectors detected.")
 
 elif page_selection == "🏛️ Five-Pillar Taxonomy":
-    st.markdown("<h2 style='color: #ffb800; font-size: 1.4rem;'>🏛️ The Five-Pillar Equity Framework</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 style='color: #ffb800; font-size: 1.3rem;'>🏛️ The Five-Pillar Equity Framework</h2>", unsafe_allow_html=True)
     st.markdown("---")
     for pillar, desc in FIVE_PILLARS.items():
         st.markdown(
             f"""
             <div class="guardian-card">
                 <strong style="color: #ffb800;">🏹 {pillar}</strong><br>
-                <span style="color: #f3d0c7; font-size: 0.85rem;">{desc}</span>
+                <span style="color: #f3d0c7; font-size: 0.82rem;">{desc}</span>
             </div>
             """,
             unsafe_allow_html=True
         )
 
 else:
-    st.markdown("<h2 style='color: #ffb800; font-size: 1.4rem;'>📖 M.A.R.G.E. System Guide</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 style='color: #ffb800; font-size: 1.3rem;'>📖 M.A.R.G.E. System Guide</h2>", unsafe_allow_html=True)
     st.markdown("""
-    <div style="color: #f3d0c7; line-height: 1.5; font-size: 0.9rem;">
+    <div style="color: #f3d0c7; line-height: 1.5; font-size: 0.85rem;">
     <p><strong>M.A.R.G.E. (Multimodal Automated Real-time Guardian Engine)</strong> acts as an algorithmic angel and spiritual equity guardian, serving as a type-safe middleware gatekeeper with gradual degradation safety.</p>
     
     <h4 style="color: #ffb800;">System Degradation & Resilience Tiers:</h4>
