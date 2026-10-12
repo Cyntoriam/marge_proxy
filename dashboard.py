@@ -34,7 +34,7 @@ if st.session_state.theme_mode == "Dark Mode":
     header_bg = "linear-gradient(135deg, #2e1004 0%, #1a0802 100%)"
     header_border = HONEY_GOLD
     title_color = HONEY_GOLD
-    title_stroke = "none"
+    text_stroke_val = "none"
     subtitle_color = "#f3d0c7"
     card_bg = "#1c0802"
     card_border = "rgba(255, 184, 0, 0.4)"
@@ -45,11 +45,13 @@ if st.session_state.theme_mode == "Dark Mode":
     input_bg = "#240c03"
     input_text = "#ffffff"
     placeholder_text = "#f3d0c7"
-    dropdown_text = HONEY_GOLD
+    dropdown_popover_bg = "#1f0902"
+    dropdown_popover_text = HONEY_GOLD
+    dropdown_hover_bg = "#3d1304"
     btn_bg = "linear-gradient(90deg, #e05624 0%, #d94e1f 100%)"
     sidebar_bg = "#170702"
 else:
-    # LIGHT MODE: Honey Gold Outlines, Subheader Border & White Input Boxes
+    # LIGHT MODE: Honey Gold Outlines & Accents
     bg_style = "linear-gradient(180deg, #fdfbf7 0%, #f7f0e6 60%, #efe3d3 100%)"
     text_color = "#2b1105"
     panel_bg = "#f5e9da"
@@ -58,7 +60,7 @@ else:
     header_bg = "linear-gradient(135deg, #8c2d0d 0%, #5e1c06 100%)"
     header_border = HONEY_GOLD
     title_color = HONEY_GOLD
-    title_stroke = f"1px {HONEY_GOLD}"
+    text_stroke_val = f"1px {HONEY_GOLD}"
     subtitle_color = HONEY_GOLD
     card_bg = "#f7ebe0"
     card_border = HONEY_GOLD
@@ -69,11 +71,13 @@ else:
     input_bg = "#ffffff"
     input_text = "#2b1105"
     placeholder_text = "#6e3b22"
-    dropdown_text = HONEY_GOLD
+    dropdown_popover_bg = "#ffffff"
+    dropdown_popover_text = "#2b1105"
+    dropdown_hover_bg = "#f5e9da"
     btn_bg = "linear-gradient(90deg, #d96b27 0%, #b84f18 100%)"
     sidebar_bg = "#f5e9da"
 
-# --- INJECT COMPLETE HIGH-CONTRAST CSS ---
+# --- INJECT COMPLETE CSS WITH OVERRIDES ---
 css_code = (
     "<style>"
     f".stApp {{ background: {bg_style} !important; color: {text_color} !important; }}"
@@ -81,12 +85,12 @@ css_code = (
     ".block-container { max-width: 100% !important; padding-top: 1.2rem !important; padding-left: 1rem !important; padding-right: 1rem !important; }"
     f".control-panel {{ background-color: {panel_bg}; padding: 1.2rem; border-radius: 12px; border: 2px solid {panel_border}; margin-bottom: 1.5rem; }}"
     f".marge-header {{ background: {header_bg}; padding: 1.5rem; border-radius: 12px; color: #ffffff; margin-bottom: 1.2rem; border: 2px solid {header_border}; text-align: center; }}"
-    f".marge-title {{ font-size: 2.2rem; font-weight: 800; margin-bottom: 0.4rem; color: {title_color}; -webkit-text-stroke: {title_stroke}; }}"
+    f".marge-title {{ font-size: 2.2rem; font-weight: 800; margin-bottom: 0.4rem; color: {title_color}; -webkit-text-stroke: {text_stroke_val}; }}"
     
-    # Subheader Gold Bordered Container
-    f".marge-subtitle-box {{ display: inline-block; padding: 0.5rem 1.2rem; border: 2px solid {HONEY_GOLD}; border-radius: 8px; background: rgba(0,0,0,0.25); margin-top: 0.3rem; }}"
-    f".marge-subtitle {{ font-size: 0.92rem; color: {subtitle_color}; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }}"
-    f".marge-essence {{ font-size: 0.85rem; color: {HONEY_GOLD}; font-style: italic; margin-top: 0.2rem; }}"
+    # Subheader Box & Typography Styling
+    f".marge-subtitle-box {{ display: inline-block; padding: 0.6rem 1.4rem; border: 2px solid {HONEY_GOLD}; border-radius: 8px; background: rgba(0,0,0,0.3); margin-top: 0.3rem; }}"
+    f".marge-subtitle {{ font-size: 0.92rem; color: {subtitle_color}; font-weight: 800; text-transform: uppercase; letter-spacing: 0.6px; -webkit-text-stroke: {text_stroke_val}; }}"
+    f".marge-essence {{ font-size: 0.85rem; color: {HONEY_GOLD} !important; font-style: italic; margin-top: 0.25rem; font-weight: 700; -webkit-text-stroke: none !important; }}"
     
     f".guardian-card {{ background-color: {card_bg}; padding: 1rem; border-radius: 8px; border-left: 4px solid {header_border}; margin-bottom: 0.8rem; border: 2px solid {card_border}; color: {text_color}; }}"
     f".degradation-badge {{ display: inline-block; padding: 0.2rem 0.6rem; border-radius: 12px; font-size: 0.75rem; font-weight: bold; background-color: {badge_bg}; border: 1px solid {header_border}; color: {badge_text}; margin-top: 0.4rem; }}"
@@ -98,14 +102,15 @@ css_code = (
     f"details summary {{ background-color: {expander_bg} !important; border-radius: 6px !important; border: 2px solid {panel_border} !important; padding: 0.5rem 1rem !important; }}"
     f"details summary p, details summary span, details summary div, details summary svg {{ color: {expander_text} !important; fill: {expander_text} !important; font-weight: 800 !important; font-size: 1rem !important; }}"
     
-    # FORCED WHITE INPUT & DROPDOWN CONTAINERS WHEN PUSHED/ACTIVE
+    # Textarea, input, and base select styling
     f"div[data-baseweb='select'], div[data-baseweb='select'] > div, div[data-baseweb='input'], div[data-baseweb='input'] > div, textarea, input {{ background-color: {input_bg} !important; color: {input_text} !important; border: 2px solid {panel_border} !important; }}"
-    f"div[data-baseweb='select']:focus, div[data-baseweb='select']:active, div[data-baseweb='select'] > div:focus, div[data-baseweb='select'] > div:active {{ background-color: {input_bg} !important; color: {input_text} !important; }}"
     f"textarea::placeholder, input::placeholder {{ color: {placeholder_text} !important; opacity: 1 !important; }}"
     
-    # DROPDOWN TEXT & POPOVER OVERRIDE
-    f"div[data-baseweb='popover'] *, div[data-baseweb='menu'] *, ul[role='listbox'] *, li[role='option'] * {{ color: {dropdown_text} !important; font-weight: 700 !important; }}"
-    f"li[role='option']:hover, li[role='option'][aria-selected='true'] {{ background-color: rgba(255, 184, 0, 0.25) !important; }}"
+    # COMPLETE POPOVER & DROPDOWN PORTAL OVERRIDE
+    f"div[data-baseweb='popover'], div[data-baseweb='popover'] > div, div[data-baseweb='menu'], ul[role='listbox'] {{ background-color: {dropdown_popover_bg} !important; border: 2px solid {panel_border} !important; }}"
+    f"div[data-baseweb='popover'] *, div[data-baseweb='menu'] *, ul[role='listbox'] * {{ color: {dropdown_popover_text} !important; }}"
+    f"li[role='option'] {{ background-color: {dropdown_popover_bg} !important; color: {dropdown_popover_text} !important; font-weight: 600 !important; }}"
+    f"li[role='option']:hover, li[role='option'][aria-selected='true'] {{ background-color: {dropdown_hover_bg} !important; color: {dropdown_popover_text} !important; }}"
     
     f"label, p, span, div {{ color: {text_color} !important; }}"
     f"div.stButton > button {{ background: {btn_bg} !important; color: #ffffff !important; border-radius: 8px !important; border: none !important; font-weight: bold !important; width: 100% !important; padding: 0.75rem !important; }}"
