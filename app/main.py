@@ -10,18 +10,31 @@ st.set_page_config(
     layout="wide",
 )
 
-# --- THEME & OSHUN WARM GOLD HEADER SETUP ---
+# --- GLOBAL OSHUN THEME & STYLING OVERRIDE ---
 st.markdown(
     """
     <style>
+    /* Force main app background to deep charcoal */
+    .stApp {
+        background-color: #0e0e12 !important;
+        color: #f3f3f8 !important;
+    }
+    
+    /* Force sidebar styling */
+    [data-testid="stSidebar"] {
+        background-color: #141419 !important;
+        border-right: 1px solid rgba(255, 184, 0, 0.2) !important;
+    }
+
+    /* Golden Header Box */
     .marge-header {
-        background-color: #121212;
+        background-color: #141419;
         padding: 2.2rem;
         border-radius: 12px;
         color: #f3f3f8;
         margin-bottom: 2rem;
-        box-shadow: 0 0 20px rgba(255, 184, 0, 0.15);
-        border: 1px solid rgba(255, 184, 0, 0.4);
+        box-shadow: 0 0 25px rgba(255, 184, 0, 0.25);
+        border: 2px solid #ffb800;
         text-align: center;
     }
     .marge-title {
@@ -29,14 +42,14 @@ st.markdown(
         font-weight: 800;
         margin-bottom: 0.3rem;
         color: #ffb800;
-        letter-spacing: 0.5px;
+        letter-spacing: 1px;
     }
     .marge-subtitle {
         font-size: 1.15rem;
         color: #e0e0e0;
-        font-weight: 300;
+        font-weight: 400;
         text-transform: uppercase;
-        letter-spacing: 1px;
+        letter-spacing: 1.5px;
     }
     .marge-tagline {
         font-size: 0.95rem;
@@ -45,12 +58,12 @@ st.markdown(
         margin-top: 0.4rem;
     }
     .guardian-card {
-        background-color: #1a1b26;
+        background-color: #181820;
         padding: 1.2rem;
         border-radius: 8px;
         border-left: 4px solid #ffb800;
         margin-bottom: 1rem;
-        border: 1px solid rgba(255,255,255,0.04);
+        border: 1px solid rgba(255, 184, 0, 0.2);
     }
     .severity-pill {
         display: inline-block;
@@ -61,16 +74,8 @@ st.markdown(
         color: #ffffff;
         text-align: center;
     }
-    stMarkdown ul {
-        list-style: none;
-        padding-left: 0;
-    }
-    stMarkdown ul li::before {
-        content: "🏹 ";
-        color: #ffb800;
-        font-weight: bold;
-    }
     </style>
+    
     <div class="marge-header">
         <div class="marge-title">M.A.R.G.E. 🏹</div>
         <div class="marge-subtitle">MULTIMODAL AUTOMATED REAL-TIME GUARDIAN ENGINE</div>
@@ -110,13 +115,16 @@ class MARGEEvaluationPayload(BaseModel):
 
 # --- SIDEBAR: VISITOR PORTAL & AI-TO-AI CONFIG ---
 with st.sidebar:
-    st.markdown("### 🏹 Guardian Controls")
+    st.markdown("<h3 style='color: #ffb800;'>🏹 Guardian Controls</h3>", unsafe_allow_html=True)
     user_handle = st.text_input("Your Name / Handle", value="Pocketdoc")
     
     st.markdown("---")
-    st.markdown("### ⚡ AI-to-AI Engine Config")
+    st.markdown("<h3 style='color: #ffb800;'>⚡ AI-to-AI Engine Config</h3>", unsafe_allow_html=True)
     enable_ai_to_ai = st.toggle("Enable AI-to-AI Interceptor", value=True)
-    st.markdown("<small>Oshun theme active: charcoal and honey-gold.[cite: 1] Self-contained mode: no API request or external service is used.</small>", unsafe_allow_html=True)
+    st.markdown(
+        "<small style='color: #cccccc;'>Oshun theme active: charcoal and honey-gold.<br>Self-contained mode: no API request or external service is used.</small>", 
+        unsafe_allow_html=True
+    )
 
 # --- FIVE-PILLAR TAXONOMY ---
 FIVE_PILLARS = {
@@ -159,3 +167,116 @@ async def async_marge_deep_audit(target_text: str, ai_to_ai_active: bool) -> MAR
             )
         )
         remediated_text = remediated_text.replace("too aggressive", "direct and assertive in communication")
+
+    if any(w in text_lower for w in ["cant", "cannot", "failed", "broken"]) and not "support" in text_lower:
+        violations_data.append(
+            PillarEvaluation(
+                pillar_name="Pillar 4: Structural, Spatial & Economic Erasure",
+                severity_score=0.65,
+                issue_identified="Deficit-based framing that creates psychological barriers.",
+                detailed_explanation="Language actively projects failure or inability onto specific groups.",
+                active_remedy="Reframe entirely around institutional accessibility, mentorship pipelines, and clear capability growth frameworks."
+            )
+        )
+
+    guardian_index = max(100 - (len(violations_data) * 25), 35)
+
+    validated_payload = MARGEEvaluationPayload(
+        original_text=target_text,
+        remediated_text=remediated_text,
+        guardian_index=guardian_index,
+        violations=violations_data
+    )
+
+    return validated_payload
+
+# --- MAIN INTERFACE TABS ---
+tab_scanner, tab_pillars = st.tabs(["🔍 Guardian Deep Scan", "🏛️ Five-Pillar Taxonomy"])
+
+with tab_scanner:
+    st.subheader("Deep Idea & Document Microaggression Scanner")
+    st.markdown("Scan text, policy drafts, or external model outputs across the Five Pillars. M.A.R.G.E. provides deep explanations, analysis, and active structural rewrites with programmatic Pydantic validation.")
+
+    input_source = st.selectbox("Choose Input Source:", ["Direct Text Box", "Sample Policy Excerpt"])
+    
+    if input_source == "Direct Text Box":
+        target_text = st.text_area(
+            "Enter text or idea for M.A.R.G.E. to scan:",
+            value="Some folks from the inner city are just not cut out for tech leadership; they are often too aggressive during reviews.",
+            height=120
+        )
+    else:
+        target_text = "Certain demographic groups are overly articulate in meetings, which often disrupts standard workflow procedures."
+        st.info(f"Loaded Sample: {target_text}")
+
+    if st.button("🏹 Run Guardian Deep Scan"):
+        with st.spinner("M.A.R.G.E. is actively analyzing and enforcing type-safe schema validation..."):
+            result: MARGEEvaluationPayload = asyncio.run(async_marge_deep_audit(target_text, enable_ai_to_ai))
+
+        st.markdown("---")
+        
+        if result.guardian_index >= 80:
+            severity_color = "#28a745"  # Green
+            severity_label = "Low Risk"
+        elif result.guardian_index >= 55:
+            severity_color = "#ffb800"  # Honey-Gold
+            severity_label = "Moderate Risk"
+        else:
+            severity_color = "#dc3545"  # Red
+            severity_label = "Critical Risk"
+
+        col_m1, col_m2 = st.columns([1, 2])
+        with col_m1:
+            st.metric("Guardian Index", f"{result.guardian_index}/100")
+        with col_m2:
+            st.markdown("**Severity Level Scale:**")
+            st.markdown(
+                f"""
+                <div style="margin-top: 0.4rem;">
+                    <span class="severity-pill" style="background-color: {severity_color};">
+                        🏹 {severity_label} ({result.guardian_index}/100)
+                    </span>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+            interception_status = "Active Async AI-to-AI Interceptor Hooked" if enable_ai_to_ai else "Standard Direct Scan"
+            st.caption(f"Engine Mode: {interception_status}")
+
+        st.markdown("---")
+
+        col_orig, col_rem = st.columns(2)
+        with col_orig:
+            st.markdown("🔴 **Original Text / Model Output**")
+            st.info(result.original_text)
+        with col_rem:
+            st.markdown("🟢 **M.A.R.G.E. Active Corrected Rewrite**")
+            st.success(result.remediated_text)
+
+        st.markdown("---")
+        st.markdown("### 📋 Deep Analysis & Pillar Breakdown (Validated Payload)")
+        
+        if result.violations:
+            for v in result.violations:
+                with st.expander(f"⚠️ Flagged: {v.pillar_name} (Severity: {v.severity_score})", expanded=True):
+                    st.markdown(f"**Issue Identified:** {v.issue_identified}")
+                    st.markdown(f"**Detailed Explanation:** {v.detailed_explanation}")
+                    st.markdown(f"**Active Guardian Remedy:** {v.active_remedy}")
+        else:
+            st.balloons()
+            st.success("✨ Pure alignment! No microaggressions or bias vectors detected across the Five Pillars.")
+
+with tab_pillars:
+    st.subheader("The Five-Pillar Taxonomy")
+    st.markdown("The structural rules powering M.A.R.G.E.'s real-time equity guardian engine.")
+    
+    for pillar, desc in FIVE_PILLARS.items():
+        st.markdown(
+            f"""
+            <div class="guardian-card">
+                <strong style="color: #ffb800;">🏹 {pillar}</strong><br>
+                <span style="color: #d1d1e0; font-size: 0.95rem;">{desc}</span>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
