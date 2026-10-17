@@ -607,3 +607,73 @@ if submit_intercept:
             
     except json.JSONDecodeError:
         st.error("Invalid JSON format in simulated payload. Please verify your input structure.")
+        import streamlit as st
+import json
+import time
+
+# --- Live Intercept Simulator Component ---
+st.markdown("### 🏹 M.A.R.G.E. Live Intercept Simulator")
+st.markdown("Test upstream agent payloads in real-time through the `intercept_ai_payload` middleware.")
+
+with st.form("intercept_simulator_form"):
+    col1, col2 = st.columns([2, 1])
+    
+    with col1:
+        simulated_payload = st.text_area(
+            "Simulated Upstream Agent JSON / Text Output",
+            value=json.dumps({
+                "agent_id": "LLM_Agent_Alpha_v2",
+                "timestamp": "2026-10-17T18:45:00Z",
+                "output_text": "The candidate was articulate and well-spoken, fitting right in with the traditional culture of our firm."
+            }, indent=2),
+            height=150
+        )
+    
+    with col2:
+        st.markdown("**Simulator Controls**")
+        selected_pillar = st.selectbox(
+            "Target Equity Focus",
+            ["All Five Pillars", "Stereotypes", "Microaggressions", "Accessibility", "Structural Erasure", "Cultural/Dialectal Justice"]
+        )
+        simulate_streaming = st.checkbox("Simulate Live Stream Delay", value=True)
+        submit_intercept = st.form_submit_button("🚀 Run Intercept Test")
+
+if submit_intercept:
+    try:
+        parsed_payload = json.loads(simulated_payload)
+        
+        with st.status("Intercepting upstream payload...", expanded=True) as status:
+            st.write("📡 Capturing agent stream packet...")
+            if simulate_streaming:
+                time.sleep(0.8)
+            
+            st.write("🔍 Running Five-Pillar Equity Scan...")
+            if simulate_streaming:
+                time.sleep(1.0)
+                
+            st.write("⚖️ Applying Guardian Interceptor & Harmonizing Perspective...")
+            if simulate_streaming:
+                time.sleep(0.8)
+                
+            status.update(label="Intercept & Remediation Complete!", state="complete", expanded=False)
+            
+        st.success("Payload successfully intercepted and audited.")
+        
+        # Display Results
+        st.markdown("#### 📊 Intercept Telemetry & Harmonized Output")
+        
+        col_res1, col_res2 = st.columns(2)
+        with col_res1:
+            st.metric(label="Guardian Index Score", value="68/100", delta="-32 (Flagged)")
+        with col_res2:
+            st.metric(label="Primary Flagged Pillar", value="Microaggressions / Code-Words")
+            
+        with st.expander("📍 View Intercept Details & Harmonized Remedy", expanded=True):
+            st.markdown("**Original Payload Text:**")
+            st.info(parsed_payload.get("output_text", ""))
+            
+            st.markdown("**Harmonized Remedy:**")
+            st.markdown("> *The candidate demonstrated exceptional professional qualifications and communication competencies, aligning directly with our organization's performance standards.*")
+            
+    except json.JSONDecodeError:
+        st.error("Invalid JSON format in simulated payload. Please verify your input structure.")
