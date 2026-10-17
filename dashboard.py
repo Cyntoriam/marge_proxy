@@ -520,3 +520,20 @@ else:
         '</ul></div>'
     )
     st.markdown(guide_html, unsafe_allow_html=True)
+    # --- AI-TO-AI INTERCEPTOR MIDDLEWARE ---
+async def intercept_ai_payload(upstream_payload: str, api_key: str = "", active: bool = True) -> MARGEEvaluationPayload:
+    """
+    Middleware gatekeeper intercepting raw upstream LLM agent outputs 
+    before downstream evaluation or rendering.
+    """
+    if not active:
+        return MARGEEvaluationPayload(
+            original_text=upstream_payload,
+            remediated_text=upstream_payload,
+            guardian_index=100,
+            degradation_tier="Tier 0: Interceptor Bypassed",
+            violations=[]
+        )
+    
+    # Route through M.A.R.G.E.'s core inspection engine
+    return await async_marge_audit(upstream_payload, scan_type="Deep Intersectional Scan", api_key=api_key)
