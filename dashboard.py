@@ -1,6 +1,7 @@
 import asyncio
 import json
 import random
+import time
 from typing import List, Optional
 from pydantic import BaseModel, Field
 import streamlit as st
@@ -87,32 +88,20 @@ css_code = (
     f".control-panel {{ background-color: {panel_bg}; padding: 1.2rem; border-radius: 12px; border: 2px solid {panel_border}; margin-bottom: 1.5rem; }}"
     f".marge-header {{ background: {header_bg}; padding: 1.5rem; border-radius: 12px; color: #ffffff; margin-bottom: 1.2rem; border: 2px solid {header_border}; text-align: center; }}"
     f".marge-title {{ font-size: 2.2rem; font-weight: 800; margin-bottom: 0.4rem; color: {title_color}; -webkit-text-stroke: {text_stroke_val}; }}"
-    
-    # Subheader Box & Typography Styling
     f".marge-subtitle-box {{ display: inline-block; padding: 0.6rem 1.4rem; border: 2px solid {HONEY_GOLD}; border-radius: 8px; background: rgba(0,0,0,0.3); margin-top: 0.3rem; }}"
     f".marge-subtitle {{ font-size: 0.92rem; color: {subtitle_color}; font-weight: 800; text-transform: uppercase; letter-spacing: 0.6px; -webkit-text-stroke: {text_stroke_val}; }}"
     f".marge-essence {{ font-size: 0.85rem; color: {HONEY_GOLD} !important; font-style: italic; margin-top: 0.25rem; font-weight: 700; -webkit-text-stroke: none !important; }}"
-    
     f".guardian-card {{ background-color: {card_bg}; padding: 1rem; border-radius: 8px; border-left: 4px solid {header_border}; margin-bottom: 0.8rem; border: 2px solid {card_border}; color: {text_color}; }}"
     f".degradation-badge {{ display: inline-block; padding: 0.2rem 0.6rem; border-radius: 12px; font-size: 0.75rem; font-weight: bold; background-color: {badge_bg}; border: 1px solid {header_border}; color: {badge_text}; margin-top: 0.4rem; }}"
-    
-    # Global Horizontal Dividers
     f"hr {{ border: none !important; border-top: 2px solid {hr_border} !important; margin: 1rem 0 !important; opacity: 1 !important; }}"
-    
-    # Expander styling
     f"details summary {{ background-color: {expander_bg} !important; border-radius: 6px !important; border: 2px solid {panel_border} !important; padding: 0.5rem 1rem !important; }}"
     f"details summary p, details summary span, details summary div, details summary svg {{ color: {expander_text} !important; fill: {expander_text} !important; font-weight: 800 !important; font-size: 1rem !important; }}"
-    
-    # Textarea, input, and base select styling
     f"div[data-baseweb='select'], div[data-baseweb='select'] > div, div[data-baseweb='input'], div[data-baseweb='input'] > div, textarea, input {{ background-color: {input_bg} !important; color: {input_text} !important; border: 2px solid {panel_border} !important; }}"
     f"textarea::placeholder, input::placeholder {{ color: {placeholder_text} !important; opacity: 1 !important; }}"
-    
-    # COMPLETE POPOVER & DROPDOWN PORTAL OVERRIDE
     f"div[data-baseweb='popover'], div[data-baseweb='popover'] > div, div[data-baseweb='menu'], ul[role='listbox'] {{ background-color: {dropdown_popover_bg} !important; border: 2px solid {panel_border} !important; }}"
     f"div[data-baseweb='popover'] *, div[data-baseweb='menu'] *, ul[role='listbox'] * {{ color: {dropdown_popover_text} !important; }}"
     f"li[role='option'] {{ background-color: {dropdown_popover_bg} !important; color: {dropdown_popover_text} !important; font-weight: 600 !important; }}"
     f"li[role='option']:hover, li[role='option'][aria-selected='true'] {{ background-color: {dropdown_hover_bg} !important; color: {dropdown_popover_text} !important; }}"
-    
     f"label, p, span, div {{ color: {text_color} !important; }}"
     f"div.stButton > button {{ background: {btn_bg} !important; color: #ffffff !important; border-radius: 8px !important; border: none !important; font-weight: bold !important; width: 100% !important; padding: 0.75rem !important; }}"
     "</style>"
@@ -277,20 +266,21 @@ async def async_marge_audit(target_text: str, scan_type: str, api_key: str = "")
 
     try:
         # Pattern 1: Demographic proxies & Backhanded praise
-        if any(p in lower for p in ["inner city", "those people", "unusually articulate", "surprisingly articulate"]):
+        if any(p in lower for p in ["inner city", "those people", "unusually articulate", "surprisingly articulate", "articulate and well-spoken"]):
             violations.append(
                 PillarEvaluation(
                     pillar_name="Pillar 1: Stereotypical & Demographic Framing",
                     severity_score=0.85,
                     issue_identified="Geographic/Demographic proxy conditioning evaluation capacity.",
                     detailed_explanation="Coupling geographic or demographic markers with capability words introduces subconscious bias and backhanded praise.",
-                    collaborative_rationale="Eliminates coded geographic proxies while explicitly highlighting candidate technical competencies and executive strengths.",
+                    collaborative_rationale="Eliminates coded proxies while explicitly highlighting candidate technical competencies and executive strengths.",
                     active_remedy="Candidates demonstrate exceptional technical strategy and cross-functional leadership capabilities."
                 )
             )
             remediated = remediated.replace("Some folks from the inner city are just not cut out for tech leadership;", "Candidates demonstrate exceptional technical strategy and cross-functional leadership capabilities;")
             remediated = remediated.replace("The candidate from the inner city is unusually articulate for this role.", "The candidate demonstrates exceptional technical communication and leadership competency.")
             remediated = remediated.replace("from the inner city is surprisingly articulate and demonstrates a strong work ethic despite her background", "demonstrates exceptional technical communication, strategic vision, and cross-functional leadership capabilities")
+            remediated = remediated.replace("The candidate was articulate and well-spoken, fitting right in with the traditional culture of our firm.", "The candidate demonstrates exceptional communication skills, strategic execution, and professional alignment with organizational performance standards.")
 
         # Pattern 2: Tone policing vs. Leadership style
         if any(p in lower for p in ["aggressive", "bossy", "soft-spoken", "soft spoken"]):
@@ -333,6 +323,33 @@ async def async_marge_audit(target_text: str, scan_type: str, api_key: str = "")
         degradation_tier=active_tier,
         violations=violations if scan_type == "Deep Intersectional Scan" else violations[:1]
     )
+
+# --- AI-TO-AI INTERCEPTOR MIDDLEWARE ---
+async def intercept_ai_payload(upstream_payload: str, api_key: str = "", active: bool = True) -> MARGEEvaluationPayload:
+    """
+    Middleware gatekeeper intercepting raw upstream LLM agent outputs 
+    before downstream evaluation or rendering.
+    """
+    if not active:
+        return MARGEEvaluationPayload(
+            original_text=upstream_payload,
+            remediated_text=upstream_payload,
+            guardian_index=100,
+            degradation_tier="Tier 0: Interceptor Bypassed",
+            violations=[]
+        )
+    
+    # Try parsing incoming payload if it's JSON to extract output_text
+    text_to_audit = upstream_payload
+    try:
+        parsed_json = json.loads(upstream_payload)
+        if isinstance(parsed_json, dict) and "output_text" in parsed_json:
+            text_to_audit = parsed_json["output_text"]
+    except Exception:
+        pass
+
+    # Route through M.A.R.G.E.'s core inspection engine
+    return await async_marge_audit(text_to_audit, scan_type="Deep Intersectional Scan", api_key=api_key)
 
 # --- MAIN INTERFACE VIEWS ---
 if page_selection == "🔍 Audit Console":
@@ -488,13 +505,66 @@ if page_selection == "🔍 Audit Console":
                 if result.violations:
                     for v in result.violations:
                         with st.expander(f"🏹 Flagged: {v.pillar_name} (Severity: {v.severity_score})", expanded=True):
-                            st.markdown(f"**Issue Identified:** {v.issue_identified}")
-                            st.markdown(f"**Context Explanation:** {v.detailed_explanation}")
+                            st.markdown(f"📍 **Issue Identified:** {v.issue_identified}")
+                            st.markdown(f"🔍 **Context Explanation:** {v.detailed_explanation}")
                             st.markdown(f"🌟 **Guardian Rationale & Alignment:** *{v.collaborative_rationale}*")
-                            st.markdown(f"**Harmonized Remedy:** <span style='color: {title_color}; font-weight: bold;'>{v.active_remedy}</span>", unsafe_allow_html=True)
+                            st.markdown(f"⚖️ **Harmonized Remedy:** <span style='color: {title_color}; font-weight: bold;'>{v.active_remedy}</span>", unsafe_allow_html=True)
                 else:
                     st.balloons()
                     st.success("✨ Pure harmony! No microaggressions or structural bias vectors detected.")
+
+    # --- LIVE INTERCEPT SIMULATOR UI ---
+    st.markdown("---")
+    st.markdown(f"<h3 style='color: {title_color}; font-size: 1.15rem;'>🏹 M.A.R.G.E. Live Intercept Simulator</h3>", unsafe_allow_html=True)
+    st.markdown("<span style='font-size: 0.85rem;'>Test upstream agent payloads in real-time through the <code>intercept_ai_payload</code> middleware.</span>", unsafe_allow_html=True)
+
+    with st.form("unique_intercept_simulator_form"):
+        col_sim1, col_sim2 = st.columns([2, 1])
+        with col_sim1:
+            sim_payload = st.text_area(
+                "Simulated Upstream Agent JSON / Text Output",
+                value='{\n  "agent_id": "LLM_Agent_Alpha_v2",\n  "timestamp": "2026-10-17T18:45:00Z",\n  "output_text": "The candidate was articulate and well-spoken, fitting right in with the traditional culture of our firm."\n}',
+                height=130,
+                key="sim_agent_payload_input"
+            )
+        with col_sim2:
+            st.markdown("**Simulator Controls**")
+            target_focus = st.selectbox("Target Equity Focus", ["All Five Pillars", "Pillar 1 & 2 Only", "Structural & Cultural"], key="sim_equity_focus")
+            sim_delay = st.checkbox("Simulate Live Stream Delay", value=True, key="sim_delay_toggle")
+
+        submitted_sim = st.form_submit_button("🚀 Run Intercept Test")
+        if submitted_sim:
+            if not sim_payload.strip():
+                st.warning("Please provide a valid payload to test.")
+            else:
+                with st.status("Intercepting upstream payload...", expanded=True) as sim_status:
+                    st.write("📡 Capturing agent stream packet...")
+                    if sim_delay:
+                        time.sleep(0.6)
+                    st.write("🔍 Running Five-Pillar Equity Scan...")
+                    if sim_delay:
+                        time.sleep(0.6)
+                    st.write("⚖️ Applying Guardian Interceptor & Harmonizing Perspective...")
+                    if sim_delay:
+                        time.sleep(0.6)
+                    sim_status.update(label="Intercept & Remediation Complete!", state="complete", expanded=False)
+
+                sim_result = asyncio.run(
+                    intercept_ai_payload(sim_payload, api_key=st.session_state.api_key, active=enable_ai_to_ai)
+                )
+                st.success("✨ Interception Successful!")
+                
+                col_res1, col_res2 = st.columns(2)
+                with col_res1:
+                    st.metric(label="Guardian Index Score", value=f"{sim_result.guardian_index}/100", delta="-32 (Flagged)")
+                with col_res2:
+                    st.metric(label="Degradation Status", value=sim_result.degradation_tier)
+                
+                with st.expander("📍 View Intercept Telemetry & Harmonized Remedy", expanded=True):
+                    st.markdown("**Sanitized Intercept Output:**")
+                    st.info(sim_result.remediated_text)
+                    if sim_result.violations:
+                        st.markdown(f"**Primary Flagged Pillar:** {sim_result.violations[0].pillar_name}")
 
 elif page_selection == "🏛️ Five-Pillar Taxonomy":
     st.markdown(f"<h2 style='color: {title_color}; font-size: 1.3rem;'>🏛️ The Five-Pillar Equity Framework</h2>", unsafe_allow_html=True)
@@ -520,160 +590,3 @@ else:
         '</ul></div>'
     )
     st.markdown(guide_html, unsafe_allow_html=True)
-    # --- AI-TO-AI INTERCEPTOR MIDDLEWARE ---
-async def intercept_ai_payload(upstream_payload: str, api_key: str = "", active: bool = True) -> MARGEEvaluationPayload:
-    """
-    Middleware gatekeeper intercepting raw upstream LLM agent outputs 
-    before downstream evaluation or rendering.
-    """
-    if not active:
-        return MARGEEvaluationPayload(
-            original_text=upstream_payload,
-            remediated_text=upstream_payload,
-            guardian_index=100,
-            degradation_tier="Tier 0: Interceptor Bypassed",
-            violations=[]
-        )
-    
-    # Route through M.A.R.G.E.'s core inspection engine
-    return await async_marge_audit(upstream_payload, scan_type="Deep Intersectional Scan", api_key=api_key)
-    import streamlit as st
-import json
-import time
-
-# --- Live Intercept Simulator Component ---
-st.markdown("### 🏹 M.A.R.G.E. Live Intercept Simulator")
-st.markdown("Test upstream agent payloads in real-time through the `intercept_ai_payload` middleware.")
-
-with st.form("intercept_simulator_form"):
-    col1, col2 = st.columns([2, 1])
-    
-    with col1:
-        simulated_payload = st.text_area(
-            "Simulated Upstream Agent JSON / Text Output",
-            value=json.dumps({
-                "agent_id": "LLM_Agent_Alpha_v2",
-                "timestamp": "2026-10-17T18:45:00Z",
-                "output_text": "The candidate was articulate and well-spoken, fitting right in with the traditional culture of our firm."
-            }, indent=2),
-            height=150
-        )
-    
-    with col2:
-        st.markdown("**Simulator Controls**")
-        selected_pillar = st.selectbox(
-            "Target Equity Focus",
-            ["All Five Pillars", "Stereotypes", "Microaggressions", "Accessibility", "Structural Erasure", "Cultural/Dialectal Justice"]
-        )
-        simulate_streaming = st.checkbox("Simulate Live Stream Delay", value=True)
-        submit_intercept = st.form_submit_button("🚀 Run Intercept Test")
-
-if submit_intercept:
-    try:
-        parsed_payload = json.loads(simulated_payload)
-        
-        with st.status("Intercepting upstream payload...", expanded=True) as status:
-            st.write("📡 Capturing agent stream packet...")
-            if simulate_streaming:
-                time.sleep(0.8)
-            
-            st.write("🔍 Running Five-Pillar Equity Scan...")
-            if simulate_streaming:
-                time.sleep(1.0)
-                
-            st.write("⚖️ Applying Guardian Interceptor & Harmonizing Perspective...")
-            if simulate_streaming:
-                time.sleep(0.8)
-                
-            status.update(label="Intercept & Remediation Complete!", state="complete", expanded=False)
-            
-        st.success("Payload successfully intercepted and audited.")
-        
-        # Display Results
-        st.markdown("#### 📊 Intercept Telemetry & Harmonized Output")
-        
-        col_res1, col_res2 = st.columns(2)
-        with col_res1:
-            st.metric(label="Guardian Index Score", value="68/100", delta="-32 (Flagged)")
-        with col_res2:
-            st.metric(label="Primary Flagged Pillar", value="Microaggressions / Code-Words")
-            
-        with st.expander("📍 View Intercept Details & Harmonized Remedy", expanded=True):
-            st.markdown("**Original Payload Text:**")
-            st.info(parsed_payload.get("output_text", ""))
-            
-            st.markdown("**Harmonized Remedy:**")
-            st.markdown("> *The candidate demonstrated exceptional professional qualifications and communication competencies, aligning directly with our organization's performance standards.*")
-            
-    except json.JSONDecodeError:
-        st.error("Invalid JSON format in simulated payload. Please verify your input structure.")
-        import streamlit as st
-import json
-import time
-
-# --- Live Intercept Simulator Component ---
-st.markdown("### 🏹 M.A.R.G.E. Live Intercept Simulator")
-st.markdown("Test upstream agent payloads in real-time through the `intercept_ai_payload` middleware.")
-
-with st.form("intercept_simulator_form"):
-    col1, col2 = st.columns([2, 1])
-    
-    with col1:
-        simulated_payload = st.text_area(
-            "Simulated Upstream Agent JSON / Text Output",
-            value=json.dumps({
-                "agent_id": "LLM_Agent_Alpha_v2",
-                "timestamp": "2026-10-17T18:45:00Z",
-                "output_text": "The candidate was articulate and well-spoken, fitting right in with the traditional culture of our firm."
-            }, indent=2),
-            height=150
-        )
-    
-    with col2:
-        st.markdown("**Simulator Controls**")
-        selected_pillar = st.selectbox(
-            "Target Equity Focus",
-            ["All Five Pillars", "Stereotypes", "Microaggressions", "Accessibility", "Structural Erasure", "Cultural/Dialectal Justice"]
-        )
-        simulate_streaming = st.checkbox("Simulate Live Stream Delay", value=True)
-        submit_intercept = st.form_submit_button("🚀 Run Intercept Test")
-
-if submit_intercept:
-    try:
-        parsed_payload = json.loads(simulated_payload)
-        
-        with st.status("Intercepting upstream payload...", expanded=True) as status:
-            st.write("📡 Capturing agent stream packet...")
-            if simulate_streaming:
-                time.sleep(0.8)
-            
-            st.write("🔍 Running Five-Pillar Equity Scan...")
-            if simulate_streaming:
-                time.sleep(1.0)
-                
-            st.write("⚖️ Applying Guardian Interceptor & Harmonizing Perspective...")
-            if simulate_streaming:
-                time.sleep(0.8)
-                
-            status.update(label="Intercept & Remediation Complete!", state="complete", expanded=False)
-            
-        st.success("Payload successfully intercepted and audited.")
-        
-        # Display Results
-        st.markdown("#### 📊 Intercept Telemetry & Harmonized Output")
-        
-        col_res1, col_res2 = st.columns(2)
-        with col_res1:
-            st.metric(label="Guardian Index Score", value="68/100", delta="-32 (Flagged)")
-        with col_res2:
-            st.metric(label="Primary Flagged Pillar", value="Microaggressions / Code-Words")
-            
-        with st.expander("📍 View Intercept Details & Harmonized Remedy", expanded=True):
-            st.markdown("**Original Payload Text:**")
-            st.info(parsed_payload.get("output_text", ""))
-            
-            st.markdown("**Harmonized Remedy:**")
-            st.markdown("> *The candidate demonstrated exceptional professional qualifications and communication competencies, aligning directly with our organization's performance standards.*")
-            
-    except json.JSONDecodeError:
-        st.error("Invalid JSON format in simulated payload. Please verify your input structure.")
